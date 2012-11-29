@@ -26,24 +26,22 @@ public class ChaseGameLoginActivity extends Activity implements OnClickListener 
 	Context context;
 	ProgressDialog progressDialog;
 	static boolean loginFlag;
-	String regId;
+	String registrationId;
 	Intent messageIntent;
 	
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
         setContentView(R.layout.login);   
         
-        //register device for Google Cloud messaging
+        //register device for Google Cloud Messaging
         GCMRegistrar.checkDevice(this);
         GCMRegistrar.checkManifest(this);
-        regId = GCMRegistrar.getRegistrationId(this);
-        if (regId.equals("")) {
+        registrationId = GCMRegistrar.getRegistrationId(this);
+        if (registrationId.equals("")) {
           GCMRegistrar.register(this, "472939073721");
         } else {
           Log.v("Notice:", "Already registered");
         }
-        
-        //Toast.makeText(this, "regId: "+ regId, Toast.LENGTH_LONG).show();
         
         View loginButton = findViewById(R.id.login_button);
         loginButton.setOnClickListener(this);
@@ -90,7 +88,7 @@ public class ChaseGameLoginActivity extends Activity implements OnClickListener 
 								guiProgressDialog(true, "Kreiranje novog naloga u toku ...");
 							
 							final String result = HTTPHelper.parseResult(HTTPHelper.
-									sendRegistrationToServer(name, password, regId, method, HTTPHelper.LOGIN_URL));	
+									sendRegistrationToServer(name, password, registrationId, method, HTTPHelper.LOGIN_URL));	
 							guiProgressDialog(false,"");
 	
 							if(!result.startsWith("Error:")){
@@ -130,7 +128,6 @@ public class ChaseGameLoginActivity extends Activity implements OnClickListener 
 	}
 	
 	private void successfulLogin(){
-		View loginButton = findViewById(R.id.login_button);
     		Intent i = new Intent(this, ChooseGameActivity.class);
 			startActivity(i);
 	}
@@ -150,27 +147,4 @@ public class ChaseGameLoginActivity extends Activity implements OnClickListener 
 		});
 	}
 	
-	// broadcast receiver that handles messages from GCM
-	
-	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-        	String message = intent.getExtras().getString("message");
-        	Log.v("GCM","Message received"+ message);
-        	// Do sth with message
-        	Toast.makeText(context, "Received: " + message, Toast.LENGTH_LONG).show();
-        }
-    };
-    
-    @Override
-	public void onResume() {
-		super.onResume();		
-		registerReceiver(broadcastReceiver, new IntentFilter(GCMIntentService.TAG));
-	}
- 
-	@Override
-	public void onPause() {
-		super.onPause();
-		unregisterReceiver(broadcastReceiver);
-	}
 }
