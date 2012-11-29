@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World!</string>
+    <string name="app_name">Chase Game</string>
+    <string name="user_name">User name :</string>
+    <string name="password">Password :</string>
+    <string name="button_login_text">Log in</string>
+    <string name="new_account_button">Create account</string>
+    <string name="reg_device_button">Register this device at GCM</string>
+
+</resources>
