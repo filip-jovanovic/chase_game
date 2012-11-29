@@ -14,7 +14,6 @@ public class ChaseGameApplication extends Application {
 	}
 	
 	public static Context getContext(){
-		int i = 0;
 		return instance;
 	}
 

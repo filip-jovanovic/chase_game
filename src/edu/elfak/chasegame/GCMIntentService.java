@@ -21,13 +21,12 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	@Override
 	protected void onError(Context arg0, String arg1) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	protected void onMessage(Context arg0, Intent arg1) {
-		// TODO Auto-generated method stub
+		 // parse message into strings
 		 String str = arg1.getExtras().getString("message");
 		 Log.v("Message from GCM: ", str);
 		 intent.putExtra("message", str);
@@ -36,14 +35,12 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	@Override
 	protected void onRegistered(Context arg0, String arg1) {
-		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
 	protected void onUnregistered(Context arg0, String arg1) {
-		// TODO Auto-generated method stub
-
+		
 	}
 
 }

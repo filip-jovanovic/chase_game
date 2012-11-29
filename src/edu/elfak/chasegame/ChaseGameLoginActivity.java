@@ -33,6 +33,7 @@ public class ChaseGameLoginActivity extends Activity implements OnClickListener 
 	    super.onCreate(savedInstanceState);
         setContentView(R.layout.login);   
         
+        //register device for Google Cloud messaging
         GCMRegistrar.checkDevice(this);
         GCMRegistrar.checkManifest(this);
         regId = GCMRegistrar.getRegistrationId(this);
@@ -42,7 +43,7 @@ public class ChaseGameLoginActivity extends Activity implements OnClickListener 
           Log.v("Notice:", "Already registered");
         }
         
-        Toast.makeText(this, "regId: "+ regId, Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "regId: "+ regId, Toast.LENGTH_LONG).show();
         
         View loginButton = findViewById(R.id.login_button);
         loginButton.setOnClickListener(this);
@@ -149,11 +150,14 @@ public class ChaseGameLoginActivity extends Activity implements OnClickListener 
 		});
 	}
 	
+	// broadcast receiver that handles messages from GCM
+	
 	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
         	String message = intent.getExtras().getString("message");
         	Log.v("GCM","Message received"+ message);
+        	// Do sth with message
         	Toast.makeText(context, "Received: " + message, Toast.LENGTH_LONG).show();
         }
     };
