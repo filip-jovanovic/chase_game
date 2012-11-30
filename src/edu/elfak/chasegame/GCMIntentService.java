@@ -25,10 +25,9 @@ public class GCMIntentService extends GCMBaseIntentService {
 	}
 
 	@Override
-	protected void onMessage(Context arg0, Intent arg1) {
+	protected void onMessage(Context arg0, Intent rec_intent) {
 		 // parse message into strings
-		 String str = arg1.getExtras().getString("message");
-		 Log.v("Message from GCM: ", str);
+		 String str = rec_intent.getExtras().getString("message");
 		 intent.putExtra("message", str);
 	     sendBroadcast(intent);
 	}
