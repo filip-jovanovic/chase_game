@@ -7,6 +7,6 @@
     <string name="password">Password :</string>
     <string name="button_login_text">Log in</string>
     <string name="new_account_button">Create account</string>
-    <string name="enter_game_button">Register this device at GCM</string>
+    <string name="enter_game_button">Map</string>
 
 </resources>
