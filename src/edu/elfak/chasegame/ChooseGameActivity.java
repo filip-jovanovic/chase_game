@@ -16,21 +16,26 @@ public class ChooseGameActivity extends Activity implements OnClickListener {
         but.setOnClickListener(this);
         but = findViewById(R.id.about_button);
         but.setOnClickListener(this);
-        //but = findViewById(R.id.enter_game_button);
-        //but.setOnClickListener(this);
+        but = findViewById(R.id.create_game_button);
+        but.setOnClickListener(this);
         but = findViewById(R.id.exit_button);
         but.setOnClickListener(this);
 	}
 	
 	public void onClick(View v) {
+		Intent i;
 		switch(v.getId()){
 			case(R.id.map_button):
-				Intent i = new Intent(this, MapActivity.class);
+				i = new Intent(this, MapActivity.class);
 				startActivity(i);
 				break;
 			case(R.id.about_button):
-				Intent ii = new Intent(this, AboutActivity.class);
-				startActivity(ii);
+				i = new Intent(this, AboutActivity.class);
+				startActivity(i);
+				break;
+			case(R.id.create_game_button):
+				i = new Intent(this, CreateGameActivity.class);
+				startActivity(i);
 				break;
 			case(R.id.exit_button):
 				finish();

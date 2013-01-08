@@ -4,11 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -18,14 +21,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.widget.Toast;
-
+import android.util.Log;
 
 public class HTTPHelper {
 
 	public static final String LOGIN_URL = "http://android-test-rig.comuf.com/login.php";
-
-	
+	public static String URL = "http://android-test-rig.comuf.com/";
+	static InputStream is = null;
+    static JSONObject jObj = null;
+    static String json = "";
+    
 	public static String sendRegistrationToServer(String name, String password, String regId, String method, String url) {
     	
     	String retStr;
@@ -51,6 +56,39 @@ public class HTTPHelper {
     	return retStr;
     }
 	
+	public static ArrayList<String> getMapList() {
+		final String TAG_MAPS = "maps";
+		final String TAG_ID = "id";
+		final String TAG_NAME = "name";
+		
+		ArrayList<String> contactList = new ArrayList<String>();
+		JSONArray contacts = null;
+		 
+		// getting JSON string from URL
+		JSONObject json = getJSONFromUrl(URL+"mapList.php");
+		 
+		try {
+		    // Getting Array of Contacts
+		    contacts = json.getJSONArray(TAG_MAPS);
+		 
+		    // looping through All Contacts
+		    for(int i = 0; i < contacts.length(); i++){
+		        JSONObject c = contacts.getJSONObject(i);
+		 
+		        // Storing each json item in variable
+		        String id = c.getString(TAG_ID);
+		        String name = c.getString(TAG_NAME);
+ 
+                // adding each child node to HashMap key => value
+                contactList.add(id);
+                contactList.add(name);
+		    }
+		} catch (JSONException e) {
+		    e.printStackTrace();
+		}    	
+    	return contactList;
+    }
+	
 	private static StringBuilder inputStreamToString(InputStream is){
 		String line = "";
 		StringBuilder total = new StringBuilder();
@@ -68,4 +106,45 @@ public class HTTPHelper {
 	public static String parseResult(String rawResult){
 		return rawResult.split("<!--")[0];
 	}
+	
+	//Ucitava JSON odgovor koji dobije kada mu se prosledi url
+	public static JSONObject getJSONFromUrl(String url) {
+        // Making HTTP request
+        try {
+            // defaultHttpClient
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost(url);
+ 
+            HttpResponse httpResponse = httpClient.execute(httpPost);
+            HttpEntity httpEntity = httpResponse.getEntity();
+            is = httpEntity.getContent();           
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    is, "iso-8859-1"), 8);
+            StringBuilder sb = new StringBuilder();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+            is.close();
+            json = sb.toString();
+        } catch (Exception e) {
+            Log.e("Buffer Error", "Error converting result " + e.toString());
+        }
+        // try parse the string to a JSON object
+        try {
+            jObj = new JSONObject(json);
+        } catch (JSONException e) {
+            Log.e("JSON Parser", "Error parsing data " + e.toString());
+        }
+        // return JSON String
+        return jObj;
+    }
 }
