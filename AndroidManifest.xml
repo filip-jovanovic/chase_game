@@ -37,6 +37,7 @@
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
+     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
 
     <application
         android:name=".ChaseGameApplication"
@@ -91,7 +92,7 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyC-qfgXH5Aw2RtrKy48-dqZsyCpNYhMLVM" />
+            android:value="AIzaSyALaFaRIh5sMVffHCeJUZC4j5aub5oPjsc" />
         
     </application>
 

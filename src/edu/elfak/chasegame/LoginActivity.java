@@ -44,7 +44,14 @@ public class LoginActivity extends Activity implements OnClickListener {
 		loginButton.setOnClickListener(this);
 		View signupButton = findViewById(R.id.signup_button);
 		signupButton.setOnClickListener(this);
-
+		
+		// just for testing phase!
+		EditText etName = (EditText) findViewById(R.id.login_name_edit);
+		etName.setText("filip");
+		EditText etPassword = (EditText) findViewById(R.id.login_password_edit);
+		etPassword.setText("asdfgh");
+		// just for testing phase!
+		
 		if (Player.player_id != "" && Player.player_id != null)
 			loginButton.setClickable(false);
 
