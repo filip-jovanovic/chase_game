@@ -23,7 +23,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	Context context;
 	ProgressDialog progressDialog;
 	static boolean loginFlag;
-	String registrationId;
+	public static String registrationId;
 	Intent messageIntent;
 
 	public void onCreate(Bundle savedInstanceState) {

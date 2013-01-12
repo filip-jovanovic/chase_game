@@ -26,7 +26,7 @@ public class ChooseGameActivity extends Activity implements OnClickListener {
 		Intent i;
 		switch(v.getId()){
 			case(R.id.map_button):
-				i = new Intent(this, MapActivity.class);
+				i = new Intent(this, LocationReceiver.class);
 				startActivity(i);
 				break;
 			case(R.id.about_button):

@@ -24,4 +24,6 @@
     <string name="title_activity_new_game">NewGameActivity</string>
     <string name="create_new_game">Create New Game</string>
     <string name="title_activity_join_game">JoinGameActivity</string>
+    <string name="title_activity_location_receiver">LocationReceiver</string>
+
 </resources>

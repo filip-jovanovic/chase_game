@@ -17,7 +17,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
-public class MapActivity extends FragmentActivity implements LocationListener {
+public class MapActivity extends FragmentActivity {
 
 	SupportMapFragment mapFragment;
 	private GoogleMap mMap;
@@ -38,14 +38,11 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		provider = locationManager.NETWORK_PROVIDER;
 		Location lastKnownLocation = locationManager.getLastKnownLocation(provider);
-		timeOfLastLocation = lastKnownLocation.getTime();
-		
-		provider = locationManager.GPS_PROVIDER;
+
 		mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		LatLng latLng = new LatLng(lastKnownLocation.getLatitude(),
 				lastKnownLocation.getLongitude());
 		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-		locationManager.requestLocationUpdates(provider, 10000, 5, this);
 		
 		LatLng loc = new LatLng(43.321244, 21.895838);
 		Polygon p = drawBoundaries(loc, mMap);
@@ -56,19 +53,17 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		locationManager.requestLocationUpdates(provider, 10000, 5, this);
 	}
 
 	/* Remove the locationlistener updates when Activity is paused */
 	@Override
 	protected void onPause() {
 		super.onPause();
-		locationManager.removeUpdates(this);
 	}
 
 	
 	public void onLocationChanged(Location location) {
-		LatLng latLng;
+		/*LatLng latLng;
 		if(TIME_DIFFERENCE<(location.getTime()-timeOfLastLocation))
 		{	
 			// this location is 10s "away" from last one
@@ -77,12 +72,10 @@ public class MapActivity extends FragmentActivity implements LocationListener {
 			// set current location on screen to
 			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 			timeOfLastLocation = location.getTime();
-			
 			// TODO : send it to others
-			
 			// put marker
 			mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker)));
-		}
+		}*/
 
 	}
 

@@ -123,6 +123,39 @@ public class HTTPHelper {
     	return contactList;
     }
 	
+	public static ArrayList<String> getBuildingAndItemList() {
+		final String TAG_GAMES = "games";
+		final String TAG_NAME = "name";
+		final String TAG_COUNT = "count";
+		ArrayList<String> contactList = new ArrayList<String>();
+		JSONArray contacts = null;
+		 
+		// getting JSON string from URL
+		JSONObject json = getJSONFromUrl(URL+"gamelist.php");
+		 
+		try {
+		    // Getting Array of Contacts
+		    contacts = json.getJSONArray(TAG_GAMES);
+		 
+		    // looping through All Contacts
+		    for(int i = 0; i < contacts.length(); i++){
+		        JSONObject c = contacts.getJSONObject(i);
+		 
+		        // Storing each json item in variable
+		        // String id = c.getString(TAG_ID);
+		        String name = c.getString(TAG_NAME);
+		        String count = c.getString(TAG_COUNT);
+                // adding each child node to HashMap key => value
+                //contactList.add(id);
+		        String result = name + " (" + count + "/4)";
+                contactList.add(result);
+		    }
+		} catch (JSONException e) {
+		    e.printStackTrace();
+		}    	
+    	return contactList;
+    }
+	
 	private static StringBuilder inputStreamToString(InputStream is){
 		String line = "";
 		StringBuilder total = new StringBuilder();
