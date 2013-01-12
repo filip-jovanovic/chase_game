@@ -34,7 +34,7 @@ public class ChooseGameActivity extends Activity implements OnClickListener {
 				startActivity(i);
 				break;
 			case(R.id.create_game_button):
-				i = new Intent(this, CreateGameActivity.class);
+				i = new Intent(this, NewGameActivity.class);
 				startActivity(i);
 				break;
 			case(R.id.exit_button):
