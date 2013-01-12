@@ -1,16 +1,44 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
     tools:context=".CreateGameActivity" >
 
-    <ListView
+    <Spinner
         android:id="@+id/mapList"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
+        android:layout_marginTop="19dp" />
 
-    </ListView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="Ime igre" />
+
+        <EditText
+            android:id="@+id/gameName"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="19dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="text" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/startGame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="26dp"
+        android:layout_marginRight="43dp"
+        android:text="Create Game" />
+
+</LinearLayout>

@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class NewGameActivity extends Activity implements OnClickListener{
+public class NewGameActivity extends Activity implements OnClickListener, OnItemClickListener{
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +28,7 @@ public class NewGameActivity extends Activity implements OnClickListener{
 		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>
 						(this,android.R.layout.simple_list_item_1, mape);
 		lista.setAdapter(arrayAdapter);
-		lista.setOnItemClickListener(new OnItemClickListener() {
+		lista.setOnItemClickListener(this);/*new OnItemClickListener() {
 			
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
             	
@@ -36,7 +36,7 @@ public class NewGameActivity extends Activity implements OnClickListener{
                 
                 Toast.makeText(getBaseContext(), item, Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
 		View but = findViewById(R.id.createGameButton);
         but.setOnClickListener(this);
 	}
@@ -44,6 +44,15 @@ public class NewGameActivity extends Activity implements OnClickListener{
 	public void onClick(View arg0) {
 		Intent i = new Intent(this, CreateGameActivity.class);
 		startActivity(i);		
+	}
+
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		String item = ((TextView)arg1).getText().toString();
+        
+        Toast.makeText(getBaseContext(), item, Toast.LENGTH_SHORT).show();
+       
+        Intent i = new Intent(this, MapActivity.class);
+		startActivity(i);	
 	}
 
 }
