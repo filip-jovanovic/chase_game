@@ -54,3 +54,4 @@ public class NewGameActivity extends Activity implements OnClickListener, OnItem
         Intent i = new Intent(this, MapActivity.class);
 		startActivity(i);	
 	}
+}
