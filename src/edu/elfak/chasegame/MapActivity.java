@@ -113,27 +113,4 @@ public class MapActivity extends FragmentActivity {
 		return myMap.addPolygon(rectOptions);
 
 	}
-	
-	// broadcast receiver that handles messages from GCM
-	/*
-	 * private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-	 * 
-	 * @Override public void onReceive(Context context, Intent intent) { String
-	 * message = intent.getExtras().getString("message");
-	 * Log.v("GCM","Message received"+ message); // Do sth with message
-	 * Toast.makeText(context, "Received: " + message,
-	 * Toast.LENGTH_LONG).show();
-	 * 
-	 * } };
-	 * 
-	 * @Override public void onResume() { super.onResume();
-	 * registerReceiver(broadcastReceiver, new
-	 * IntentFilter(GCMIntentService.TAG)); }
-	 */
-	// @Override
-	/*
-	 * public void onPause() { super.onPause();
-	 * unregisterReceiver(broadcastReceiver); }
-	 */
-
 }

@@ -123,32 +123,31 @@ public class HTTPHelper {
     	return contactList;
     }
 	
-	public static ArrayList<String> getBuildingAndItemList() {
-		final String TAG_GAMES = "games";
-		final String TAG_NAME = "name";
-		final String TAG_COUNT = "count";
-		ArrayList<String> contactList = new ArrayList<String>();
-		JSONArray contacts = null;
+	public static ArrayList<ObjectOnMap> getBuildingAndItemList() {
+		final String TAG_BUILDINGS = "buildings";
+		final String TAG_ITEMS = "items";
+		ArrayList<ObjectOnMap> objects = new ArrayList<ObjectOnMap>();
+		JSONArray jObjects = null;
 		 
 		// getting JSON string from URL
 		JSONObject json = getJSONFromUrl(URL+"gamelist.php");
 		 
 		try {
-		    // Getting Array of Contacts
-		    contacts = json.getJSONArray(TAG_GAMES);
+		    // Getting Array of buildings
+			jObjects = json.getJSONArray(TAG_BUILDINGS);
 		 
 		    // looping through All Contacts
-		    for(int i = 0; i < contacts.length(); i++){
-		        JSONObject c = contacts.getJSONObject(i);
+		    for(int i = 0; i < jObjects.length(); i++){
+		        JSONObject b = jObjects.getJSONObject(i);
 		 
 		        // Storing each json item in variable
-		        // String id = c.getString(TAG_ID);
-		        String name = c.getString(TAG_NAME);
+		        /*String name = c.getString(TAG_NAME);
 		        String count = c.getString(TAG_COUNT);
                 // adding each child node to HashMap key => value
                 //contactList.add(id);
 		        String result = name + " (" + count + "/4)";
-                contactList.add(result);
+                contactList.add(result);*/
+		        b.getString(name)
 		    }
 		} catch (JSONException e) {
 		    e.printStackTrace();

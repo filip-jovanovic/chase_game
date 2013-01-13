@@ -23,6 +23,8 @@ public class LocationReceiver extends Activity implements OnClickListener {
         but.setOnClickListener(this);
 	}
 
+	
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

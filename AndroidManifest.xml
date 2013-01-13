@@ -106,6 +106,7 @@
         </activity>
         
         <service android:enabled="true" android:name=".LocationSenderService" />
+        <service android:enabled="true" android:name="edu.elfak.chasegame.GameService" />
     </application>
 
 </manifest>
