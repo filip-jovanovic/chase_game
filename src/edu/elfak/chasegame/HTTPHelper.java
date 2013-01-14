@@ -61,7 +61,7 @@ public class HTTPHelper {
 	
 	public static String sendValuesToUrl(ArrayList<String> parameters, ArrayList<String> values, String url) {
     	
-    	String retStr;
+    	String retStr = "no action";
     	HttpClient client = new DefaultHttpClient();
     	HttpPost post = new HttpPost(url);
     	
@@ -78,7 +78,6 @@ public class HTTPHelper {
 			e.printStackTrace();
 			retStr = "Error during upload!";
 		} 
-    	
     	return retStr;
     }
 	

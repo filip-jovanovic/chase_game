@@ -6,11 +6,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-public class ChooseGameActivity extends Activity implements OnClickListener {
+public class HomeActivity extends Activity implements OnClickListener {
 
 	public void onCreate(Bundle savedInstanceState ){
 		super.onCreate(savedInstanceState);
-        setContentView(R.layout.choosegame); 
+        setContentView(R.layout.home); 
         
         View but = findViewById(R.id.about_button);
         but.setOnClickListener(this);
@@ -30,7 +30,7 @@ public class ChooseGameActivity extends Activity implements OnClickListener {
 				startActivity(i);
 				break;
 			case(R.id.create_game_button):
-				i = new Intent(this, NewGameActivity.class);
+				i = new Intent(this, JoinGameActivity.class);
 				startActivity(i);
 				break;
 			case(R.id.debug_button):

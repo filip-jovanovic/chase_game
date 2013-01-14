@@ -19,7 +19,7 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.create_game);
+		setContentView(R.layout.creategame);
 		
 		ArrayList<String> maps = HTTPHelper.getMapList();
 		

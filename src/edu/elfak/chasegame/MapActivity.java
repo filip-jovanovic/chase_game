@@ -34,6 +34,7 @@ public class MapActivity extends FragmentActivity {
 		mMap = ((SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.map)).getMap();
 
+		/*
 		// Get the location manager
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		provider = locationManager.NETWORK_PROVIDER;
@@ -46,7 +47,7 @@ public class MapActivity extends FragmentActivity {
 		
 		LatLng loc = new LatLng(43.321244, 21.895838);
 		Polygon p = drawBoundaries(loc, mMap);
-		
+		*/
 	}
 
 	/* Request updates at startup */

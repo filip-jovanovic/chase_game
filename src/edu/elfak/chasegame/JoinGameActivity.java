@@ -19,13 +19,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class NewGameActivity extends Activity implements OnClickListener, OnItemClickListener{
+public class JoinGameActivity extends Activity implements OnClickListener, OnItemClickListener{
 
 	HashMap<String, String> gamesHashMap;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.new_game);
+		setContentView(R.layout.joingame);
 		
 		gamesHashMap = HTTPHelper.getGameList();
 		

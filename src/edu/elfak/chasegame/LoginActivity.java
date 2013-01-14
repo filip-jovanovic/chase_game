@@ -136,7 +136,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	}
 
 	private void successfulLogin() {
-		Intent i = new Intent(this, ChooseGameActivity.class);
+		Intent i = new Intent(this, HomeActivity.class);
 		//finish();
 		startActivity(i);
 	}

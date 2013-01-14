@@ -37,10 +37,9 @@ public class GameService extends Service {
 			
 			players.add(new ObjectOnMap(0,0,LoginActivity.registrationId,role,"player"));	
 			
-			
-			
 			if(role.compareTo("thief")==0)
 			{
+				
 				ArrayList<String> parameters = new ArrayList<String>();
 				ArrayList<String> values = new ArrayList<String>();
 				parameters.add("name");
@@ -49,8 +48,9 @@ public class GameService extends Service {
 				values.add(gameName);
 				values.add(String.valueOf(mapId));
 				values.add(LoginActivity.registrationId);
-				String result = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.CREATE_GAME_URL);
-				Log.v(">>...",result);
+				String result = "empty";
+				result = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.CREATE_GAME_URL);
+				Log.v("thief Game id: ",result);
 				gameId = Integer.valueOf(result);
 			}
 			else
