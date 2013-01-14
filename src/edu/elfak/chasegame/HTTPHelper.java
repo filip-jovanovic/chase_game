@@ -26,10 +26,11 @@ import android.util.Log;
 
 public class HTTPHelper {
 
-	public static final String LOGIN_URL = "http://android-test-rig.comuf.com/login.php";
-	public static final String CREATE_GAME_URL = "http://android-test-rig.comuf.com/createNewGame.php";
-	public static final String UPDATE_GAME_URL = "http://android-test-rig.comuf.com/getGame.php";
-	public static String URL = "http://android-test-rig.comuf.com/";
+	public static final String LOGIN_URL = "login.php";
+	public static final String CREATE_GAME_URL = "createNewGame.php";
+	public static final String UPDATE_GAME_URL = "getGame.php";
+	public static final String ANNOUNCE_NEW_PLAYER_URL = "announceNewPlayer.php";
+	public static String SERVER_URL = "http://android-test-rig.comuf.com/";
 	static InputStream is = null;
     static JSONObject jObj = null;
     static String json = "";
@@ -38,7 +39,7 @@ public class HTTPHelper {
     	
     	String retStr;
     	HttpClient client = new DefaultHttpClient();
-    	HttpPost post = new HttpPost(url);
+    	HttpPost post = new HttpPost(SERVER_URL + url);
     	
     	try {
     		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
@@ -90,7 +91,7 @@ public class HTTPHelper {
 		JSONArray contacts = null;
 		 
 		// getting JSON string from URL
-		JSONObject json = getJSONFromUrl(URL+"mapList.php");
+		JSONObject json = getJSONFromUrl(SERVER_URL+"mapList.php");
 		 
 		try {
 		    // Getting Array of Contacts
@@ -123,7 +124,7 @@ public class HTTPHelper {
 		JSONArray jsonGames = null;
 		HashMap<String, String> hmp = null;
 		// getting JSON string from URL
-		JSONObject json = getJSONFromUrl(URL+"gamelist.php");
+		JSONObject json = getJSONFromUrl(SERVER_URL+"gamelist.php");
 		 
 		try {
 		    // Getting Array of Contacts
@@ -157,7 +158,7 @@ public class HTTPHelper {
 		JSONArray jObjects = null;
 		 
 		// getting JSON string from URL
-		JSONObject json = getJSONFromUrl(URL+"buildingList.php?mapId="+mapId);
+		JSONObject json = getJSONFromUrl(SERVER_URL+"buildingList.php?mapId="+mapId);
 		
 		try {
 		    // Getting Array of buildings

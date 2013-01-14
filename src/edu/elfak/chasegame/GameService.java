@@ -94,6 +94,24 @@ public class GameService extends Service {
 		    return START_STICKY;
 		}
 		
+		private void announceNewPlayer(String newPlayerId)
+		{			
+			ArrayList<String> parameters = new ArrayList<String>();
+			ArrayList<String> values = new ArrayList<String>();
+		
+			for(int i = 0; i<players.size(); i++){
+				String id = players.get(i).getId();
+				if(id.compareTo(newPlayerId)!=0){
+					parameters.add(players.get(i).getName());
+					values.add(id);
+				}
+			}
+			parameters.add("new_player_id");
+			values.add(newPlayerId);
+			HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.ANNOUNCE_NEW_PLAYER_URL);	
+		}
+		
+		
 		public int getGameId() {
 			return gameId;
 		}
