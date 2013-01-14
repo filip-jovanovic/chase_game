@@ -104,9 +104,18 @@
             android:name="edu.elfak.chasegame.LocationReceiver"
             android:label="@string/title_activity_location_receiver" >
         </activity>
-        
-        <service android:enabled="true" android:name=".LocationSenderService" />
-        <service android:enabled="true" android:name="edu.elfak.chasegame.GameService" />
+
+        <service
+            android:name="edu.elfak.chasegame.LocationSenderService"
+            android:enabled="true" />
+        <service
+            android:name="edu.elfak.chasegame.GameService"
+            android:enabled="true" />
+
+        <activity
+            android:name="edu.elfak.chasegame.DebugActivity"
+            android:label="@string/title_activity_debug" >
+        </activity>
     </application>
 
 </manifest>

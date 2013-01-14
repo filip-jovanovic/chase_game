@@ -1,8 +1,7 @@
 package edu.elfak.chasegame;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import edu.elfak.chasegame.Player.Role;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -15,62 +14,86 @@ import android.util.Log;
 
 public class GameService extends Service {
 	
-		private List<Location> buildings;
-		private List<Location> items;
-		private List<Player> players;
+		private ArrayList<ObjectOnMap> buildings;
+		private ArrayList<ObjectOnMap> items;
+		private ArrayList<ObjectOnMap> players;
 		private int gameId;
 		private int mapId;
 		private String gameName;		
 
-		public List<Location> getBuildings() {
-			return buildings;
-		}
-
-		public void setBuildings(List<Location> buildings) {
-			this.buildings = buildings;
-		}
-
 		@Override
 		public int onStartCommand(Intent intent, int flags, int startId) {
-			Log.v("GameService","Game initialisation..."); 
-
-			mapId = intent.getExtras().getInt("mapid");
-			gameName = intent.getExtras().getString("gameName");
-			Role role = (Role)intent.getExtras().get("role");
-			players.add(new Player(LoginActivity.registrationId,role));
 			
-			if(role==Role.thief)
+			buildings = new ArrayList<ObjectOnMap>();
+			items = new ArrayList<ObjectOnMap>();
+			players = new ArrayList<ObjectOnMap>();
+			
+			
+			mapId = intent.getExtras().getInt("mapId");
+			
+			gameName = intent.getExtras().getString("gameName");
+			
+			String role = intent.getExtras().getString("role");
+			
+			players.add(new ObjectOnMap(0,0,LoginActivity.registrationId,role,"player"));	
+			
+			
+			
+			if(role.compareTo("thief")==0)
 			{
-				// create the game on server!
+				ArrayList<String> parameters = new ArrayList<String>();
+				ArrayList<String> values = new ArrayList<String>();
+				parameters.add("name");
+				parameters.add("mapId");
+				parameters.add("thief");
+				values.add(gameName);
+				values.add(String.valueOf(mapId));
+				values.add(LoginActivity.registrationId);
+				String result = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.CREATE_GAME_URL);
+				Log.v(">>...",result);
+				gameId = Integer.valueOf(result);
 			}
 			else
 			{
-				// find the game on server and pull info about players
+				int whoAmI = 1;
+				gameId = intent.getExtras().getInt("game_id");
+				String thiefId = intent.getExtras().getString("thief");
+				players.add(new ObjectOnMap(0,0,thiefId,"thief","player"));
+				
+				String cop_1Id = intent.getExtras().getString("cop_1");
+				players.add(new ObjectOnMap(0,0,cop_1Id,"policeman1","player"));	
+				String cop_2Id = intent.getExtras().getString("cop_2");
+				if(cop_2Id.compareTo("empty")!=0)
+				{
+					players.add(new ObjectOnMap(0,0,cop_2Id,"policeman2","player"));	
+					whoAmI = 2;
+				}
+				String cop_3Id = intent.getExtras().getString("cop_3");
+				if(cop_3Id.compareTo("empty")!=0)
+				{
+					players.add(new ObjectOnMap(0,0,cop_3Id,"policeman3","player"));
+					whoAmI = 3;
+				}	
+				
 			}
 			
+			
 			// populate items and buildings from server
-			
-			
-			
-			/*
-			this.buildings = buildings;
-			this.items = items;
-			*/
+			ArrayList<ObjectOnMap> allObjects = HTTPHelper.getBuildingAndItemList(String.valueOf(mapId));
+			ObjectOnMap ob = null;
+			for(int i = 0; i<allObjects.size(); i++)
+			{
+				ob = allObjects.get(i);
+				if(ob.getType()=="building")
+					buildings.add(ob);
+				else
+					items.add(ob);	
+			}			
 			
 			registerReceiver(broadcastReceiver, new IntentFilter(GCMIntentService.TAG));
 		    return START_STICKY;
 		}
 		
-		
-		
-		public List<Location> getItems() {
-			return items;
-		}
-
-		public void setItems(List<Location> items) {
-			this.items = items;
-		}
-
 		public int getGameId() {
 			return gameId;
 		}
@@ -83,6 +106,10 @@ public class GameService extends Service {
 		public IBinder onBind(Intent arg0) {
 			// TODO Auto-generated method stub
 			return null;
+		}
+		
+		public void OnDestroy(){
+			unregisterReceiver(broadcastReceiver);
 		}
 		
 		// broadcast receiver that handles messages from GCM

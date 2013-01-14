@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -26,6 +27,8 @@ import android.util.Log;
 public class HTTPHelper {
 
 	public static final String LOGIN_URL = "http://android-test-rig.comuf.com/login.php";
+	public static final String CREATE_GAME_URL = "http://android-test-rig.comuf.com/createNewGame.php";
+	public static final String UPDATE_GAME_URL = "http://android-test-rig.comuf.com/getGame.php";
 	public static String URL = "http://android-test-rig.comuf.com/";
 	static InputStream is = null;
     static JSONObject jObj = null;
@@ -56,12 +59,35 @@ public class HTTPHelper {
     	return retStr;
     }
 	
+	public static String sendValuesToUrl(ArrayList<String> parameters, ArrayList<String> values, String url) {
+    	
+    	String retStr;
+    	HttpClient client = new DefaultHttpClient();
+    	HttpPost post = new HttpPost(url);
+    	
+    	try {
+    		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+    		for(int i = 0; i<parameters.size();i++){
+    			Log.v("http",parameters.get(i) + " : " + values.get(i));
+    			nameValuePairs.add(new BasicNameValuePair(parameters.get(i), values.get(i)));
+    		}
+    		post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+    		HttpResponse response = client.execute(post);
+    		retStr = inputStreamToString(response.getEntity().getContent()).toString().split("<!--")[0];
+    	} catch (IOException e) {
+			e.printStackTrace();
+			retStr = "Error during upload!";
+		} 
+    	
+    	return retStr;
+    }
+	
 	public static ArrayList<String> getMapList() {
 		final String TAG_MAPS = "maps";
 		final String TAG_ID = "id";
 		final String TAG_NAME = "name";
 		
-		ArrayList<String> contactList = new ArrayList<String>();
+		ArrayList<String> mapList = new ArrayList<String>();
 		JSONArray contacts = null;
 		 
 		// getting JSON string from URL
@@ -81,78 +107,91 @@ public class HTTPHelper {
  
                 // adding each child node to HashMap key => value
                 //contactList.add(id);
-                contactList.add(id+". "+name);
+                mapList.add(id+". "+name);
 		    }
 		} catch (JSONException e) {
 		    e.printStackTrace();
 		}    	
-    	return contactList;
+    	return mapList;
     }
 	
-	public static ArrayList<String> getGameList() {
+	public static HashMap<String, String> getGameList() {
 		final String TAG_GAMES = "games";
-		//final String TAG_ID = "id";
+		final String TAG_ID = "id";
 		final String TAG_NAME = "name";
 		final String TAG_COUNT = "count";
-		ArrayList<String> contactList = new ArrayList<String>();
-		JSONArray contacts = null;
-		 
+		HashMap<String, String> gameHashMap = new HashMap<String, String>();
+		JSONArray jsonGames = null;
+		HashMap<String, String> hmp = null;
 		// getting JSON string from URL
 		JSONObject json = getJSONFromUrl(URL+"gamelist.php");
 		 
 		try {
 		    // Getting Array of Contacts
-		    contacts = json.getJSONArray(TAG_GAMES);
+		    jsonGames = json.getJSONArray(TAG_GAMES);
 		 
 		    // looping through All Contacts
-		    for(int i = 0; i < contacts.length(); i++){
-		        JSONObject c = contacts.getJSONObject(i);
+		    for(int i = 0; i < jsonGames.length(); i++){
+		        JSONObject c = jsonGames.getJSONObject(i);
 		 
 		        // Storing each json item in variable
-		        // String id = c.getString(TAG_ID);
+		        String id = c.getString(TAG_ID);
 		        String name = c.getString(TAG_NAME);
 		        String count = c.getString(TAG_COUNT);
                 // adding each child node to HashMap key => value
                 //contactList.add(id);
 		        String result = name + " (" + count + "/4)";
-                contactList.add(result);
+                gameHashMap.put(result, id);
 		    }
 		} catch (JSONException e) {
 		    e.printStackTrace();
 		}    	
-    	return contactList;
+    	return gameHashMap;
     }
 	
-	public static ArrayList<ObjectOnMap> getBuildingAndItemList() {
+	
+	
+	public static ArrayList<ObjectOnMap> getBuildingAndItemList(String mapId) {
 		final String TAG_BUILDINGS = "buildings";
 		final String TAG_ITEMS = "items";
 		ArrayList<ObjectOnMap> objects = new ArrayList<ObjectOnMap>();
 		JSONArray jObjects = null;
 		 
 		// getting JSON string from URL
-		JSONObject json = getJSONFromUrl(URL+"gamelist.php");
-		 
+		JSONObject json = getJSONFromUrl(URL+"buildingList.php?mapId="+mapId);
+		
 		try {
 		    // Getting Array of buildings
 			jObjects = json.getJSONArray(TAG_BUILDINGS);
 		 
 		    // looping through All Contacts
 		    for(int i = 0; i < jObjects.length(); i++){
-		        JSONObject b = jObjects.getJSONObject(i);
-		 
-		        // Storing each json item in variable
-		        /*String name = c.getString(TAG_NAME);
-		        String count = c.getString(TAG_COUNT);
-                // adding each child node to HashMap key => value
-                //contactList.add(id);
-		        String result = name + " (" + count + "/4)";
-                contactList.add(result);*/
-		        b.getString(name)
+		        JSONObject building = jObjects.getJSONObject(i);
+		        //$data_string .= '{ "id": "'.$id.'", "lat": "'.$lat.'","lon": "'.$lon.'","name": "'.$name.'" },';
+		        Log.v("HttpHelper",building.toString());
+		        objects.add(new ObjectOnMap(
+		        		building.getDouble("lat"), 
+		        		building.getDouble("lon"), 
+		        		building.getString("id"), 
+		        		building.getString("name"), 
+		        		"building"));  
+		    }
+		    jObjects = json.getJSONArray(TAG_ITEMS);
+		    for(int i = 0; i < jObjects.length(); i++){
+		        JSONObject item = jObjects.getJSONObject(i);
+		        //$data_string .= '{ "id": "'.$id.'", "lat": "'.$lat.'","lon": "'.$lon.'","name": "'.$name.'" },';
+		        Log.v("HttpHelper",item.toString());
+		        objects.add(new ObjectOnMap(
+		        		item.getDouble("lat"), 
+		        		item.getDouble("lon"), 
+		        		item.getString("id"), 
+		        		item.getString("name"), 
+		        		"item"));  
 		    }
 		} catch (JSONException e) {
 		    e.printStackTrace();
-		}    	
-    	return contactList;
+		}	
+    	return objects;
     }
 	
 	private static StringBuilder inputStreamToString(InputStream is){

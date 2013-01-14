@@ -2,11 +2,10 @@ package edu.elfak.chasegame;
 
 import java.util.ArrayList;
 
-import edu.elfak.chasegame.Player.Role;
-
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -42,9 +41,9 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 	    else{
 	    	
 	    	Intent gameIntent = new Intent(this, GameService.class);
-	    	gameIntent.putExtra("gameName",gameName.getText());	    	
+	    	gameIntent.putExtra("gameName",gameName.getText().toString());
 	    	gameIntent.putExtra("mapId",Integer.parseInt(((String)listOfMaps.getSelectedItem()).split("\\.")[0]));
-	    	gameIntent.putExtra("role",Role.thief);
+	    	gameIntent.putExtra("role","thief");
 	    	startService(gameIntent);
 
 	    	Intent i = new Intent(this, MapActivity.class);

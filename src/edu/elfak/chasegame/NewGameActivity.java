@@ -1,10 +1,15 @@
 package edu.elfak.chasegame;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -16,19 +21,30 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class NewGameActivity extends Activity implements OnClickListener, OnItemClickListener{
 
+	HashMap<String, String> gamesHashMap;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_game);
 		
-		ArrayList<String> mape = HTTPHelper.getGameList();
+		gamesHashMap = HTTPHelper.getGameList();
 		
-		ListView lista = (ListView) findViewById(R.id.gameList);
+		ArrayList<String> listForAdapter = new ArrayList<String>();
+		
+		Object[] games = gamesHashMap.keySet().toArray();
+		
+		for(int i = 0; i< gamesHashMap.size(); i++){
+			listForAdapter.add((String)games[i]);
+		}
+		
+		ListView list = (ListView) findViewById(R.id.gameList);
 		
 		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>
-						(this,android.R.layout.simple_list_item_1, mape);
-		lista.setAdapter(arrayAdapter);
-		lista.setOnItemClickListener(this);/*new OnItemClickListener() {
+						(this,android.R.layout.simple_list_item_1, listForAdapter);
+		list.setAdapter(arrayAdapter);
+		list.setOnItemClickListener(this);
+		
+		/*new OnItemClickListener() {
 			
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
             	
@@ -47,11 +63,43 @@ public class NewGameActivity extends Activity implements OnClickListener, OnItem
 	}
 
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		String item = ((TextView)arg1).getText().toString();
-        
-        Toast.makeText(getBaseContext(), item, Toast.LENGTH_SHORT).show();
-       
-        Intent i = new Intent(this, MapActivity.class);
-		startActivity(i);	
+		
+		String gameId =  gamesHashMap.get(((TextView)arg1).getText().toString());
+
+		ArrayList<String> parameters = new ArrayList<String>();
+		ArrayList<String> values =  new ArrayList<String>();
+		parameters.add("game_id");
+		parameters.add("player_id");
+		values.add(gameId);
+		values.add(LoginActivity.registrationId);
+		String res = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.UPDATE_GAME_URL);
+		
+		Intent gameIntent = new Intent(this, GameService.class);
+		
+		try {
+			Log.v("res",res);
+			
+			JSONObject jsonGame = new JSONObject(res);
+			
+			gameIntent.putExtra("gameName",jsonGame.getString("game_name"));
+			gameIntent.putExtra("mapId",jsonGame.getInt("map_id"));
+			gameIntent.putExtra("thief",jsonGame.getString("thief"));
+			gameIntent.putExtra("cop_1",jsonGame.getString("cop_1"));
+			gameIntent.putExtra("cop_2",jsonGame.getString("cop_2"));
+			gameIntent.putExtra("cop_3",jsonGame.getString("cop_3"));			
+			gameIntent.putExtra("game_id",Integer.valueOf(gameId));
+	    	gameIntent.putExtra("role","policeman");
+	    	
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+
+    	startService(gameIntent);
+
+    	Intent i = new Intent(this, MapActivity.class);
+    	startActivity(i);	
+		
 	}
 }
