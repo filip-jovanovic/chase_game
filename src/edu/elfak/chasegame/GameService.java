@@ -43,7 +43,7 @@ public class GameService extends Service implements LocationListener {
 			items = new ArrayList<ObjectOnMap>();
 			players = new ArrayList<ObjectOnMap>();
 			
-			registerReceiver(broadcastReceiver, new IntentFilter(GCMIntentService.TAG));
+			registerReceiver(gcmBroadcastReceiver, new IntentFilter(GCMIntentService.TAG));
 			
 			mapId = intent.getExtras().getInt("mapId");
 			gameName = intent.getExtras().getString("gameName");			
@@ -190,12 +190,12 @@ public class GameService extends Service implements LocationListener {
 		
 		public void onDestroy (){
 		    super.onDestroy();
-			unregisterReceiver(broadcastReceiver);
+			unregisterReceiver(gcmBroadcastReceiver);
 			locationManager.removeUpdates(this);
 		}
 		
 		// broadcast receiver that handles messages from GCM
-		private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		private BroadcastReceiver gcmBroadcastReceiver = new BroadcastReceiver() {
 					 
 			@Override public void onReceive(Context context, Intent intent) { 
 
