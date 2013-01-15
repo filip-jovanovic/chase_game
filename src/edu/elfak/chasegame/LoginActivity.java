@@ -62,6 +62,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 		progressDialog = new ProgressDialog(this);
 		loginFlag = false;
 	}
+	
+	public void OnDestroy(){
+		GCMRegistrar.onDestroy(this);
+	}
 
 	public void onClick(View v) {
 		final String method;

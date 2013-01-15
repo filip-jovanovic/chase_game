@@ -38,8 +38,9 @@ public class HomeActivity extends Activity implements OnClickListener {
 				startActivity(i);
 				break;
 			case(R.id.exit_button):
-				stopService(new Intent(this, GameService.class));
-				finish();
+				
+				if(stopService(new Intent(this, GameService.class)))
+					finish();
 		}
 	}
 

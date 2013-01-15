@@ -26,10 +26,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	@Override
 	protected void onMessage(Context arg0, Intent rec_intent) {
-		 // parse message into strings
-		 String str = rec_intent.getExtras().getString("message");
-		 intent.putExtra("message", str);
-	     sendBroadcast(intent);
+		intent.putExtras(rec_intent.getExtras());
+	    sendBroadcast(intent);
 	}
 
 	@Override
@@ -40,6 +38,10 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onUnregistered(Context arg0, String arg1) {
 		
+	}
+	
+	public void onDestroy(){
+		  //Write your clean-up code here
 	}
 
 }

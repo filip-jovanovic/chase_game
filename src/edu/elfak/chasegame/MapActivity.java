@@ -1,6 +1,9 @@
 package edu.elfak.chasegame;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -25,7 +28,8 @@ public class MapActivity extends FragmentActivity {
 	private LocationManager locationManager;
 	private String provider;
 	private long timeOfLastLocation;
-
+	private MapUpdateReceiver dataUpdateReceiver;
+	
 	protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
@@ -34,64 +38,21 @@ public class MapActivity extends FragmentActivity {
 		mMap = ((SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.map)).getMap();
 
-		/*
-		// Get the location manager
-		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		provider = locationManager.NETWORK_PROVIDER;
-		Location lastKnownLocation = locationManager.getLastKnownLocation(provider);
-
 		mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-		LatLng latLng = new LatLng(lastKnownLocation.getLatitude(),
-				lastKnownLocation.getLongitude());
-		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-		
-		LatLng loc = new LatLng(43.321244, 21.895838);
-		Polygon p = drawBoundaries(loc, mMap);
-		*/
 	}
 
-	/* Request updates at startup */
-	@Override
-	protected void onResume() {
+	public void onResume(){
+		if (dataUpdateReceiver == null) dataUpdateReceiver = new MapUpdateReceiver();
+		IntentFilter intentFilter = new IntentFilter("UPDATE_MAP_TAG");
+		registerReceiver(dataUpdateReceiver, intentFilter);
 		super.onResume();
 	}
-
-	/* Remove the locationlistener updates when Activity is paused */
-	@Override
-	protected void onPause() {
+	
+	public void onPause(){
+		if (dataUpdateReceiver != null) unregisterReceiver(dataUpdateReceiver);
 		super.onPause();
 	}
 
-	
-	public void onLocationChanged(Location location) {
-		/*LatLng latLng;
-		if(TIME_DIFFERENCE<(location.getTime()-timeOfLastLocation))
-		{	
-			// this location is 10s "away" from last one
-			latLng = new LatLng(location.getLatitude(),location.getLongitude());
-			
-			// set current location on screen to
-			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-			timeOfLastLocation = location.getTime();
-			// TODO : send it to others
-			// put marker
-			mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker)));
-		}*/
-
-	}
-
-	public void onProviderDisabled(String provider) {
-		
-	}
-
-	public void onProviderEnabled(String provider) {
-	
-	}
-
-	public void onStatusChanged(String provider, int status, Bundle extras) {
-		
-	}
-	
 	private Polygon drawBoundaries(LatLng location, GoogleMap myMap){
 		
 		// Instantiates a new Polygon object and adds points in a counterclockwise
@@ -114,4 +75,16 @@ public class MapActivity extends FragmentActivity {
 		return myMap.addPolygon(rectOptions);
 
 	}
+	
+	private class MapUpdateReceiver extends BroadcastReceiver {
+	    @Override
+	    public void onReceive(Context context, Intent intent) {
+	        if (intent.getAction().equals("UPDATE_MAP_TAG")) {
+	        	LatLng latLng = (LatLng) intent.getExtras().get("newLocation");
+	        	mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+				mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker)));
+	        }
+	    }
+	}
 }
+

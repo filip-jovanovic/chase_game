@@ -30,6 +30,8 @@ public class HTTPHelper {
 	public static final String CREATE_GAME_URL = "createNewGame.php";
 	public static final String UPDATE_GAME_URL = "getGame.php";
 	public static final String ANNOUNCE_NEW_PLAYER_URL = "announceNewPlayer.php";
+	public static final String SEND_GCM_MESSAGE_URL = "sendMessage.php";
+	public static final String ADD_NEW_PLAYER_LOC_URL = "addNewPlayerLocation.php";
 	public static String SERVER_URL = "http://android-test-rig.comuf.com/";
 	static InputStream is = null;
     static JSONObject jObj = null;
@@ -64,7 +66,7 @@ public class HTTPHelper {
     	
     	String retStr = "no action";
     	HttpClient client = new DefaultHttpClient();
-    	HttpPost post = new HttpPost(url);
+    	HttpPost post = new HttpPost(SERVER_URL + url);
     	
     	try {
     		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
