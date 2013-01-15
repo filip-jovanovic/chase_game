@@ -10,6 +10,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -81,6 +82,7 @@ public class MapActivity extends FragmentActivity {
 	    public void onReceive(Context context, Intent intent) {
 	        if (intent.getAction().equals("UPDATE_MAP_TAG")) {
 	        	LatLng latLng = (LatLng) intent.getExtras().get("newLocation");
+	        	Log.v("MapActivity", latLng.toString());
 	        	mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 				mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker)));
 	        }

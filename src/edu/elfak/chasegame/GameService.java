@@ -121,7 +121,7 @@ public class GameService extends Service implements LocationListener {
 					lastKnownLocation.getLongitude());
 		   updateMapView(latLng);
 		   provider = locationManager.GPS_PROVIDER;
-		   locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 1000, 10, this);
+		   locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 1000, 0, this);
 		   return START_STICKY;
 		}
 		
@@ -138,6 +138,18 @@ public class GameService extends Service implements LocationListener {
 				// TODO : send it to others
 				// put marker
 				
+				//registrovanje nove lokacije u tabelu player_locations
+				ArrayList<String> parameters = new ArrayList<String>();
+				ArrayList<String> values = new ArrayList<String>();
+				parameters.add("game_id");
+				parameters.add("player_id");
+				parameters.add("latitude");
+				parameters.add("longitude");
+				values.add(String.valueOf(gameId));
+				values.add(LoginActivity.registrationId);
+				values.add(String.valueOf(latLng.latitude));
+				values.add(String.valueOf(latLng.longitude));
+				HTTPHelper.sendValuesToUrl(parameters, values, "playerLocations.php");
 			}
 
 		}
@@ -208,6 +220,9 @@ public class GameService extends Service implements LocationListener {
 					players.add(new ObjectOnMap(0,0,message.getString(GCM_ANNOUNCE_TAG),
 							"policeman" + String.valueOf(numberOfPolicemen),"player"));
 					*/
+				}
+				if(message.containsKey("player_locations")){
+					Log.v("GCM Received","Player locations: "+ message.getString("player_locations"));
 				}
 					
 					

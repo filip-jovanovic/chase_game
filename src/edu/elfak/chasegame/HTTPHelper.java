@@ -32,7 +32,7 @@ public class HTTPHelper {
 	public static final String ANNOUNCE_NEW_PLAYER_URL = "announceNewPlayer.php";
 	public static final String SEND_GCM_MESSAGE_URL = "sendMessage.php";
 	public static final String ADD_NEW_PLAYER_LOC_URL = "addNewPlayerLocation.php";
-	public static String SERVER_URL = "http://android-test-rig.comuf.com/";
+	public static String SERVER_URL = "http://android-test-rig.comuf.com/"; 
 	static InputStream is = null;
     static JSONObject jObj = null;
     static String json = "";
@@ -77,6 +77,7 @@ public class HTTPHelper {
     		post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
     		HttpResponse response = client.execute(post);
     		retStr = inputStreamToString(response.getEntity().getContent()).toString().split("<!--")[0];
+    		Log.v("http",retStr);
     	} catch (IOException e) {
 			e.printStackTrace();
 			retStr = "Error during upload!";
