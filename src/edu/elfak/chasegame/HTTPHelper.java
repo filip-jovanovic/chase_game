@@ -5,19 +5,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,9 +36,9 @@ public class HTTPHelper {
 	public static final String CREATE_GAME_URL = "createNewGame.php";
 	public static final String UPDATE_GAME_URL = "getGame.php";
 	public static final String ANNOUNCE_NEW_PLAYER_URL = "announceNewPlayer.php";
-	public static final String SEND_GCM_MESSAGE_URL = "sendMessage.php";
 	public static final String ADD_NEW_PLAYER_LOC_URL = "addNewPlayerLocation.php";
-	public static String SERVER_URL = "http://android-test-rig.comuf.com/"; 
+	private static final String GCM_GOOGLE_URL = "https://android.googleapis.com/gcm/send";
+	public static String SERVER_URL = "http://android-test-rig.comuf.com/";
 	static InputStream is = null;
     static JSONObject jObj = null;
     static String json = "";
@@ -77,7 +83,35 @@ public class HTTPHelper {
     		post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
     		HttpResponse response = client.execute(post);
     		retStr = inputStreamToString(response.getEntity().getContent()).toString().split("<!--")[0];
-    		Log.v("http",retStr);
+    	} catch (IOException e) {
+			e.printStackTrace();
+			retStr = "Error during upload!";
+		} 
+    	return retStr;
+    }
+
+	public static String sendGCMMessage(String GCMMessageType, String payload, ArrayList<String> receivers) {
+    	
+		for(int i = 0; i< receivers.size();i++)
+			receivers.set(i, "\"" + receivers.get(i)+ "\"");
+		
+		String data = "{\"data\": { \"" + GCMMessageType + "\": \"" + payload + 			
+		"\" }, \"registration_ids\": " + receivers.toString() +"}";	
+		
+    	String retStr;    	
+    	HttpParams params = new BasicHttpParams();
+    	HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+    	HttpProtocolParams.setContentCharset(params, "utf-8");    	
+    	HttpClient client = new DefaultHttpClient(params);
+    	HttpPost post = new HttpPost(GCM_GOOGLE_URL);
+
+    	try {
+    		StringEntity se = new StringEntity(data);
+    		post.setEntity(se);
+    		post.setHeader("Content-Type","application/json");
+        	post.setHeader("Authorization","key=AIzaSyDGuC1_kqe-bGT1_-SnHEaJbjMCvBeb0fc");
+    		HttpResponse response = client.execute(post);
+    		retStr = inputStreamToString(response.getEntity().getContent()).toString().split("<!--")[0];
     	} catch (IOException e) {
 			e.printStackTrace();
 			retStr = "Error during upload!";

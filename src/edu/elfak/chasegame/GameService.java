@@ -43,7 +43,7 @@ public class GameService extends Service implements LocationListener {
 			items = new ArrayList<ObjectOnMap>();
 			players = new ArrayList<ObjectOnMap>();
 			
-			registerReceiver(gcmBroadcastReceiver, new IntentFilter(GCMIntentService.TAG));
+			registerReceiver(broadcastReceiver, new IntentFilter(GCMIntentService.TAG));
 			
 			mapId = intent.getExtras().getInt("mapId");
 			gameName = intent.getExtras().getString("gameName");			
@@ -169,31 +169,9 @@ public class GameService extends Service implements LocationListener {
 				//if(id.compareTo(newPlayerId)!=0)		// RETURN FOR TESTING WITH DIFFERENT DEVICES !!!
 					receivers.add(id);
 			}
-			sendGCMMessage(GCM_ANNOUNCE_TAG, newPlayerId, receivers);
+			HTTPHelper.sendGCMMessage(GCM_ANNOUNCE_TAG, newPlayerId, receivers);
 		}	
-		
-		public void sendGCMMessage(String GCMMessageType, String payload, ArrayList<String> receivers){
-			JSONObject data = new JSONObject();
-			try {
-				for(int i = 0; i< receivers.size();i++)
-					receivers.set(i, "\"" + receivers.get(i)+ "\"");
 				
-				data.put(GCMMessageType, payload);
-				ArrayList<String> parameters = new ArrayList<String>();
-				ArrayList<String> values = new ArrayList<String>();
-				parameters.add("data");
-				parameters.add("receivers");
-				
-				values.add(data.toString());
-				values.add(receivers.toString());
-				
-				String res = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.SEND_GCM_MESSAGE_URL);
-				Log.v("GCM response",res);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
-		
 		@Override
 		public IBinder onBind(Intent arg0) {
 			// TODO Auto-generated method stub
@@ -202,12 +180,12 @@ public class GameService extends Service implements LocationListener {
 		
 		public void onDestroy (){
 		    super.onDestroy();
-			unregisterReceiver(gcmBroadcastReceiver);
+			unregisterReceiver(broadcastReceiver);
 			locationManager.removeUpdates(this);
 		}
 		
 		// broadcast receiver that handles messages from GCM
-		private BroadcastReceiver gcmBroadcastReceiver = new BroadcastReceiver() {
+		private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 					 
 			@Override public void onReceive(Context context, Intent intent) { 
 
@@ -223,8 +201,7 @@ public class GameService extends Service implements LocationListener {
 				}
 				if(message.containsKey("player_locations")){
 					Log.v("GCM Received","Player locations: "+ message.getString("player_locations"));
-				}
-					
+				}	
 					
 				
 			}

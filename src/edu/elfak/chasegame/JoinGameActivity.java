@@ -80,7 +80,6 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 			Log.v("res",res);
 			
 			JSONObject jsonGame = new JSONObject(res);
-			
 			gameIntent.putExtra("gameName",jsonGame.getString("game_name"));
 			gameIntent.putExtra("mapId",jsonGame.getInt("map_id"));
 			gameIntent.putExtra("thief",jsonGame.getString("thief"));
