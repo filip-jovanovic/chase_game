@@ -125,10 +125,9 @@ public class GameService extends Service implements LocationListener {
 					   
 		   locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		   provider = locationManager.NETWORK_PROVIDER;
-		   Location lastKnownLocation = locationManager.getLastKnownLocation(provider);
-		   LatLng latLng = new LatLng(lastKnownLocation.getLatitude(),
-					lastKnownLocation.getLongitude());
-		   updateMapView(latLng);
+		   //Location lastKnownLocation = locationManager.getLastKnownLocation(provider);
+		   //LatLng latLng = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
+		   //updateMapView(latLng);
 		   provider = locationManager.GPS_PROVIDER;
 		   locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 1000, 0, this);
 		   return START_STICKY;
@@ -181,7 +180,7 @@ public class GameService extends Service implements LocationListener {
 			ArrayList<String>receivers = new ArrayList<String>();
 			for(int i = 0; i<players.size(); i++){
 				String id = players.get(i).getId();
-				//if(id.compareTo(newPlayerId)!=0)		// RETURN FOR TESTING WITH DIFFERENT DEVICES !!!
+				if(id.compareTo(newPlayerId)!=0)		// RETURN FOR TESTING WITH DIFFERENT DEVICES !!!
 					receivers.add(id);
 			}
 			HTTPHelper.sendGCMMessage(GCM_ANNOUNCE_TAG, newPlayerId, receivers);
@@ -211,8 +210,8 @@ public class GameService extends Service implements LocationListener {
 					numberOfPolicemen++;
 					Log.v("GCM Received","Player added: "+ message.getString(GCM_ANNOUNCE_TAG));
 						//		RETURN FOR MULTIPLE DEVICE!
-					/*players.add(new ObjectOnMap(0,0,message.getString(GCM_ANNOUNCE_TAG),
-							"policeman" + String.valueOf(numberOfPolicemen),"player"));*/
+					players.add(new ObjectOnMap(0,0,message.getString(GCM_ANNOUNCE_TAG),
+							"policeman" + String.valueOf(numberOfPolicemen),"player"));
 					
 				}
 				if(message.containsKey("player_locations")){
@@ -222,15 +221,18 @@ public class GameService extends Service implements LocationListener {
 					
 					try {
 						JSONArray ja = new JSONArray(message.getString("player_locations"));
-						JSONObject jo = ja.getJSONObject(0);
-						playerId = jo.getString("player_id");
-						newLocation = new LatLng(jo.getDouble("latitude"), jo.getDouble("longitude"));
-						
-						for(int i = 0; i<players.size(); i++){
-							String id = players.get(i).getId();
-							if(id.equals(playerId)){
-								players.get(i).setLatlng(newLocation);
-								updateMapObject(players.get(i));
+						JSONObject jo;
+						int length = ja.length();
+						for(int i = 0; i<length; i++){
+							jo = ja.getJSONObject(i);
+							playerId = jo.getString("player_id");
+							newLocation = new LatLng(jo.getDouble("latitude"), jo.getDouble("longitude"));
+							for(int j = 0; j<players.size(); j++){
+								String id = players.get(j).getId();
+								if(id.equals(playerId)){
+									players.get(j).setLatlng(newLocation);
+									updateMapObject(players.get(j));
+								}
 							}
 						}
 					} catch (JSONException e) {
