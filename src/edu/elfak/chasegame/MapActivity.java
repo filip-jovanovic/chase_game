@@ -1,5 +1,7 @@
 package edu.elfak.chasegame;
 
+//import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.content.BroadcastReceiver;
@@ -7,9 +9,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.location.Location;
+/*import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
+import android.location.LocationManager;*/
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -30,6 +32,7 @@ public class MapActivity extends FragmentActivity {
 	private GoogleMap mMap;
 	private MapUpdateReceiver dataUpdateReceiver;
 	private HashMap<String, Marker> markers;
+	private HashMap<String, Marker> itemMarkers;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -43,8 +46,22 @@ public class MapActivity extends FragmentActivity {
 		
 		//if(markers == null)
 			markers = new HashMap<String, Marker>();
+			itemMarkers = new HashMap<String, Marker>();
 	}
-
+	
+	private void drawItems(ArrayList<ObjectOnMap> items){
+		for (int i = 0; i <= items.size(); i++) {
+			MarkerOptions markerOptions = new MarkerOptions();
+			markerOptions.position(items.get(i).getLatlng());
+			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker));
+			markerOptions.title(items.get(i).getName());
+			
+			Marker marker = mMap.addMarker(markerOptions);
+					
+			itemMarkers.put(items.get(i).getId(), marker);
+		}
+	}
+	
 	public void onResume(){
 		if (dataUpdateReceiver == null) dataUpdateReceiver = new MapUpdateReceiver();
 		IntentFilter intentFilter = new IntentFilter();
@@ -86,11 +103,12 @@ public class MapActivity extends FragmentActivity {
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
 	    	String action = intent.getAction();
-	    	LatLng latLng = (LatLng) intent.getExtras().get("location");
 	    	if(action.equals("UPDATE_MAP_TAG")){
+	    		LatLng latLng = (LatLng) intent.getExtras().get("location");
 	        	mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
-	    	}
+	    	}else
 	    	if(action.equals("UPDATE_MAP_OBJECT_TAG")){
+	    		LatLng latLng = (LatLng) intent.getExtras().get("location");
 	    		String id =  intent.getExtras().getString("objectId");
 	    		Log.v("UPDATE MARKER",id + " " + latLng.toString());
 	    		Marker marker = markers.get(id);
@@ -104,8 +122,22 @@ public class MapActivity extends FragmentActivity {
 	    					
 	    			markers.put(id, marker);
 	    		}
-	    		else
+	    		else{
+	    			MarkerOptions markerOptions = new MarkerOptions();
+	    			markerOptions.position(latLng);
+	    			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker));
+	    			markerOptions.title(id);
+	    			
+	    			marker = mMap.addMarker(markerOptions);
 	    			marker.setPosition(latLng);
+	    		}
+	    	}else{
+	    	//if(action.equals("DRAW_ITEMS")){
+				Log.v("DRAW_ITEMS","Usao u funkciju");
+	    		Bundle bun = intent.getExtras().getBundle("dataBundle");
+	    		ArrayList<ObjectOnMap> items = bun.getParcelableArrayList("itemi");
+	    		drawItems(items);
+	    		Log.v("DRAW_ITEMS","Zavrsio funkciju");
 	    	}
 	    }
 	}

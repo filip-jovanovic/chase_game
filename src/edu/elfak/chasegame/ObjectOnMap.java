@@ -1,8 +1,13 @@
 package edu.elfak.chasegame;
 
+import java.io.Serializable;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
 
-public class ObjectOnMap {
+public class ObjectOnMap implements Parcelable{
 
 	private LatLng latlng;
 	private String id;
@@ -46,5 +51,31 @@ public class ObjectOnMap {
 		this.id = id;
 		this.name = name;
 		this.type = type;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(id);
+		dest.writeString(name);
+		dest.writeString(type);
+		double lat = latlng.latitude;
+		dest.writeDouble(lat);
+		double lng = latlng.longitude;
+		dest.writeDouble(lng);
+	}
+	
+	public void ConstantData(Parcel in) {
+		id = in.readString();
+		name = in.readString();
+        type = in.readString();
+        double lat = in.readDouble();
+        double lng = in.readDouble();
+        latlng = new LatLng(lat,lng);
+	}
+	
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

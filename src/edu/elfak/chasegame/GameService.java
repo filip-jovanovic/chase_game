@@ -20,6 +20,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.util.Log;
 
 public class GameService extends Service implements LocationListener {
@@ -112,7 +113,7 @@ public class GameService extends Service implements LocationListener {
 					buildings.add(ob);
 				else
 					items.add(ob);	
-			}	
+			}
 			
 		   //registrovanje nove lokacije u tabelu player_locations
 		   ArrayList<String> parameters = new ArrayList<String>();
@@ -157,6 +158,15 @@ public class GameService extends Service implements LocationListener {
 				values.add(String.valueOf(latLng.latitude));
 				values.add(String.valueOf(latLng.longitude));
 				HTTPHelper.sendValuesToUrl(parameters, values, "playerLocations.php");
+				
+				//Iscrtavanje Itema
+				Intent j = new Intent("DRAW_ITEMS");
+				Log.v("Bundle","Usao u funkciju");
+				Bundle dataBundle = new Bundle();
+				//dataBundle.putParcelableArrayList("itemi", items);
+				//j.putExtra("dataBundle",dataBundle);
+				sendBroadcast(j);
+				Log.v("Bundle","Poslao");
 			}
 
 		}
@@ -173,6 +183,13 @@ public class GameService extends Service implements LocationListener {
 			i.putExtra("location", oom.getLatlng());
 			Log.v("update map object!",oom.getId() + " " + oom.getLatlng().toString());
 			sendBroadcast(i);
+			
+			//Iscrtavanje Itema
+			/*Intent j = new Intent("DRAW_ITEMS");
+			Bundle dataBundle = new Bundle();
+			dataBundle.putParcelableArrayList("itemi", items);
+			j.putExtra("dataBundle",dataBundle);
+			sendBroadcast(j);*/
 		}
 		
 		private void announceNewPlayer(String newPlayerId)
@@ -205,7 +222,7 @@ public class GameService extends Service implements LocationListener {
 			@Override public void onReceive(Context context, Intent intent) { 
 
 				Bundle message = intent.getExtras();
-				
+				Log.v("GCM Received", message.toString());
 				if(message.containsKey(GCM_ANNOUNCE_TAG)){
 					numberOfPolicemen++;
 					Log.v("GCM Received","Player added: "+ message.getString(GCM_ANNOUNCE_TAG));
@@ -222,9 +239,11 @@ public class GameService extends Service implements LocationListener {
 					try {
 						JSONArray ja = new JSONArray(message.getString("player_locations"));
 						JSONObject jo;
+						Log.v("GCM Primio","Poruka: "+ message.getString("player_locations"));
 						int length = ja.length();
 						for(int i = 0; i<length; i++){
 							jo = ja.getJSONObject(i);
+							
 							playerId = jo.getString("player_id");
 							newLocation = new LatLng(jo.getDouble("latitude"), jo.getDouble("longitude"));
 							for(int j = 0; j<players.size(); j++){
@@ -236,10 +255,8 @@ public class GameService extends Service implements LocationListener {
 							}
 						}
 					} catch (JSONException e) {
-					}					
-				}	
-					
-				
+					}	
+				}					
 			}
 		
 		};
