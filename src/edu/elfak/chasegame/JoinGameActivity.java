@@ -21,18 +21,18 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class JoinGameActivity extends Activity implements OnClickListener, OnItemClickListener{
 
-	HashMap<String, String> gamesHashMap;
+	private HashMap<String, String> gamesHashMap;
+	private Bundle dataBundle;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.joingame);
 		
+		dataBundle = getIntent().getExtras().getBundle("dataBundle");
+		
 		gamesHashMap = HTTPHelper.getGameList();
-		
 		ArrayList<String> listForAdapter = new ArrayList<String>();
-		
 		Object[] games = gamesHashMap.keySet().toArray();
-		
 		for(int i = 0; i< gamesHashMap.size(); i++){
 			listForAdapter.add((String)games[i]);
 		}
@@ -59,9 +59,11 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 
 	public void onClick(View arg0) {
 		Intent i = new Intent(this, CreateGameActivity.class);
-		startActivity(i);		
+		i.putExtra("dataBundle",dataBundle);
+		startActivity(i);	
+		finish();
 	}
-
+	
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		
 		String gameId =  gamesHashMap.get(((TextView)arg1).getText().toString());
@@ -71,7 +73,7 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 		parameters.add("game_id");
 		parameters.add("player_id");
 		values.add(gameId);
-		values.add(LoginActivity.registrationId);
+		values.add(dataBundle.getString("registrationId"));
 		String res = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.UPDATE_GAME_URL);
 		
 		Intent gameIntent = new Intent(this, GameService.class);
@@ -88,17 +90,18 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 			gameIntent.putExtra("cop_3",jsonGame.getString("cop_3"));			
 			gameIntent.putExtra("game_id",Integer.valueOf(gameId));
 	    	gameIntent.putExtra("role","policeman");
+	    	gameIntent.putExtra("dataBundle",dataBundle);
 	    	
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-
     	startService(gameIntent);
 
     	Intent i = new Intent(this, MapActivity.class);
+    	//i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     	startActivity(i);	
-		
+    	finish();
 	}
 }

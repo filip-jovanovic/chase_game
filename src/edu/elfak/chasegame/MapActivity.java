@@ -1,5 +1,7 @@
 package edu.elfak.chasegame;
 
+import java.util.HashMap;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +19,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -25,11 +28,8 @@ public class MapActivity extends FragmentActivity {
 
 	SupportMapFragment mapFragment;
 	private GoogleMap mMap;
-	private static long TIME_DIFFERENCE = 10000;
-	private LocationManager locationManager;
-	private String provider;
-	private long timeOfLastLocation;
 	private MapUpdateReceiver dataUpdateReceiver;
+	private HashMap<String, Marker> markers;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -40,11 +40,16 @@ public class MapActivity extends FragmentActivity {
 				.findFragmentById(R.id.map)).getMap();
 
 		mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+		
+		//if(markers == null)
+			markers = new HashMap<String, Marker>();
 	}
 
 	public void onResume(){
 		if (dataUpdateReceiver == null) dataUpdateReceiver = new MapUpdateReceiver();
-		IntentFilter intentFilter = new IntentFilter("UPDATE_MAP_TAG");
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction("UPDATE_MAP_OBJECT_TAG");
+		intentFilter.addAction("UPDATE_MAP_TAG");
 		registerReceiver(dataUpdateReceiver, intentFilter);
 		super.onResume();
 	}
@@ -80,12 +85,28 @@ public class MapActivity extends FragmentActivity {
 	private class MapUpdateReceiver extends BroadcastReceiver {
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
-	        if (intent.getAction().equals("UPDATE_MAP_TAG")) {
-	        	LatLng latLng = (LatLng) intent.getExtras().get("newLocation");
-	        	Log.v("MapActivity", latLng.toString());
-	        	mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-				mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker)));
-	        }
+	    	String action = intent.getAction();
+	    	LatLng latLng = (LatLng) intent.getExtras().get("location");
+	    	if(action.equals("UPDATE_MAP_TAG")){
+	        	mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
+	    	}
+	    	if(action.equals("UPDATE_MAP_OBJECT_TAG")){
+	    		String id =  intent.getExtras().getString("objectId");
+	    		Log.v("UPDATE MARKER",id + " " + latLng.toString());
+	    		Marker marker = markers.get(id);
+	    		if(marker == null){
+	    			MarkerOptions markerOptions = new MarkerOptions();
+	    			markerOptions.position(latLng);
+	    			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker));
+	    			markerOptions.title(id);
+	    			
+	    			marker = mMap.addMarker(markerOptions);
+	    					
+	    			markers.put(id, marker);
+	    		}
+	    		else
+	    			marker.setPosition(latLng);
+	    	}
 	    }
 	}
 }

@@ -9,6 +9,7 @@
     <string name="new_account_button">Create account</string>
     <string name="map_button">Map</string>
     <string name="create_game_button">New Game</string>
+     <string name="stop_game_button">End game</string>
     <string name="about_button">About</string>
     <string name="exit_button">Exit</string>
     <string name="about_text"><i>Lorem Ipsum er rett og</i> slett dummytekst fra og for trykkeindustrien. 

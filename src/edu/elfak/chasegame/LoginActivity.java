@@ -23,8 +23,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 	Context context;
 	ProgressDialog progressDialog;
 	static boolean loginFlag;
-	public static String registrationId;
-	public static String player_name;
+	private String registrationId;
+	private String playerName;
 	Intent messageIntent;
 	
 
@@ -54,7 +54,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		etPassword.setText("asdfgh");
 		// just for testing phase!
 		
-		if (player_name != "" && player_name != null)
+		if (playerName != "" && playerName != null)
 			loginButton.setClickable(false);
 
 		guiThread = new Handler();
@@ -99,10 +99,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 						guiProgressDialog(false, "");
 
 						if (!result.startsWith("Error:")) {
-							player_name = result;
+							playerName = result;
 							successfulLogin();
 						} else {
-							player_name = "";
+							playerName = "";
 							guiNotifyUser(result);
 						}
 
@@ -141,7 +141,11 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 	private void successfulLogin() {
 		Intent i = new Intent(this, HomeActivity.class);
-		//finish();
+		Bundle dataBundle = new Bundle();
+		dataBundle.putString("registrationId", registrationId);
+		dataBundle.putString("playerName",playerName);
+		i.putExtra("dataBundle",dataBundle);
+		finish();
 		startActivity(i);
 	}
 

@@ -106,6 +106,7 @@ public class HTTPHelper {
     	HttpPost post = new HttpPost(GCM_GOOGLE_URL);
 
     	try {
+    		Log.v("GCM Req:", data);
     		StringEntity se = new StringEntity(data);
     		post.setEntity(se);
     		post.setHeader("Content-Type","application/json");
@@ -116,6 +117,7 @@ public class HTTPHelper {
 			e.printStackTrace();
 			retStr = "Error during upload!";
 		} 
+    	Log.v("GCM response",retStr);
     	return retStr;
     }
 	

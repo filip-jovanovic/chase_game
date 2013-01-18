@@ -3,6 +3,7 @@ package edu.elfak.chasegame;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,9 +36,14 @@ public class GameService extends Service implements LocationListener {
 		private long timeOfLastLocation;
 		public static final String GCM_ANNOUNCE_TAG = "announce";
 		private static final long TIME_DIFFERENCE = 5000;
+		private String registrationId;
+		private String playerName;
+		public static boolean isRuning = false;
 
 		@Override
 		public int onStartCommand(Intent intent, int flags, int startId) {
+			
+			isRuning = true;
 			
 			buildings = new ArrayList<ObjectOnMap>();
 			items = new ArrayList<ObjectOnMap>();
@@ -50,9 +56,12 @@ public class GameService extends Service implements LocationListener {
 			String role = intent.getExtras().getString("role");
 			numberOfPolicemen = 0;
 			
+			registrationId = intent.getExtras().getBundle("dataBundle").getString("registrationId");
+			playerName = intent.getExtras().getBundle("dataBundle").getString("playerName");
+			
 			if(role.compareTo("thief")==0)
 			{
-				players.add(new ObjectOnMap(0,0,LoginActivity.registrationId,role,"player"));
+				players.add(new ObjectOnMap(0,0,registrationId,role,"player"));
 				ArrayList<String> parameters = new ArrayList<String>();
 				ArrayList<String> values = new ArrayList<String>();
 				parameters.add("name");
@@ -60,7 +69,7 @@ public class GameService extends Service implements LocationListener {
 				parameters.add("thief");
 				values.add(gameName);
 				values.add(String.valueOf(mapId));
-				values.add(LoginActivity.registrationId);
+				values.add(registrationId);
 				String result = "empty";
 				result = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.CREATE_GAME_URL);
 				Log.v("thief Game id: ",result);
@@ -91,7 +100,7 @@ public class GameService extends Service implements LocationListener {
 			}
 			// let other players be informed about new player
 			if(role.compareTo("thief")!=0)
-				announceNewPlayer(LoginActivity.registrationId);
+				announceNewPlayer(registrationId);
 			
 			// populate items and buildings from server
 			ArrayList<ObjectOnMap> allObjects = HTTPHelper.getBuildingAndItemList(String.valueOf(mapId));
@@ -111,7 +120,7 @@ public class GameService extends Service implements LocationListener {
 		   parameters.add("game_id");
 		   parameters.add("player_id");
 		   values.add(String.valueOf(gameId));
-		   values.add(LoginActivity.registrationId);
+		   values.add(registrationId);
 		   HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.ADD_NEW_PLAYER_LOC_URL);
 					   
 		   locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -138,7 +147,6 @@ public class GameService extends Service implements LocationListener {
 				// TODO : send it to others
 				// put marker
 				
-				//registrovanje nove lokacije u tabelu player_locations
 				ArrayList<String> parameters = new ArrayList<String>();
 				ArrayList<String> values = new ArrayList<String>();
 				parameters.add("game_id");
@@ -146,7 +154,7 @@ public class GameService extends Service implements LocationListener {
 				parameters.add("latitude");
 				parameters.add("longitude");
 				values.add(String.valueOf(gameId));
-				values.add(LoginActivity.registrationId);
+				values.add(registrationId);
 				values.add(String.valueOf(latLng.latitude));
 				values.add(String.valueOf(latLng.longitude));
 				HTTPHelper.sendValuesToUrl(parameters, values, "playerLocations.php");
@@ -156,8 +164,15 @@ public class GameService extends Service implements LocationListener {
 		
 		private void updateMapView(LatLng latLng){
 			Intent i = new Intent("UPDATE_MAP_TAG");
-			i.putExtra("newLocation", latLng);
-			Log.v("updateMap from GS:",i.getExtras().toString());
+			i.putExtra("location", latLng);
+			sendBroadcast(i);
+		}
+		
+		private void updateMapObject(ObjectOnMap oom){
+			Intent i = new Intent("UPDATE_MAP_OBJECT_TAG");
+			i.putExtra("objectId", oom.getId());
+			i.putExtra("location", oom.getLatlng());
+			Log.v("update map object!",oom.getId() + " " + oom.getLatlng().toString());
 			sendBroadcast(i);
 		}
 		
@@ -182,6 +197,7 @@ public class GameService extends Service implements LocationListener {
 		    super.onDestroy();
 			unregisterReceiver(broadcastReceiver);
 			locationManager.removeUpdates(this);
+			isRuning = false;
 		}
 		
 		// broadcast receiver that handles messages from GCM
@@ -194,13 +210,31 @@ public class GameService extends Service implements LocationListener {
 				if(message.containsKey(GCM_ANNOUNCE_TAG)){
 					numberOfPolicemen++;
 					Log.v("GCM Received","Player added: "+ message.getString(GCM_ANNOUNCE_TAG));
-					/*			RETURN FOR MULTIPLE DEVICE!
-					players.add(new ObjectOnMap(0,0,message.getString(GCM_ANNOUNCE_TAG),
-							"policeman" + String.valueOf(numberOfPolicemen),"player"));
-					*/
+						//		RETURN FOR MULTIPLE DEVICE!
+					/*players.add(new ObjectOnMap(0,0,message.getString(GCM_ANNOUNCE_TAG),
+							"policeman" + String.valueOf(numberOfPolicemen),"player"));*/
+					
 				}
 				if(message.containsKey("player_locations")){
-					Log.v("GCM Received","Player locations: "+ message.getString("player_locations"));
+					Log.v("player locations","");
+					String playerId = null;
+					LatLng newLocation = null;
+					
+					try {
+						JSONArray ja = new JSONArray(message.getString("player_locations"));
+						JSONObject jo = ja.getJSONObject(0);
+						playerId = jo.getString("player_id");
+						newLocation = new LatLng(jo.getDouble("latitude"), jo.getDouble("longitude"));
+						
+						for(int i = 0; i<players.size(); i++){
+							String id = players.get(i).getId();
+							if(id.equals(playerId)){
+								players.get(i).setLatlng(newLocation);
+								updateMapObject(players.get(i));
+							}
+						}
+					} catch (JSONException e) {
+					}					
 				}	
 					
 				
