@@ -1,3 +1,4 @@
+
 package edu.elfak.chasegame;
 
 import java.util.ArrayList;
@@ -234,7 +235,7 @@ public class GameService extends Service implements LocationListener {
 						Log.v("player locations","");
 						String playerId = null;
 						LatLng newLocation = null;
-						
+						ArrayList<String> player_ids = new ArrayList<String>();
 						try {
 							JSONArray ja = new JSONArray(message.getString("player_locations"));
 							JSONObject jo;
@@ -242,8 +243,8 @@ public class GameService extends Service implements LocationListener {
 							int length = ja.length();
 							for(int i = 0; i<length; i++){
 								jo = ja.getJSONObject(i);
-								
 								playerId = jo.getString("player_id");
+								player_ids.add(playerId);
 								newLocation = new LatLng(jo.getDouble("latitude"), jo.getDouble("longitude"));
 								for(int j = 0; j<players.size(); j++){
 									String id = players.get(j).getId();
@@ -253,30 +254,15 @@ public class GameService extends Service implements LocationListener {
 									}
 								}
 							}
-						} catch (JSONException e) {
-						}	
-					}else
-					if(message.containsKey("player_exited")){
-						String playerId = null;
-						
-						try {
-							JSONObject jo = new JSONObject(message.getString("player_exited"));
-							//JSONObject jo;
-							Log.v("GCM Primio","Poruka: "+ message.getString("player_exited"));
-							//int length = ja.length();
-							//for(int i = 0; i<length; i++){
-								//jo = ja.getJSONObject(i);
-								playerId = message.getString("player_exited");
-								//playerId = jo.getString("player_id");
-								
-								/*for(int j = 0; j<players.size(); j++){
-									String id = players.get(j).getId();
-									if(id.equals(playerId)){
-										updateMapObject(players.get(j));
+							if(length<players.size()){
+								for(int i = 0; i<players.size(); i++){
+									if(!player_ids.contains(players.get(i).getId())){
+										players.remove(i);
+										Log.v("GCM Obrisao",players.get(i).getId());
 									}
-								}*/
+								}
 							}
-						catch (JSONException e) {
+						} catch (JSONException e) {
 						}	
 					}	
 				}
@@ -328,3 +314,4 @@ public class GameService extends Service implements LocationListener {
 	      return (rad * 180.0 / Math.PI);
 	    }
 }		 
+
