@@ -257,8 +257,9 @@ public class GameService extends Service implements LocationListener {
 							if(length<players.size()){
 								for(int i = 0; i<players.size(); i++){
 									if(!player_ids.contains(players.get(i).getId())){
-										players.remove(i);
 										Log.v("GCM Obrisao",players.get(i).getId());
+										players.remove(i);
+										
 									}
 								}
 							}
