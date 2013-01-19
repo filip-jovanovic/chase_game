@@ -129,7 +129,7 @@ public class MapActivity extends FragmentActivity {
 	    		if(marker == null){
 	    			MarkerOptions markerOptions = new MarkerOptions();
 	    			markerOptions.position(latLng);
-	    			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker));
+	    			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.moderator));
 	    			markerOptions.title(id);		
 	    			marker = mMap.addMarker(markerOptions);		
 	    			playerMarkers.put(id, marker);

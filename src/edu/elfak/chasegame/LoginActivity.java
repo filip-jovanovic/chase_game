@@ -36,8 +36,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 		GCMRegistrar.checkDevice(this);
 		GCMRegistrar.checkManifest(this);
 		registrationId = GCMRegistrar.getRegistrationId(this);
+		
 		if (registrationId.equals("")) {
 			GCMRegistrar.register(this, "472939073721");
+			registrationId = GCMRegistrar.getRegistrationId(this);
 		} else {
 			Log.v("Notice:", "Already registered");
 		}
