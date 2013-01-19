@@ -35,6 +35,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 		// register device for Google Cloud Messaging
 		GCMRegistrar.checkDevice(this);
 		GCMRegistrar.checkManifest(this);
+		
+		/*
 		registrationId = GCMRegistrar.getRegistrationId(this);
 		
 		if (registrationId.equals("")) {
@@ -43,6 +45,12 @@ public class LoginActivity extends Activity implements OnClickListener {
 		} else {
 			Log.v("Notice:", "Already registered");
 		}
+		*/
+		GCMRegistrar.register(this, "472939073721");
+		
+		registrationId = GCMRegistrar.getRegistrationId(this);
+		
+		
 
 		View loginButton = findViewById(R.id.login_button);
 		loginButton.setOnClickListener(this);
