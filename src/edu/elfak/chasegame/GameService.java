@@ -309,4 +309,22 @@ public class GameService extends Service implements LocationListener {
 			// TODO Auto-generated method stub
 			
 		}
+		
+		public static double calculateDistance(LatLng p1, LatLng p2){
+		      double theta = p1.longitude -  p2.longitude;
+		      double dist = Math.sin(deg2rad(p1.latitude)) 
+		    		  * Math.sin(deg2rad(p2.latitude)) 
+		    		  + Math.cos(deg2rad(p1.latitude)) 
+		    		  * Math.cos(deg2rad(p2.latitude)) 
+		    		  * Math.cos(deg2rad(theta));
+		      return( rad2deg(Math.acos(dist)) * 111.18957696 ); 
+		}
+		
+	    private static double deg2rad(double deg){
+	      return (deg * Math.PI / 180.0);
+	    }
+	    
+	    private static double rad2deg(double rad){
+	      return (rad * 180.0 / Math.PI);
+	    }
 }		 

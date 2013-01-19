@@ -114,10 +114,8 @@ public class MapActivity extends FragmentActivity {
 	    	
 	    	if(action.equals("UPDATE_MAP_TAG")&&(screenLockButton.isChecked())){
 	    		LatLng latLng = (LatLng) intent.getExtras().get("location");
-	    		double distance = calculateDistance(
-	    				mMap.getCameraPosition().target.latitude, 
-	    				mMap.getCameraPosition().target.longitude, 
-	    				latLng.latitude,latLng.longitude,"K")*1000;
+	    		double distance = GameService.calculateDistance(
+	    				mMap.getCameraPosition().target, latLng);
 	    		Toast.makeText(getApplicationContext(), String.valueOf(distance), Toast.LENGTH_LONG).show();
 	    		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
 	        	
@@ -148,37 +146,6 @@ public class MapActivity extends FragmentActivity {
 	    	}
 	    }
 	}
-
-	private double calculateDistance(double lat1, double lon1, double lat2, double lon2, String unit) 
-	{
-	      double theta = lon1 - lon2;
-	      double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-	      dist = Math.acos(dist);
-	      dist = rad2deg(dist);
-	      dist = dist * 60 * 1.1515;
-	      if (unit == "K") {
-	        dist = dist * 1.609344;
-	      } else if (unit == "M") {
-	        dist = dist * 0.8684;
-	        }
-	      return (dist);
-	}
-
-	    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	    /*::  This function converts decimal degrees to radians             :*/
-	    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	    private double deg2rad(double deg) 
-	    {
-	      return (deg * Math.PI / 180.0);
-	    }
-
-	    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	    /*::  This function converts radians to decimal degrees             :*/
-	    /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	    private double rad2deg(double rad)
-	    {
-	      return (rad * 180.0 / Math.PI);
-	    }
 
 }
 
