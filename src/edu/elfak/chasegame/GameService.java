@@ -39,7 +39,7 @@ public class GameService extends Service implements LocationListener {
 		private static final long TIME_DIFFERENCE = 5000;
 		private String registrationId;
 		private String playerName;
-		private LatLng lastKnownLocation;
+
 		private LatLng mapCenter;
 		public static boolean isRuning = false;
 
@@ -131,12 +131,10 @@ public class GameService extends Service implements LocationListener {
 		   HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.ADD_NEW_PLAYER_LOC_URL);
 					   
 		   locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		   provider = locationManager.NETWORK_PROVIDER;
-		   Location loc = locationManager.getLastKnownLocation(provider);
-		   lastKnownLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
-		   
-		   provider = locationManager.GPS_PROVIDER;
-		   locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 1000, 0, this);
+		
+		   provider = LocationManager.GPS_PROVIDER;
+		  
+		   locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
 		   return START_STICKY;
 		}
 		
@@ -254,7 +252,7 @@ public class GameService extends Service implements LocationListener {
 				}
 				else if (action.equals("REQ_INITIALISE_DATA")){
 					
-					updateMapView(lastKnownLocation);
+					updateMapView(mapCenter);
 				
 					Intent j = new Intent("DRAW_ITEMS");
 					j.putExtra("items", items);

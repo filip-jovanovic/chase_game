@@ -5,13 +5,13 @@ import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public class ObjectOnMap implements Parcelable{
+public class ObjectOnMap implements Parcelable {
 
 	private LatLng latlng;
 	private String id;
 	private String name;
 	private String type;
-	
+
 	public LatLng getLatlng() {
 		return latlng;
 	}
@@ -44,21 +44,14 @@ public class ObjectOnMap implements Parcelable{
 		this.type = type;
 	}
 
-	public ObjectOnMap(double lat, double lon, String id, String name, String type){
-		this.latlng = new LatLng(lat,lon);
+	public ObjectOnMap(double lat, double lon, String id, String name,
+			String type) {
+		this.latlng = new LatLng(lat, lon);
 		this.id = id;
 		this.name = name;
 		this.type = type;
 	}
 
-	/* private ObjectOnMap(Parcel in) {
-		 this.latlng = in.readParcelable(null);
-		 this.id = in.readString();
-		 this.name = in.readString();
-		 this.type = in.readString();
-		 
-     }*/
-	 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(id);
@@ -69,30 +62,29 @@ public class ObjectOnMap implements Parcelable{
 		double lng = latlng.longitude;
 		dest.writeDouble(lng);
 	}
-	
+
 	public ObjectOnMap(Parcel in) {
 		id = in.readString();
 		name = in.readString();
-        type = in.readString();
-        double lat = in.readDouble();
-        double lng = in.readDouble();
-        latlng = new LatLng(lat,lng);
+		type = in.readString();
+		double lat = in.readDouble();
+		double lng = in.readDouble();
+		latlng = new LatLng(lat, lng);
 	}
-	
+
 	@Override
 	public int describeContents() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
-	 public static final Parcelable.Creator<ObjectOnMap> CREATOR
-     = new Parcelable.Creator<ObjectOnMap>() {
-		 public ObjectOnMap createFromParcel(Parcel in) {
-			 return new ObjectOnMap(in);
-		 }
 
- public ObjectOnMap[] newArray(int size) {
-     return new ObjectOnMap[size];
- }
-};
+	public static final Parcelable.Creator<ObjectOnMap> CREATOR = new Parcelable.Creator<ObjectOnMap>() {
+		public ObjectOnMap createFromParcel(Parcel in) {
+			return new ObjectOnMap(in);
+		}
+
+		public ObjectOnMap[] newArray(int size) {
+			return new ObjectOnMap[size];
+		}
+	};
 }
