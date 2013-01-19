@@ -76,8 +76,8 @@ public class HomeActivity extends Activity implements OnClickListener {
 				buttonStop.setVisibility(View.GONE);
 				break;
 			case(R.id.exit_button):
-				if(stopService(new Intent(this, GameService.class)))
-					finish();
+				stopService(new Intent(this, GameService.class));
+				finish();
 		}
 	}
 

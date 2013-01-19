@@ -15,6 +15,9 @@ import android.location.LocationManager;*/
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -35,6 +38,8 @@ public class MapActivity extends FragmentActivity {
 	private HashMap<String, Marker> playerMarkers;
 	private HashMap<String, Marker> itemMarkers;
 	private Polygon boundaries;
+	IntentFilter intentFilter;
+	private ToggleButton screenLockButton;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -49,6 +54,8 @@ public class MapActivity extends FragmentActivity {
 		//if(markers == null)
 			playerMarkers = new HashMap<String, Marker>();
 			itemMarkers = new HashMap<String, Marker>();
+			
+		screenLockButton = (ToggleButton) findViewById(R.id.screenLockButton);
 	}
 	
 	private void drawItems(ArrayList<ObjectOnMap> items, BitmapDescriptor icon){
@@ -66,7 +73,7 @@ public class MapActivity extends FragmentActivity {
 	
 	public void onResume(){
 		if (dataUpdateReceiver == null) dataUpdateReceiver = new MapUpdateReceiver();
-		IntentFilter intentFilter = new IntentFilter();
+		intentFilter = new IntentFilter();
 		intentFilter.addAction("UPDATE_MAP_OBJECT_TAG");
 		intentFilter.addAction("UPDATE_MAP_TAG");
 		intentFilter.addAction("DRAW_ITEMS");
@@ -110,7 +117,7 @@ public class MapActivity extends FragmentActivity {
 	    public void onReceive(Context context, Intent intent) {
 	    	String action = intent.getAction();
 	    	
-	    	if(action.equals("UPDATE_MAP_TAG")){
+	    	if(action.equals("UPDATE_MAP_TAG")&&(screenLockButton.isChecked())){
 	    		LatLng latLng = (LatLng) intent.getExtras().get("location");
 	        	mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
 	    	}
@@ -140,5 +147,7 @@ public class MapActivity extends FragmentActivity {
 	    	}
 	    }
 	}
+
+
 }
 
