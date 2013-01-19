@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -167,7 +166,6 @@ public class HTTPHelper {
 		final String TAG_COUNT = "count";
 		HashMap<String, String> gameHashMap = new HashMap<String, String>();
 		JSONArray jsonGames = null;
-		HashMap<String, String> hmp = null;
 		// getting JSON string from URL
 		JSONObject json = getJSONFromUrl(SERVER_URL+"gamelist.php");
 		 

@@ -1,13 +1,11 @@
 package edu.elfak.chasegame;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.android.gms.internal.l;
 import com.google.android.gms.maps.model.LatLng;
 
 import android.app.Service;
@@ -20,7 +18,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.util.Log;
 
 public class GameService extends Service implements LocationListener {
@@ -28,16 +25,16 @@ public class GameService extends Service implements LocationListener {
 		private ArrayList<ObjectOnMap> buildings;
 		private ArrayList<ObjectOnMap> items;
 		private ArrayList<ObjectOnMap> players;
-		public static int gameId;
+		public int gameId;
 		private int mapId;
 		private String gameName;
-		public static int numberOfPolicemen;
+		public int numberOfPolicemen;
 		private LocationManager locationManager;
 		private String provider;
 		private long timeOfLastLocation;
 		public static final String GCM_ANNOUNCE_TAG = "announce";
 		private static final long TIME_DIFFERENCE = 5000;
-		public static String registrationId;
+		public String registrationId;
 		private String playerName;
 
 		private LatLng mapCenter;
@@ -202,6 +199,18 @@ public class GameService extends Service implements LocationListener {
 			unregisterReceiver(broadcastReceiver);
 			locationManager.removeUpdates(this);
 			isRuning = false;
+			//obrisi igrace iz baze i game tabele
+			if(GameService.isRuning){
+				ArrayList<String> parameters = new ArrayList<String>();
+				ArrayList<String> values = new ArrayList<String>();
+				parameters.add("game_id");
+				parameters.add("player_id");
+				parameters.add("place");
+				values.add(String.valueOf(gameId));
+				values.add(String.valueOf(registrationId));
+				values.add(String.valueOf(numberOfPolicemen));
+				String result = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.EXIT_GAME);
+			}
 		}
 		
 		// broadcast receiver that handles messages from GCM
@@ -216,7 +225,7 @@ public class GameService extends Service implements LocationListener {
 					Bundle message = intent.getExtras();
 					Log.v("GCM Received", message.toString());
 					if(message.containsKey(GCM_ANNOUNCE_TAG)){
-						numberOfPolicemen++;
+						//numberOfPolicemen++;
 						Log.v("GCM Received","Player added: "+ message.getString(GCM_ANNOUNCE_TAG));
 							//		RETURN FOR MULTIPLE DEVICE!
 						players.add(new ObjectOnMap(0,0,message.getString(GCM_ANNOUNCE_TAG),
