@@ -39,6 +39,7 @@ public class HTTPHelper {
 	public static final String UPDATE_GAME_URL = "getGame.php";
 	public static final String ANNOUNCE_NEW_PLAYER_URL = "announceNewPlayer.php";
 	public static final String ADD_NEW_PLAYER_LOC_URL = "addNewPlayerLocation.php";
+	public static final String EXIT_GAME = "exitGame.php";
 	private static final String GCM_GOOGLE_URL = "https://android.googleapis.com/gcm/send";
 	public static String SERVER_URL = "http://android-test-rig.comuf.com/";
 	static InputStream is = null;

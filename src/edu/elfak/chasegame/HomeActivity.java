@@ -1,5 +1,7 @@
 package edu.elfak.chasegame;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -74,6 +76,18 @@ public class HomeActivity extends Activity implements OnClickListener {
 				Button button = (Button)findViewById(R.id.create_game_button);
 				button.setText("New Game");
 				buttonStop.setVisibility(View.GONE);
+				//obrisi igrace iz baze i game tabele
+				if(GameService.isRuning){
+					ArrayList<String> parameters = new ArrayList<String>();
+					ArrayList<String> values = new ArrayList<String>();
+					parameters.add("game_id");
+					parameters.add("player_id");
+					parameters.add("place");
+					values.add(String.valueOf(GameService.gameId));
+					values.add(String.valueOf(GameService.registrationId));
+					values.add(String.valueOf(GameService.numberOfPolicemen));
+					String result = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.EXIT_GAME);
+				}
 				break;
 			case(R.id.exit_button):
 				stopService(new Intent(this, GameService.class));

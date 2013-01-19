@@ -28,16 +28,16 @@ public class GameService extends Service implements LocationListener {
 		private ArrayList<ObjectOnMap> buildings;
 		private ArrayList<ObjectOnMap> items;
 		private ArrayList<ObjectOnMap> players;
-		private int gameId;
+		public static int gameId;
 		private int mapId;
 		private String gameName;
-		private int numberOfPolicemen;
+		public static int numberOfPolicemen;
 		private LocationManager locationManager;
 		private String provider;
 		private long timeOfLastLocation;
 		public static final String GCM_ANNOUNCE_TAG = "announce";
 		private static final long TIME_DIFFERENCE = 5000;
-		private String registrationId;
+		public static String registrationId;
 		private String playerName;
 
 		private LatLng mapCenter;
