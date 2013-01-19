@@ -229,7 +229,7 @@ public class GameService extends Service implements LocationListener {
 						players.add(new ObjectOnMap(0,0,message.getString(GCM_ANNOUNCE_TAG),
 								"policeman" + String.valueOf(numberOfPolicemen),"player"));
 						
-					}
+					}else
 					if(message.containsKey("player_locations")){
 						Log.v("player locations","");
 						String playerId = null;
@@ -255,7 +255,30 @@ public class GameService extends Service implements LocationListener {
 							}
 						} catch (JSONException e) {
 						}	
-					}
+					}else
+					if(message.containsKey("player_exited")){
+						String playerId = null;
+						
+						try {
+							JSONObject jo = new JSONObject(message.getString("player_exited"));
+							//JSONObject jo;
+							Log.v("GCM Primio","Poruka: "+ message.getString("player_exited"));
+							//int length = ja.length();
+							//for(int i = 0; i<length; i++){
+								//jo = ja.getJSONObject(i);
+								playerId = message.getString("player_exited");
+								//playerId = jo.getString("player_id");
+								
+								/*for(int j = 0; j<players.size(); j++){
+									String id = players.get(j).getId();
+									if(id.equals(playerId)){
+										updateMapObject(players.get(j));
+									}
+								}*/
+							}
+						catch (JSONException e) {
+						}	
+					}	
 				}
 				else if (action.equals("REQ_INITIALISE_DATA")){
 					
