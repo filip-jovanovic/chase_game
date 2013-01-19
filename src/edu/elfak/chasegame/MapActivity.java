@@ -19,6 +19,7 @@ import android.util.Log;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -31,8 +32,9 @@ public class MapActivity extends FragmentActivity {
 	SupportMapFragment mapFragment;
 	private GoogleMap mMap;
 	private MapUpdateReceiver dataUpdateReceiver;
-	private HashMap<String, Marker> markers;
+	private HashMap<String, Marker> playerMarkers;
 	private HashMap<String, Marker> itemMarkers;
+	private Polygon boundaries;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -45,15 +47,15 @@ public class MapActivity extends FragmentActivity {
 		mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		
 		//if(markers == null)
-			markers = new HashMap<String, Marker>();
+			playerMarkers = new HashMap<String, Marker>();
 			itemMarkers = new HashMap<String, Marker>();
 	}
 	
-	private void drawItems(ArrayList<ObjectOnMap> items){
-		for (int i = 0; i <= items.size(); i++) {
+	private void drawItems(ArrayList<ObjectOnMap> items, BitmapDescriptor icon){
+		for (int i = 0; i < items.size(); i++) {
 			MarkerOptions markerOptions = new MarkerOptions();
 			markerOptions.position(items.get(i).getLatlng());
-			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker));
+			markerOptions.icon(icon);
 			markerOptions.title(items.get(i).getName());
 			
 			Marker marker = mMap.addMarker(markerOptions);
@@ -67,7 +69,11 @@ public class MapActivity extends FragmentActivity {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("UPDATE_MAP_OBJECT_TAG");
 		intentFilter.addAction("UPDATE_MAP_TAG");
+		intentFilter.addAction("DRAW_ITEMS");
 		registerReceiver(dataUpdateReceiver, intentFilter);
+		
+		sendBroadcast(new Intent("REQ_INITIALISE_DATA"));
+		
 		super.onResume();
 	}
 	
@@ -103,41 +109,34 @@ public class MapActivity extends FragmentActivity {
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
 	    	String action = intent.getAction();
+	    	
 	    	if(action.equals("UPDATE_MAP_TAG")){
 	    		LatLng latLng = (LatLng) intent.getExtras().get("location");
 	        	mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
-	    	}else
-	    	if(action.equals("UPDATE_MAP_OBJECT_TAG")){
+	    	}
+	    	else if(action.equals("UPDATE_MAP_OBJECT_TAG")){
 	    		LatLng latLng = (LatLng) intent.getExtras().get("location");
 	    		String id =  intent.getExtras().getString("objectId");
 	    		Log.v("UPDATE MARKER",id + " " + latLng.toString());
-	    		Marker marker = markers.get(id);
+	    		Marker marker = playerMarkers.get(id);
 	    		if(marker == null){
 	    			MarkerOptions markerOptions = new MarkerOptions();
 	    			markerOptions.position(latLng);
 	    			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker));
-	    			markerOptions.title(id);
-	    			
-	    			marker = mMap.addMarker(markerOptions);
-	    					
-	    			markers.put(id, marker);
+	    			markerOptions.title(id);		
+	    			marker = mMap.addMarker(markerOptions);		
+	    			playerMarkers.put(id, marker);
 	    		}
 	    		else{
-	    			MarkerOptions markerOptions = new MarkerOptions();
-	    			markerOptions.position(latLng);
-	    			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.androidmarker));
-	    			markerOptions.title(id);
-	    			
-	    			marker = mMap.addMarker(markerOptions);
 	    			marker.setPosition(latLng);
 	    		}
-	    	}else{
-	    	//if(action.equals("DRAW_ITEMS")){
-				Log.v("DRAW_ITEMS","Usao u funkciju");
-	    		Bundle bun = intent.getExtras().getBundle("dataBundle");
-	    		ArrayList<ObjectOnMap> items = bun.getParcelableArrayList("itemi");
-	    		drawItems(items);
-	    		Log.v("DRAW_ITEMS","Zavrsio funkciju");
+	    	}
+	    	else if(action.equals("DRAW_ITEMS")){
+	    		ArrayList<ObjectOnMap> items = intent.getExtras().getParcelableArrayList("items");
+	    		ArrayList<ObjectOnMap> buildings = intent.getExtras().getParcelableArrayList("buildings");
+	    		drawItems(items,BitmapDescriptorFactory.fromResource(R.drawable.wooden_crate));
+	    		drawItems(buildings,BitmapDescriptorFactory.fromResource(R.drawable.building));
+	    		boundaries = drawBoundaries((LatLng) intent.getExtras().get("mapCenter"), mMap);
 	    	}
 	    }
 	}

@@ -28,6 +28,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import android.util.Log;
 
 public class HTTPHelper {
@@ -121,12 +123,13 @@ public class HTTPHelper {
     	return retStr;
     }
 	
-	public static ArrayList<String> getMapList() {
+	public static HashMap<String, LatLng> getMapList() {
 		final String TAG_MAPS = "maps";
 		final String TAG_ID = "id";
 		final String TAG_NAME = "name";
-		
-		ArrayList<String> mapList = new ArrayList<String>();
+		final String TAG_LAT = "latitude";
+		final String TAG_LON = "longitude";
+		HashMap<String, LatLng> mapHashMap = new HashMap<String, LatLng>();
 		JSONArray contacts = null;
 		 
 		// getting JSON string from URL
@@ -143,15 +146,17 @@ public class HTTPHelper {
 		        // Storing each json item in variable
 		        String id = c.getString(TAG_ID);
 		        String name = c.getString(TAG_NAME);
+		        String latitude = c.getString(TAG_LAT);
+		        String longitude = c.getString(TAG_LON);
  
-                // adding each child node to HashMap key => value
-                //contactList.add(id);
-                mapList.add(id+". "+name);
+		        mapHashMap.put(id+". "+name, 
+		        		new LatLng(Double.parseDouble(latitude), 
+		        				Double.parseDouble(longitude)));
 		    }
 		} catch (JSONException e) {
 		    e.printStackTrace();
 		}    	
-    	return mapList;
+    	return mapHashMap;
     }
 	
 	public static HashMap<String, String> getGameList() {

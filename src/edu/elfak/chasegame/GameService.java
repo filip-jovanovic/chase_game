@@ -39,6 +39,8 @@ public class GameService extends Service implements LocationListener {
 		private static final long TIME_DIFFERENCE = 5000;
 		private String registrationId;
 		private String playerName;
+		private LatLng lastKnownLocation;
+		private LatLng mapCenter;
 		public static boolean isRuning = false;
 
 		@Override
@@ -50,9 +52,13 @@ public class GameService extends Service implements LocationListener {
 			items = new ArrayList<ObjectOnMap>();
 			players = new ArrayList<ObjectOnMap>();
 			
-			registerReceiver(broadcastReceiver, new IntentFilter(GCMIntentService.TAG));
+			IntentFilter intentFilter = new IntentFilter(GCMIntentService.TAG);
+			intentFilter.addAction("REQ_INITIALISE_DATA");
+			registerReceiver(broadcastReceiver,intentFilter);
 			
 			mapId = intent.getExtras().getInt("mapId");
+			mapCenter = (LatLng) intent.getExtras().get("mapCenter");
+			
 			gameName = intent.getExtras().getString("gameName");			
 			String role = intent.getExtras().getString("role");
 			numberOfPolicemen = 0;
@@ -126,9 +132,9 @@ public class GameService extends Service implements LocationListener {
 					   
 		   locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		   provider = locationManager.NETWORK_PROVIDER;
-		   //Location lastKnownLocation = locationManager.getLastKnownLocation(provider);
-		   //LatLng latLng = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
-		   //updateMapView(latLng);
+		   Location loc = locationManager.getLastKnownLocation(provider);
+		   lastKnownLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
+		   
 		   provider = locationManager.GPS_PROVIDER;
 		   locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 1000, 0, this);
 		   return START_STICKY;
@@ -144,8 +150,6 @@ public class GameService extends Service implements LocationListener {
 				// set current location on screen to
 				
 				timeOfLastLocation = location.getTime();
-				// TODO : send it to others
-				// put marker
 				
 				ArrayList<String> parameters = new ArrayList<String>();
 				ArrayList<String> values = new ArrayList<String>();
@@ -159,14 +163,6 @@ public class GameService extends Service implements LocationListener {
 				values.add(String.valueOf(latLng.longitude));
 				HTTPHelper.sendValuesToUrl(parameters, values, "playerLocations.php");
 				
-				//Iscrtavanje Itema
-				Intent j = new Intent("DRAW_ITEMS");
-				Log.v("Bundle","Usao u funkciju");
-				Bundle dataBundle = new Bundle();
-				//dataBundle.putParcelableArrayList("itemi", items);
-				//j.putExtra("dataBundle",dataBundle);
-				sendBroadcast(j);
-				Log.v("Bundle","Poslao");
 			}
 
 		}
@@ -184,12 +180,6 @@ public class GameService extends Service implements LocationListener {
 			Log.v("update map object!",oom.getId() + " " + oom.getLatlng().toString());
 			sendBroadcast(i);
 			
-			//Iscrtavanje Itema
-			/*Intent j = new Intent("DRAW_ITEMS");
-			Bundle dataBundle = new Bundle();
-			dataBundle.putParcelableArrayList("itemi", items);
-			j.putExtra("dataBundle",dataBundle);
-			sendBroadcast(j);*/
 		}
 		
 		private void announceNewPlayer(String newPlayerId)
@@ -220,43 +210,59 @@ public class GameService extends Service implements LocationListener {
 		private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 					 
 			@Override public void onReceive(Context context, Intent intent) { 
-
-				Bundle message = intent.getExtras();
-				Log.v("GCM Received", message.toString());
-				if(message.containsKey(GCM_ANNOUNCE_TAG)){
-					numberOfPolicemen++;
-					Log.v("GCM Received","Player added: "+ message.getString(GCM_ANNOUNCE_TAG));
-						//		RETURN FOR MULTIPLE DEVICE!
-					players.add(new ObjectOnMap(0,0,message.getString(GCM_ANNOUNCE_TAG),
-							"policeman" + String.valueOf(numberOfPolicemen),"player"));
-					
-				}
-				if(message.containsKey("player_locations")){
-					Log.v("player locations","");
-					String playerId = null;
-					LatLng newLocation = null;
-					
-					try {
-						JSONArray ja = new JSONArray(message.getString("player_locations"));
-						JSONObject jo;
-						Log.v("GCM Primio","Poruka: "+ message.getString("player_locations"));
-						int length = ja.length();
-						for(int i = 0; i<length; i++){
-							jo = ja.getJSONObject(i);
-							
-							playerId = jo.getString("player_id");
-							newLocation = new LatLng(jo.getDouble("latitude"), jo.getDouble("longitude"));
-							for(int j = 0; j<players.size(); j++){
-								String id = players.get(j).getId();
-								if(id.equals(playerId)){
-									players.get(j).setLatlng(newLocation);
-									updateMapObject(players.get(j));
+				
+				String action = intent.getAction();
+				
+				if(action.equals(GCMIntentService.TAG))
+				{
+					Bundle message = intent.getExtras();
+					Log.v("GCM Received", message.toString());
+					if(message.containsKey(GCM_ANNOUNCE_TAG)){
+						numberOfPolicemen++;
+						Log.v("GCM Received","Player added: "+ message.getString(GCM_ANNOUNCE_TAG));
+							//		RETURN FOR MULTIPLE DEVICE!
+						players.add(new ObjectOnMap(0,0,message.getString(GCM_ANNOUNCE_TAG),
+								"policeman" + String.valueOf(numberOfPolicemen),"player"));
+						
+					}
+					if(message.containsKey("player_locations")){
+						Log.v("player locations","");
+						String playerId = null;
+						LatLng newLocation = null;
+						
+						try {
+							JSONArray ja = new JSONArray(message.getString("player_locations"));
+							JSONObject jo;
+							Log.v("GCM Primio","Poruka: "+ message.getString("player_locations"));
+							int length = ja.length();
+							for(int i = 0; i<length; i++){
+								jo = ja.getJSONObject(i);
+								
+								playerId = jo.getString("player_id");
+								newLocation = new LatLng(jo.getDouble("latitude"), jo.getDouble("longitude"));
+								for(int j = 0; j<players.size(); j++){
+									String id = players.get(j).getId();
+									if(id.equals(playerId)){
+										players.get(j).setLatlng(newLocation);
+										updateMapObject(players.get(j));
+									}
 								}
 							}
-						}
-					} catch (JSONException e) {
-					}	
-				}					
+						} catch (JSONException e) {
+						}	
+					}
+				}
+				else if (action.equals("REQ_INITIALISE_DATA")){
+					
+					updateMapView(lastKnownLocation);
+				
+					Intent j = new Intent("DRAW_ITEMS");
+					j.putExtra("items", items);
+					j.putExtra("mapCenter",mapCenter);
+					j.putExtra("buildings",buildings);
+					sendBroadcast(j);
+				}
+									
 			}
 		
 		};

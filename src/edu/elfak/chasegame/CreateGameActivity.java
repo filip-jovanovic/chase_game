@@ -1,6 +1,9 @@
 package edu.elfak.chasegame;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -17,6 +20,7 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 	private EditText gameName;
 	private Spinner listOfMaps;
 	private Bundle dataBundle;
+	private HashMap<String, LatLng> result;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -24,10 +28,16 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 		
 		dataBundle = getIntent().getExtras().getBundle("dataBundle");
 		
-		ArrayList<String> maps = HTTPHelper.getMapList();
+		result = new HashMap<String, LatLng>();
+		result = HTTPHelper.getMapList();
+		
 		listOfMaps = (Spinner) findViewById(R.id.mapList);
+		
+		String[] maps = new String[result.size()];
+		result.keySet().toArray(maps);
 		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>
-						(this,android.R.layout.simple_spinner_dropdown_item, maps);
+						(this,android.R.layout.simple_spinner_dropdown_item, maps );
+		
 		listOfMaps.setAdapter(arrayAdapter);
 		View button = findViewById(R.id.startGame);
 		button.setOnClickListener(this);
@@ -40,9 +50,13 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 	    	Toast.makeText(getBaseContext(), "Unesi tekst", Toast.LENGTH_SHORT).show();
 	    else{
 	    	
+	    	String selected = (String)listOfMaps.getSelectedItem();
+	    	LatLng mapCenter = result.get(selected);
+	    	
 	    	Intent gameIntent = new Intent(this, GameService.class);
 	    	gameIntent.putExtra("gameName",gameName.getText().toString());
-	    	gameIntent.putExtra("mapId",Integer.parseInt(((String)listOfMaps.getSelectedItem()).split("\\.")[0]));
+	    	gameIntent.putExtra("mapId",Integer.parseInt(selected.split("\\.")[0]));
+	    	gameIntent.putExtra("mapCenter", mapCenter);
 	    	gameIntent.putExtra("role","thief");
 	    	gameIntent.putExtra("dataBundle",dataBundle);
 	    	startService(gameIntent);

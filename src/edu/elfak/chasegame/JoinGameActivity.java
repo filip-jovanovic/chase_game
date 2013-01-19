@@ -6,6 +6,8 @@ import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -82,8 +84,13 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 			Log.v("res",res);
 			
 			JSONObject jsonGame = new JSONObject(res);
+			
 			gameIntent.putExtra("gameName",jsonGame.getString("game_name"));
 			gameIntent.putExtra("mapId",jsonGame.getInt("map_id"));
+			
+			gameIntent.putExtra("mapCenter", new LatLng(jsonGame.getDouble("map_latitude"), 
+					jsonGame.getDouble("map_longitude")));
+			
 			gameIntent.putExtra("thief",jsonGame.getString("thief"));
 			gameIntent.putExtra("cop_1",jsonGame.getString("cop_1"));
 			gameIntent.putExtra("cop_2",jsonGame.getString("cop_2"));

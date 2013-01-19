@@ -1,7 +1,5 @@
 package edu.elfak.chasegame;
 
-import java.io.Serializable;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -53,6 +51,14 @@ public class ObjectOnMap implements Parcelable{
 		this.type = type;
 	}
 
+	/* private ObjectOnMap(Parcel in) {
+		 this.latlng = in.readParcelable(null);
+		 this.id = in.readString();
+		 this.name = in.readString();
+		 this.type = in.readString();
+		 
+     }*/
+	 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(id);
@@ -64,7 +70,7 @@ public class ObjectOnMap implements Parcelable{
 		dest.writeDouble(lng);
 	}
 	
-	public void ConstantData(Parcel in) {
+	public ObjectOnMap(Parcel in) {
 		id = in.readString();
 		name = in.readString();
         type = in.readString();
@@ -78,4 +84,15 @@ public class ObjectOnMap implements Parcelable{
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	 public static final Parcelable.Creator<ObjectOnMap> CREATOR
+     = new Parcelable.Creator<ObjectOnMap>() {
+		 public ObjectOnMap createFromParcel(Parcel in) {
+			 return new ObjectOnMap(in);
+		 }
+
+ public ObjectOnMap[] newArray(int size) {
+     return new ObjectOnMap[size];
+ }
+};
 }
