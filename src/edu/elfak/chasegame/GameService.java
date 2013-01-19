@@ -200,17 +200,15 @@ public class GameService extends Service implements LocationListener {
 			locationManager.removeUpdates(this);
 			isRuning = false;
 			//obrisi igrace iz baze i game tabele
-			if(GameService.isRuning){
-				ArrayList<String> parameters = new ArrayList<String>();
-				ArrayList<String> values = new ArrayList<String>();
-				parameters.add("game_id");
-				parameters.add("player_id");
-				parameters.add("place");
-				values.add(String.valueOf(gameId));
-				values.add(String.valueOf(registrationId));
-				values.add(String.valueOf(numberOfPolicemen));
-				String result = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.EXIT_GAME);
-			}
+			ArrayList<String> parameters = new ArrayList<String>();
+			ArrayList<String> values = new ArrayList<String>();
+			parameters.add("game_id");
+			parameters.add("player_id");
+			parameters.add("place");
+			values.add(String.valueOf(gameId));
+			values.add(String.valueOf(registrationId));
+			values.add(String.valueOf(numberOfPolicemen));
+			String result = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.EXIT_GAME);
 		}
 		
 		// broadcast receiver that handles messages from GCM
