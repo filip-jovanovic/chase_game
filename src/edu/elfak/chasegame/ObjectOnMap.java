@@ -11,6 +11,8 @@ public class ObjectOnMap implements Parcelable {
 	private String id;
 	private String name;
 	private String type;
+	private int value;
+	private int bankId;
 
 	public LatLng getLatlng() {
 		return latlng;
@@ -44,12 +46,16 @@ public class ObjectOnMap implements Parcelable {
 		this.type = type;
 	}
 
-	public ObjectOnMap(double lat, double lon, String id, String name,
-			String type) {
+	public ObjectOnMap(double lat, double lon, String id, String name, int value, String type) {
 		this.latlng = new LatLng(lat, lon);
 		this.id = id;
 		this.name = name;
 		this.type = type;
+		
+		if(type.compareTo("item")==0)
+			bankId = value;
+		else
+			this.value = value;
 	}
 
 	@Override
@@ -57,6 +63,8 @@ public class ObjectOnMap implements Parcelable {
 		dest.writeString(id);
 		dest.writeString(name);
 		dest.writeString(type);
+		dest.writeInt(value);
+		dest.writeInt(bankId);
 		double lat = latlng.latitude;
 		dest.writeDouble(lat);
 		double lng = latlng.longitude;
@@ -67,6 +75,8 @@ public class ObjectOnMap implements Parcelable {
 		id = in.readString();
 		name = in.readString();
 		type = in.readString();
+		value = in.readInt();
+		bankId = in.readInt();
 		double lat = in.readDouble();
 		double lng = in.readDouble();
 		latlng = new LatLng(lat, lng);
@@ -79,12 +89,40 @@ public class ObjectOnMap implements Parcelable {
 	}
 
 	public static final Parcelable.Creator<ObjectOnMap> CREATOR = new Parcelable.Creator<ObjectOnMap>() {
+		@Override
 		public ObjectOnMap createFromParcel(Parcel in) {
 			return new ObjectOnMap(in);
 		}
 
+		@Override
 		public ObjectOnMap[] newArray(int size) {
 			return new ObjectOnMap[size];
 		}
 	};
+
+	public boolean isPoliceStation() {
+		if(value==0)
+			return true;
+		return false;
+	}
+	
+	public boolean isBank() {
+		if((value!=0)&&(value!=-1))
+			return true;
+		return false;
+	}
+	
+	public boolean isSafeHouse() {
+		if(value==-1)
+			return true;
+		return false;
+	}
+	
+	public int getValue() {
+		return value;
+	}
+	
+	public int getBankId(){
+		return value;
+	}
 }

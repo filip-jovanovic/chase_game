@@ -27,7 +27,7 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 		dataBundle = getIntent().getExtras().getBundle("dataBundle");
 		
 		result = new HashMap<String, LatLng>();
-		result = HTTPHelper.getMapList();
+		result = HttpHelper.getMapList();
 		
 		listOfMaps = (Spinner) findViewById(R.id.mapList);
 		
@@ -43,6 +43,7 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 		gameName = (EditText) findViewById(R.id.gameName);
 	}
 	
+	@Override
 	public void onClick(View arg0) {
 	    if(gameName.getText().toString().compareTo("")==0)
 	    	Toast.makeText(getBaseContext(), "Unesi tekst", Toast.LENGTH_SHORT).show();

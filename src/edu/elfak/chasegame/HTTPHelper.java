@@ -29,9 +29,9 @@ import org.json.JSONObject;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import android.util.Log;
+//import android.util.Log;
 
-public class HTTPHelper {
+public class HttpHelper {
 
 	public static final String LOGIN_URL = "login.php";
 	public static final String CREATE_GAME_URL = "createNewGame.php";
@@ -39,11 +39,23 @@ public class HTTPHelper {
 	public static final String ANNOUNCE_NEW_PLAYER_URL = "announceNewPlayer.php";
 	public static final String ADD_NEW_PLAYER_LOC_URL = "addNewPlayerLocation.php";
 	public static final String EXIT_GAME = "exitGame.php";
+	public static final String PLAYER_LOC_URL = "playerLocations.php";
+	private static final String MAP_LIST_URL = "mapList.php";
+	private static final String GAME_LIST_URL = "gamelist.php";
+	private static final String BUILDING_ITEMS_LIST_URL = "buildingList.php";
+	
 	private static final String GCM_GOOGLE_URL = "https://android.googleapis.com/gcm/send";
-	public static String SERVER_URL = "http://android-test-rig.comuf.com/";
+
+	//public static String SERVER_URL = "http://android-test-rig.comuf.com/";
+	public static String SERVER_URL = "http://android-test-rig2.netii.net/";
+	
 	static InputStream is = null;
     static JSONObject jObj = null;
     static String json = "";
+    
+    public static ArrayList<String> parameters;
+    public static ArrayList<String> values;
+    
     
 	public static String sendRegistrationToServer(String name, String password, String regId, String method, String url) {
     	
@@ -70,7 +82,7 @@ public class HTTPHelper {
     	return retStr;
     }
 	
-	public static String sendValuesToUrl(ArrayList<String> parameters, ArrayList<String> values, String url) {
+	public static String sendValuesToUrl(String url) {
     	
     	String retStr = "no action";
     	HttpClient client = new DefaultHttpClient();
@@ -79,7 +91,7 @@ public class HTTPHelper {
     	try {
     		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
     		for(int i = 0; i<parameters.size();i++){
-    			Log.v("http",parameters.get(i) + " : " + values.get(i));
+    			//Log.v("http",parameters.get(i) + " : " + values.get(i));
     			nameValuePairs.add(new BasicNameValuePair(parameters.get(i), values.get(i)));
     		}
     		post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
@@ -92,12 +104,12 @@ public class HTTPHelper {
     	return retStr;
     }
 
-	public static String sendGCMMessage(String GCMMessageType, String payload, ArrayList<String> receivers) {
+	public static String sendGcmMessage(String gcmMessageType, String payload, ArrayList<String> receivers) {
     	
 		for(int i = 0; i< receivers.size();i++)
 			receivers.set(i, "\"" + receivers.get(i)+ "\"");
 		
-		String data = "{\"data\": { \"" + GCMMessageType + "\": \"" + payload + 			
+		String data = "{\"data\": { \"" + gcmMessageType + "\": \"" + payload + 			
 		"\" }, \"registration_ids\": " + receivers.toString() +"}";	
 		
     	String retStr;    	
@@ -108,7 +120,7 @@ public class HTTPHelper {
     	HttpPost post = new HttpPost(GCM_GOOGLE_URL);
 
     	try {
-    		Log.v("GCM Req:", data);
+    		//Log.v("GCM Req:", data);
     		StringEntity se = new StringEntity(data);
     		post.setEntity(se);
     		post.setHeader("Content-Type","application/json");
@@ -119,7 +131,7 @@ public class HTTPHelper {
 			e.printStackTrace();
 			retStr = "Error during upload!";
 		} 
-    	Log.v("GCM response",retStr);
+    	//Log.v("GCM response",retStr);
     	return retStr;
     }
 	
@@ -133,7 +145,7 @@ public class HTTPHelper {
 		JSONArray contacts = null;
 		 
 		// getting JSON string from URL
-		JSONObject json = getJSONFromUrl(SERVER_URL+"mapList.php");
+		JSONObject json = getJSONFromUrl(SERVER_URL+ MAP_LIST_URL);
 		 
 		try {
 		    // Getting Array of Contacts
@@ -167,8 +179,8 @@ public class HTTPHelper {
 		HashMap<String, String> gameHashMap = new HashMap<String, String>();
 		JSONArray jsonGames = null;
 		// getting JSON string from URL
-		JSONObject json = getJSONFromUrl(SERVER_URL+"gamelist.php");
-		 
+		JSONObject json = getJSONFromUrl(SERVER_URL+ GAME_LIST_URL);
+	//	 Log.v("gamelist",json.toString());
 		try {
 		    // Getting Array of Contacts
 		    jsonGames = json.getJSONArray(TAG_GAMES);
@@ -194,14 +206,14 @@ public class HTTPHelper {
 	
 	
 	
-	public static ArrayList<ObjectOnMap> getBuildingAndItemList(String mapId) {
+	public static ArrayList<ObjectOnMap> getObjectsList(String mapId) {
 		final String TAG_BUILDINGS = "buildings";
 		final String TAG_ITEMS = "items";
 		ArrayList<ObjectOnMap> objects = new ArrayList<ObjectOnMap>();
 		JSONArray jObjects = null;
 		 
 		// getting JSON string from URL
-		JSONObject json = getJSONFromUrl(SERVER_URL+"buildingList.php?mapId="+mapId);
+		JSONObject json = getJSONFromUrl(SERVER_URL+BUILDING_ITEMS_LIST_URL+"?mapId="+mapId);
 		
 		try {
 		    // Getting Array of buildings
@@ -210,25 +222,25 @@ public class HTTPHelper {
 		    // looping through All Contacts
 		    for(int i = 0; i < jObjects.length(); i++){
 		        JSONObject building = jObjects.getJSONObject(i);
-		        //$data_string .= '{ "id": "'.$id.'", "lat": "'.$lat.'","lon": "'.$lon.'","name": "'.$name.'" },';
-		        Log.v("HttpHelper",building.toString());
+		        //Log.v("HttpHelper",building.toString());
 		        objects.add(new ObjectOnMap(
 		        		building.getDouble("lat"), 
 		        		building.getDouble("lon"), 
 		        		building.getString("id"), 
 		        		building.getString("name"), 
+		        		building.getInt("value"),
 		        		"building"));  
 		    }
 		    jObjects = json.getJSONArray(TAG_ITEMS);
 		    for(int i = 0; i < jObjects.length(); i++){
 		        JSONObject item = jObjects.getJSONObject(i);
-		        //$data_string .= '{ "id": "'.$id.'", "lat": "'.$lat.'","lon": "'.$lon.'","name": "'.$name.'" },';
-		        Log.v("HttpHelper",item.toString());
+		       // Log.v("HttpHelper",item.toString());
 		        objects.add(new ObjectOnMap(
 		        		item.getDouble("lat"), 
 		        		item.getDouble("lon"), 
 		        		item.getString("id"), 
-		        		item.getString("name"), 
+		        		item.getString("name"),
+		        		item.getInt("value"),
 		        		"item"));  
 		    }
 		} catch (JSONException e) {
@@ -284,15 +296,25 @@ public class HTTPHelper {
             is.close();
             json = sb.toString();
         } catch (Exception e) {
-            Log.e("Buffer Error", "Error converting result " + e.toString());
+        //    Log.e("Buffer Error", "Error converting result " + e.toString());
         }
         // try parse the string to a JSON object
         try {
             jObj = new JSONObject(json);
         } catch (JSONException e) {
-            Log.e("JSON Parser", "Error parsing data " + e.toString());
+          //  Log.e("JSON Parser", "Error parsing data " + e.toString());
         }
         // return JSON String
         return jObj;
     }
+	
+	public static void flushParameters() {
+		parameters = new ArrayList<String>();
+		values = new ArrayList<String>();	
+	}
+
+	public static void addParameter(String valueName, String value) {
+		parameters.add(valueName);
+		values.add(value);
+	}
 }

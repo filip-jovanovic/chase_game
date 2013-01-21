@@ -31,7 +31,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	@Override
 	protected void onRegistered(Context arg0, String arg1) {
-		Log.v("###***GCMIntentService",arg1);
+		//Log.v("###***GCMIntentService",arg1);
 	}
 
 	@Override
@@ -39,6 +39,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 		
 	}
 	
+	@Override
 	public void onDestroy(){
 		  //Write your clean-up code here
 	}

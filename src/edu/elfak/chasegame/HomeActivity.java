@@ -11,6 +11,7 @@ public class HomeActivity extends Activity implements OnClickListener {
 	
 	private Bundle dataBundle;
 	
+	@Override
 	public void onCreate(Bundle savedInstanceState ){
 		
 		super.onCreate(savedInstanceState);
@@ -29,6 +30,7 @@ public class HomeActivity extends Activity implements OnClickListener {
 	}
 	
 
+	@Override
 	public void onResume(){
 		
         Button button = (Button)findViewById(R.id.create_game_button);
@@ -46,6 +48,7 @@ public class HomeActivity extends Activity implements OnClickListener {
 		
 	}
 	
+	@Override
 	public void onClick(View v) {
 		Intent i;
 		switch(v.getId()){

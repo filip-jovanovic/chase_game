@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -28,6 +27,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	Intent messageIntent;
 	
 
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
@@ -77,6 +77,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		GCMRegistrar.onDestroy(this);
 	}
 
+	@Override
 	public void onClick(View v) {
 		final String method;
 
@@ -94,6 +95,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 			ExecutorService transThread = Executors.newSingleThreadExecutor();
 			transThread.submit(new Runnable() {
+				@Override
 				public void run() {
 					try {
 						if (method == "login")
@@ -102,10 +104,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 							guiProgressDialog(true,
 									"Kreiranje novog naloga u toku ...");
 
-						final String result = HTTPHelper.parseResult(HTTPHelper
+						final String result = HttpHelper.parseResult(HttpHelper
 								.sendRegistrationToServer(name, password,
 										registrationId, method,
-										HTTPHelper.LOGIN_URL));
+										HttpHelper.LOGIN_URL));
 						guiProgressDialog(false, "");
 
 						if (!result.startsWith("Error:")) {
@@ -143,6 +145,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 	public void guiNotifyUser(final String message) {
 		guiThread.post(new Runnable() {
+			@Override
 			public void run() {
 				Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 			}
@@ -161,6 +164,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 	private void guiProgressDialog(final boolean start, final String message) {
 		guiThread.post(new Runnable() {
+			@Override
 			public void run() {
 				if (start) {
 					progressDialog.setMessage(message);

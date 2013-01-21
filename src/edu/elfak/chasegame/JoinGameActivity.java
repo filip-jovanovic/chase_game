@@ -31,7 +31,7 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 		
 		dataBundle = getIntent().getExtras().getBundle("dataBundle");
 		
-		gamesHashMap = HTTPHelper.getGameList();
+		gamesHashMap = HttpHelper.getGameList();
 		ArrayList<String> listForAdapter = new ArrayList<String>();
 		Object[] games = gamesHashMap.keySet().toArray();
 		for(int i = 0; i< gamesHashMap.size(); i++){
@@ -58,6 +58,7 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
         but.setOnClickListener(this);
 	}
 
+	@Override
 	public void onClick(View arg0) {
 		Intent i = new Intent(this, CreateGameActivity.class);
 		i.putExtra("dataBundle",dataBundle);
@@ -65,17 +66,15 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 		finish();
 	}
 	
+	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		
 		String gameId =  gamesHashMap.get(((TextView)arg1).getText().toString());
-
-		ArrayList<String> parameters = new ArrayList<String>();
-		ArrayList<String> values =  new ArrayList<String>();
-		parameters.add("game_id");
-		parameters.add("player_id");
-		values.add(gameId);
-		values.add(dataBundle.getString("registrationId"));
-		String res = HTTPHelper.sendValuesToUrl(parameters, values, HTTPHelper.UPDATE_GAME_URL);
+		
+		HttpHelper.flushParameters();
+		HttpHelper.addParameter("game_id", gameId);
+		HttpHelper.addParameter("player_id", dataBundle.getString("registrationId"));
+		String res = HttpHelper.sendValuesToUrl(HttpHelper.UPDATE_GAME_URL);
 		
 		Intent gameIntent = new Intent(this, GameService.class);
 		
