@@ -3,6 +3,7 @@ package edu.elfak.chasegame;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gcm.GCMBaseIntentService;
 
@@ -32,6 +33,10 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onRegistered(Context arg0, String arg1) {
 		//Log.v("###***GCMIntentService",arg1);
+		Intent i = new Intent("REGISTRATION_RECEIVED");
+		i.putExtra("registrationId",arg1);
+	    sendBroadcast(i);
+		
 	}
 
 	@Override

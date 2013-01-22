@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!-- Overwrite the ToggleButton style -->
+<style name="Widget.Button.Toggle" parent="android:Widget">
+    <item name="android:background">@drawable/btn_toggle_bg</item>
+    <item name="android:textOn">Add</item>
+    <item name="android:textOff">Del</item>
+    <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
+</style>
+
+
+<style name="myTheme"  parent="@android:Theme.Black">
+    <!-- Tell Android to use a custom style when creating a ToggleButton -->
+    <item name="android:buttonStyleToggle">@style/Widget.Button.Toggle</item>
+      <item name="android:textOn"></item>
+    <item name="android:textOff"></item>
+
+    <item name="android:spinnerStyle">@style/Widget.Spinner</item>
+</style>
+
+<style name="Widget.Spinner" parent="android:Widget">
+     <item name="android:background">@drawable/android_slim_spiner</item>
+     <item name="android:clickable">true</item>
+</style>
+</resources>

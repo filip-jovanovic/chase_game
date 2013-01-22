@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:background="@drawable/loginbackground7" >
+        
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_vertical|center_horizontal"
+            android:orientation="vertical" >
 
     <TextView
         android:id="@+id/TextView01"
@@ -15,8 +24,11 @@
         android:id="@+id/login_name_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/custombutton1"
+        android:textColor="@android:color/white"
         android:ems="10"
-        android:inputType="text" >
+        android:inputType="text"
+         >
 
         <requestFocus />
     </EditText>
@@ -33,19 +45,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:textColor="@android:color/white"
+                android:background="@drawable/custombutton1" />
 
     <Button
         android:id="@+id/login_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:text="@string/button_login_text" />
-    <Button
+        android:background="@drawable/custombutton1"
+        android:text="@string/button_login_text"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/white" />
+
+"
+
+    <Button
         android:id="@+id/signup_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/new_account_button" />
+        android:background="@drawable/custombutton1"
+        android:text="@string/new_account_button"
+        android:textColor="@android:color/white" />
 
 </LinearLayout>
+
+    </FrameLayout>

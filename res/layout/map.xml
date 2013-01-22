@@ -9,12 +9,22 @@
         android:layout_height="match_parent"
         class="com.google.android.gms.maps.SupportMapFragment" />
 
-    <ToggleButton
-        android:id="@+id/screenLockButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:checked="true" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp" >
+
+        <ToggleButton
+            android:id="@+id/screenLockButton"
+            style="@style/myTheme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_toggle_bg"
+            android:checked="true" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,30 +34,36 @@
         android:paddingTop="10dp" >
 
         <ImageButton
-            android:id="@+id/button3"
+            android:id="@+id/jammerButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"
             android:paddingBottom="10dp"
             android:paddingRight="7dp"
-            android:src="@drawable/vest" >
+            android:src="@drawable/jammer"
+            android:visibility="visible" >
+
         </ImageButton>
 
-        <Button
+        <ImageButton
             android:id="@+id/shootButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Shoot"
+            android:background="@null"
+            android:paddingBottom="10dp"
+            android:paddingRight="7dp"
+            android:src="@drawable/shootbutton"
             android:visibility="visible" />
 
         <ImageButton
-            android:id="@+id/button2"
+            android:id="@+id/vestButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"
             android:paddingBottom="5dp"
             android:paddingRight="7dp"
-            android:src="@drawable/vest2" />
+            android:src="@drawable/vest"
+            android:visibility="visible" />
 
         <LinearLayout
             android:layout_width="wrap_content"

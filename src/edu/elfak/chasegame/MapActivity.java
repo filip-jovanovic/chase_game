@@ -8,12 +8,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 //import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ToggleButton;
 
@@ -40,7 +42,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	private ToggleButton screenLockButton;
 	
 	private ImageView bullet;
-	private View shootButton;
+	private ImageButton shootButton;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,17 +59,48 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		itemMarkers = new HashMap<String, Marker>();
 			
 		screenLockButton = (ToggleButton) findViewById(R.id.screenLockButton);
-		shootButton = findViewById(R.id.shootButton);
-		shootButton.setOnClickListener(this);
+		
+		View imBut;
+		if(GameService.isThief){
+			imBut =  findViewById(R.id.shootButton);
+			imBut.setVisibility(View.GONE);
+			imBut =  findViewById(R.id.jammerButton);
+			imBut.setVisibility(View.VISIBLE);
+			imBut = findViewById(R.id.vestButton);
+			imBut.setVisibility(View.VISIBLE);
+			imBut = findViewById(R.id.bullet1);
+			imBut.setVisibility(View.GONE);
+			imBut = findViewById(R.id.bullet2);
+			imBut.setVisibility(View.GONE);
+			imBut = findViewById(R.id.bullet3);
+			imBut.setVisibility(View.GONE);
+		}
+		else{
+			imBut =  findViewById(R.id.jammerButton);
+			imBut.setVisibility(View.GONE);
+			imBut = findViewById(R.id.vestButton);
+			imBut.setVisibility(View.GONE);
+			shootButton = (ImageButton) findViewById(R.id.shootButton);
+			shootButton.setOnClickListener(this);
+		}
 	}
 	
-	private void drawItems(ArrayList<ObjectOnMap> items, BitmapDescriptor icon){
+	private void drawItems(ArrayList<ObjectOnMap> items){
 		for (int i = 0; i < items.size(); i++) {
 			MarkerOptions markerOptions = new MarkerOptions();
 			markerOptions.position(items.get(i).getLatlng());
-			markerOptions.icon(icon);
 			markerOptions.title(items.get(i).getName());
-			
+			if(items.get(i).getType().compareTo("item")==0)
+				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.wooden_crate));
+			else{			
+				if(items.get(i).isBank())
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.dollar_icon));
+				if(items.get(i).isPoliceStation())
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.policestation));
+				if(items.get(i).isSafeHouse())
+					markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.safehouse));
+			}
+				
 			Marker marker = mMap.addMarker(markerOptions);
 					
 			itemMarkers.put(items.get(i).getId(), marker);
@@ -122,31 +155,32 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	    		LatLng latLng = (LatLng) intent.getExtras().get("location");
 	    		double distance = GameService.calculateDistance(
 	    				mMap.getCameraPosition().target, latLng);
-	    		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
+	    		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 	        	
 	    	}
 	    	else if(action.equals("UPDATE_MAP_OBJECT_TAG")){
-	    		LatLng latLng = (LatLng) intent.getExtras().get("location");
-	    		String id =  intent.getExtras().getString("objectId");
-	    		//Log.v("UPDATE MARKER",id + " " + latLng.toString());
-	    		Marker marker = playerMarkers.get(id);
+		    	ObjectOnMap player = (ObjectOnMap) intent.getExtras().get("object");
+	    		Marker marker = playerMarkers.get(player.getId());
 	    		if(marker == null){
 	    			MarkerOptions markerOptions = new MarkerOptions();
-	    			markerOptions.position(latLng);
-	    			markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.moderator));
-	    			markerOptions.title(id);		
+	    			markerOptions.position(player.getLatlng());
+	    			if(player.getName().compareTo("thief")==0)
+	    				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.thief));
+	    			else
+	    				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.policeman));
+	    			markerOptions.title(player.getName());		
 	    			marker = mMap.addMarker(markerOptions);		
-	    			playerMarkers.put(id, marker);
+	    			playerMarkers.put(player.getId(), marker);
 	    		}
 	    		else{
-	    			marker.setPosition(latLng);
+	    			marker.setPosition(player.getLatlng());
 	    		}
 	    	}
 	    	else if(action.equals("DRAW_ITEMS")){
 	    		ArrayList<ObjectOnMap> items = intent.getExtras().getParcelableArrayList("items");
 	    		ArrayList<ObjectOnMap> buildings = intent.getExtras().getParcelableArrayList("buildings");
-	    		drawItems(items,BitmapDescriptorFactory.fromResource(R.drawable.wooden_crate));
-	    		drawItems(buildings,BitmapDescriptorFactory.fromResource(R.drawable.building));
+	    		drawItems(items);
+	    		drawItems(buildings);
 	    		boundaries = drawBoundaries((LatLng) intent.getExtras().get("mapCenter"), mMap);
 	    	}
 	    	else if(action.equals("BULLETS_UPDATE")){
@@ -168,23 +202,23 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		    		bullet = (ImageView) findViewById(R.id.bullet2);
 		    		bullet.setAlpha(255);
 		    		bullet = (ImageView) findViewById(R.id.bullet3);
-		    		bullet.setAlpha(0);
+		    		bullet.setAlpha(100);
 		    	}
 		    	if(remainingBullets == 1){
 		    		bullet = (ImageView) findViewById(R.id.bullet1);
 		    		bullet.setAlpha(255);
 		    		bullet = (ImageView) findViewById(R.id.bullet2);
-		    		bullet.setAlpha(0);
+		    		bullet.setAlpha(100);
 		    		bullet = (ImageView) findViewById(R.id.bullet3);
-		    		bullet.setAlpha(0);
+		    		bullet.setAlpha(100);
 		    	}
 		    	if(remainingBullets == 0){
 		    		bullet = (ImageView) findViewById(R.id.bullet1);
-		    		bullet.setAlpha(0);
+		    		bullet.setAlpha(100);
 		    		bullet = (ImageView) findViewById(R.id.bullet2);
-		    		bullet.setAlpha(0);
+		    		bullet.setAlpha(100);
 		    		bullet = (ImageView) findViewById(R.id.bullet3);
-		    		bullet.setAlpha(0);
+		    		bullet.setAlpha(100);
 		    		
 		    		shootButton.setClickable(false);
 		    		shootButton.setEnabled(false);

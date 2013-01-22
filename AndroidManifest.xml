@@ -44,7 +44,7 @@
         android:name="edu.elfak.chasegame.ChaseGameApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name" >
+        android:label="@string/app_name">
         <uses-library android:name="com.google.android.maps" />
 
         <activity
@@ -98,7 +98,7 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyC-qfgXH5Aw2RtrKy48-dqZsyCpNYhMLVM" />
+            android:value="AIzaSyALaFaRIh5sMVffHCeJUZC4j5aub5oPjsc" />
 
         <activity
             android:name="edu.elfak.chasegame.LocationReceiver"
@@ -106,16 +106,8 @@
         </activity>
 
         <service
-            android:name="edu.elfak.chasegame.LocationSenderService"
-            android:enabled="true" />
-        <service
             android:name="edu.elfak.chasegame.GameService"
             android:enabled="true" />
-
-        <activity
-            android:name="edu.elfak.chasegame.DebugActivity"
-            android:label="@string/title_activity_debug" >
-        </activity>
     </application>
 
 </manifest>

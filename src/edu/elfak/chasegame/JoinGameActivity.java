@@ -10,9 +10,12 @@ import com.google.android.gms.maps.model.LatLng;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -24,9 +27,14 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 
 	private HashMap<String, String> gamesHashMap;
 	private Bundle dataBundle;
+	private ProgressDialog progressDialog;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		
 		setContentView(R.layout.joingame);
 		
 		dataBundle = getIntent().getExtras().getBundle("dataBundle");
@@ -45,17 +53,12 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 		list.setAdapter(arrayAdapter);
 		list.setOnItemClickListener(this);
 		
-		/*new OnItemClickListener() {
-			
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-            	
-                String item = ((TextView)v).getText().toString();
-                
-                Toast.makeText(getBaseContext(), item, Toast.LENGTH_SHORT).show();
-            }
-        });*/
 		View but = findViewById(R.id.createGameButton);
         but.setOnClickListener(this);
+        
+        progressDialog = new ProgressDialog(this);
+		progressDialog.setMessage("Ucitavanje mape ...");
+		
 	}
 
 	@Override
@@ -68,6 +71,7 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 	
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		progressDialog.show();
 		
 		String gameId =  gamesHashMap.get(((TextView)arg1).getText().toString());
 		
@@ -79,8 +83,6 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 		Intent gameIntent = new Intent(this, GameService.class);
 		
 		try {
-			Log.v("res",res);
-			
 			JSONObject jsonGame = new JSONObject(res);
 			
 			gameIntent.putExtra("gameName",jsonGame.getString("game_name"));

@@ -40,7 +40,7 @@ public class GameService extends Service implements LocationListener {
 	private String playerName;
 	public String registrationId;
 	private LocationManager locationManager;
-	private boolean isThief;
+	public static boolean isThief;
 
 	private final long TIME_DIFFERENCE = 5000;
 	public static final String GCM_ANNOUNCE_TAG = "announce";
@@ -52,7 +52,6 @@ public class GameService extends Service implements LocationListener {
 	private boolean jammer;
 	private boolean gameStarted;
 	public static boolean isRuning = false;
-
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -248,8 +247,9 @@ public class GameService extends Service implements LocationListener {
 
 	private void updateMapObject(ObjectOnMap object) {
 		Intent i = new Intent("UPDATE_MAP_OBJECT_TAG");
-		i.putExtra("objectId", object.getId());
-		i.putExtra("location", object.getLatlng());
+		i.putExtra("object", object);
+		//i.putExtra("objectId", object.getId());
+		//i.putExtra("location", object.getLatlng());
 		sendBroadcast(i);
 
 	}

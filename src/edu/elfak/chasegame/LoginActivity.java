@@ -5,14 +5,20 @@ import java.util.concurrent.Executors;
 
 import com.google.android.gcm.GCMRegistrar;
 
+
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -24,37 +30,31 @@ public class LoginActivity extends Activity implements OnClickListener {
 	static boolean loginFlag;
 	private String registrationId;
 	private String playerName;
-	Intent messageIntent;
-	
+	private Intent messageIntent;
+	private GcmRegisterReceiver gcmRegisterReceiver;
+	private Button loginButton,signupButton;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.login);
 
 		// register device for Google Cloud Messaging
 		GCMRegistrar.checkDevice(this);
 		GCMRegistrar.checkManifest(this);
 		
-		/*
+		
 		registrationId = GCMRegistrar.getRegistrationId(this);
 		
 		if (registrationId.equals("")) {
 			GCMRegistrar.register(this, "472939073721");
-			registrationId = GCMRegistrar.getRegistrationId(this);
-		} else {
-			Log.v("Notice:", "Already registered");
 		}
-		*/
-		GCMRegistrar.register(this, "472939073721");
-		
-		registrationId = GCMRegistrar.getRegistrationId(this);
-		
-		
 
-		View loginButton = findViewById(R.id.login_button);
+		loginButton = (Button) findViewById(R.id.login_button);
 		loginButton.setOnClickListener(this);
-		View signupButton = findViewById(R.id.signup_button);
+		signupButton = (Button) findViewById(R.id.signup_button);
 		signupButton.setOnClickListener(this);
 		
 		// just for testing phase!
@@ -71,6 +71,30 @@ public class LoginActivity extends Activity implements OnClickListener {
 		context = this;
 		progressDialog = new ProgressDialog(this);
 		loginFlag = false;
+	}
+	
+	
+	public void onResume(){
+		registrationId = GCMRegistrar.getRegistrationId(this);
+		if (registrationId.equals("")){
+			if (gcmRegisterReceiver == null) gcmRegisterReceiver = new GcmRegisterReceiver();
+			IntentFilter intentFilter = new IntentFilter();
+			intentFilter.addAction("REGISTRATION_RECEIVED");
+			registerReceiver(gcmRegisterReceiver, intentFilter);
+			loginButton.setEnabled(false);
+			GCMRegistrar.register(this, "472939073721");
+		}
+		super.onResume();
+	}
+	
+	private class GcmRegisterReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			registrationId = intent.getExtras().getString("registrationId");
+			loginButton.setEnabled(true);
+		}
+		
 	}
 	
 	public void OnDestroy(){
@@ -151,17 +175,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			}
 		});
 	}
-
-	private void successfulLogin() {
-		Intent i = new Intent(this, HomeActivity.class);
-		Bundle dataBundle = new Bundle();
-		dataBundle.putString("registrationId", registrationId);
-		dataBundle.putString("playerName",playerName);
-		i.putExtra("dataBundle",dataBundle);
-		finish();
-		startActivity(i);
-	}
-
+	
 	private void guiProgressDialog(final boolean start, final String message) {
 		guiThread.post(new Runnable() {
 			@Override
@@ -175,5 +189,17 @@ public class LoginActivity extends Activity implements OnClickListener {
 			}
 		});
 	}
+
+	private void successfulLogin() {
+		Intent i = new Intent(this, HomeActivity.class);
+		Bundle dataBundle = new Bundle();
+		dataBundle.putString("registrationId", registrationId);
+		dataBundle.putString("playerName",playerName);
+		i.putExtra("dataBundle",dataBundle);
+		finish();
+		startActivity(i);
+	}
+
+
 
 }
