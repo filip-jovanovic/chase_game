@@ -297,7 +297,9 @@ public class GameService extends Service implements LocationListener {
 				updateMapView(mapCenter);
 
 				Intent j = new Intent("DRAW_ITEMS");
-				j.putExtra("items", items);
+				ArrayList<ObjectOnMap> visibleItems = new ArrayList<ObjectOnMap>(items);
+				visibleItems.removeAll(gatheredItems);
+				j.putExtra("items", visibleItems);
 				j.putExtra("mapCenter", mapCenter);
 				j.putExtra("buildings", buildings);
 				sendBroadcast(j);

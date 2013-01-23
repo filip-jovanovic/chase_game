@@ -99,6 +99,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	
 	public void OnDestroy(){
 		GCMRegistrar.onDestroy(this);
+		unregisterReceiver(gcmRegisterReceiver);
 	}
 
 	@Override

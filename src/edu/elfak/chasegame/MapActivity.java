@@ -12,6 +12,7 @@ import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 //import android.util.Log;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -88,6 +89,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	private void drawItems(ArrayList<ObjectOnMap> items){
 		for (int i = 0; i < items.size(); i++) {
 			MarkerOptions markerOptions = new MarkerOptions();
+			markerOptions.visible(true);
 			markerOptions.position(items.get(i).getLatlng());
 			markerOptions.title(items.get(i).getName());
 			if(items.get(i).getType().compareTo("item")==0)
@@ -102,7 +104,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 			}
 				
 			Marker marker = mMap.addMarker(markerOptions);
-					
+			Log.v("MARKER ADDED",marker.getId() +" "  + marker.getTitle() + " "  + marker.getPosition().toString());		
 			itemMarkers.put(items.get(i).getId(), marker);
 		}
 	}
@@ -118,7 +120,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		intentFilter.addAction("BULLETS_UPDATE");
 		registerReceiver(dataUpdateReceiver, intentFilter);
 		
-		sendBroadcast(new Intent("REQ_INITIALISE_DATA"));
+		if(itemMarkers.size()==0)
+			sendBroadcast(new Intent("REQ_INITIALISE_DATA"));
 		
 		super.onResume();
 	}
@@ -126,6 +129,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	@Override
 	public void onPause(){
 		if (dataUpdateReceiver != null) unregisterReceiver(dataUpdateReceiver);
+		
 		super.onPause();
 	}
 
@@ -179,8 +183,12 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	    	}	
 	    	else if(action.equals("REMOVE_MAP_OBJECT_TAG")){
 		    	ObjectOnMap item = (ObjectOnMap) intent.getExtras().get("object");
-	    		Marker marker = itemMarkers.remove(item.getId());
+	    		Marker m = itemMarkers.get(item.getId());
+	    		Log.v("MARKER DELETE",item.getId() +" "  + m.getTitle() + " "  + m.getPosition().toString());
+	    		m.setVisible(false);
+	    		m.remove();
 	    		
+	    		itemMarkers.remove(item.getId());	    		
 	    	}
 	    	else if(action.equals("DRAW_ITEMS")){
 	    		ArrayList<ObjectOnMap> items = intent.getExtras().getParcelableArrayList("items");
