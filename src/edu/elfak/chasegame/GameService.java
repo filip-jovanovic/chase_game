@@ -322,6 +322,35 @@ public class GameService extends Service implements LocationListener {
 		return (rad2deg(Math.acos(dist)) * 111189.57696);
 	}
 
+	public ArrayList<Double> getDistanceFromPoliceman()
+	{
+		ArrayList<Double> distance = new ArrayList<Double>();
+		LatLng myLocation = players.get(numberOfPolicemen).getLatlng();
+		for (int j = 0; j < players.size(); j++) {
+			if(myLocation!=players.get(j).getLatlng() && players.get(j).getName().equals("thief")){
+				distance.add(calculateDistance(myLocation,players.get(j).getLatlng()));
+			}
+		}
+		return distance;
+	}
+	
+	public ArrayList<Double> getDistanceFromThief()
+	{
+		ArrayList<Double> distance = new ArrayList<Double>();
+		if(players.get(numberOfPolicemen).getName().equals("thief")){
+			distance.add(Double.valueOf(0.0));
+		}
+		else{
+			LatLng myLocation = players.get(numberOfPolicemen).getLatlng();
+			for (int j = 0; j < players.size(); j++) {
+				if(players.get(j).getName().equals("thief")){
+					distance.add(calculateDistance(myLocation,players.get(j).getLatlng()));
+				}
+			}
+		}
+		return distance;
+	}
+	
 	protected void processGcmEvent(Intent intent, Context context) {
 		{
 			Bundle message = intent.getExtras();

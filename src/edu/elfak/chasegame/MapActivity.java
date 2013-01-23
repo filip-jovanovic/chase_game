@@ -12,6 +12,7 @@ import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 //import android.util.Log;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -44,6 +45,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	
 	private ImageView bullet;
 	private ImageButton shootButton;
+	private ImageView radarThiefIcon;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,9 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		itemMarkers = new HashMap<String, Marker>();
 			
 		screenLockButton = (ToggleButton) findViewById(R.id.screenLockButton);
+		
+		radarThiefIcon = (ImageView) findViewById(R.id.radarThief);
+		
 		
 		View imBut;
 		if(GameService.isThief){
@@ -161,6 +166,14 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	    		double distance = GameService.calculateDistance(
 	    				mMap.getCameraPosition().target, latLng);
 	    		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+	    		DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+	    		int padding = (int)((12 * displayMetrics.density) + 0.5);
+
+	    		if(radarThiefIcon.getPaddingLeft()>212)
+	    			radarThiefIcon.setPadding(padding, padding, 0, 0);
+	    		else 
+	    			
+	    			radarThiefIcon.setPadding(radarThiefIcon.getPaddingLeft()+padding, padding, 0, 0);
 	        	
 	    	}
 	    	else if(action.equals("UPDATE_MAP_OBJECT_TAG")){
