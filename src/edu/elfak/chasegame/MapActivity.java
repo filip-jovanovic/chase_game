@@ -112,6 +112,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		if (dataUpdateReceiver == null) dataUpdateReceiver = new MapUpdateReceiver();
 		intentFilter = new IntentFilter();
 		intentFilter.addAction("UPDATE_MAP_OBJECT_TAG");
+		intentFilter.addAction("REMOVE_MAP_OBJECT_TAG");
 		intentFilter.addAction("UPDATE_MAP_TAG");
 		intentFilter.addAction("DRAW_ITEMS");
 		intentFilter.addAction("BULLETS_UPDATE");
@@ -175,6 +176,11 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	    		else{
 	    			marker.setPosition(player.getLatlng());
 	    		}
+	    	}	
+	    	else if(action.equals("REMOVE_MAP_OBJECT_TAG")){
+		    	ObjectOnMap item = (ObjectOnMap) intent.getExtras().get("object");
+	    		Marker marker = itemMarkers.remove(item.getId());
+	    		
 	    	}
 	    	else if(action.equals("DRAW_ITEMS")){
 	    		ArrayList<ObjectOnMap> items = intent.getExtras().getParcelableArrayList("items");

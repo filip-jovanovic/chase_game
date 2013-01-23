@@ -19,6 +19,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+
 //import android.util.Log;
 
 public class GameService extends Service implements LocationListener {
@@ -51,7 +52,9 @@ public class GameService extends Service implements LocationListener {
 	private boolean buletproof;
 	private boolean jammer;
 	private boolean gameStarted;
+	private boolean gameCanStart;
 	public static boolean isRuning = false;
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -110,16 +113,12 @@ public class GameService extends Service implements LocationListener {
 						"player"));
 				numberOfPolicemen++;
 			}
-			
-			
 
 			// let other players be informed about new player
 			ArrayList<String> receivers = new ArrayList<String>();
 			for (int i = 0; i < players.size(); i++) {
 				String id = players.get(i).getId();
-				if (id.compareTo(registrationId) != 0) // RETURN FOR TESTING
-														// WITH DIFFERENT
-														// DEVICES !!!
+				if (!id.equals(registrationId))
 					receivers.add(id);
 			}
 			HttpHelper.sendGcmMessage(GCM_ANNOUNCE_TAG, registrationId,
@@ -156,15 +155,15 @@ public class GameService extends Service implements LocationListener {
 		newCoordinates = new LatLng(location.getLatitude(),
 				location.getLongitude());
 		updateMapView(newCoordinates);
-		
+
 		checkAndProcessColision(newCoordinates);
-		
+
 		// TODO check timer !
 		if (TIME_DIFFERENCE < (location.getTime() - timeOfLastLocation)) {
 			// this location is 10s "away" from last one
 
 			timeOfLastLocation = location.getTime();
-			
+
 			HttpHelper.flushParameters();
 			HttpHelper.addParameter("game_id", String.valueOf(gameId));
 			HttpHelper.addParameter("player_id", registrationId);
@@ -178,7 +177,7 @@ public class GameService extends Service implements LocationListener {
 
 	private void checkAndProcessColision(LatLng newCoordinates) {
 		ObjectOnMap object = null;
-		
+
 		for (int i = 0; i < buildings.size(); i++) {
 			object = buildings.get(i);
 			if (calculateDistance(newCoordinates, object.getLatlng()) < 10.0) {
@@ -186,22 +185,24 @@ public class GameService extends Service implements LocationListener {
 					if (!isThief)
 						refillAmmo();
 				} else if (object.isSafeHouse()) {
-					//TODO Nisam siguran sta se ovde desava...
+					// TODO Nisam siguran sta se ovde desava...
 				} else if (object.isBank()) {
 					if (isThief) {
 						int bankId = object.getBankId();
-						int numOfNecessaryItems = 0,numOfGatheredNecessaryItems = 0;	
-						for(int j = 0; j<items.size(); j++){
-							if(bankId == items.get(j).getBankId())
+						int numOfNecessaryItems = 0, numOfGatheredNecessaryItems = 0;
+						for (int j = 0; j < items.size(); j++) {
+							if (bankId == items.get(j).getBankId())
 								numOfNecessaryItems++;
 						}
-						for(int j = 0; j<items.size(); j++){
-							if(bankId == items.get(j).getBankId())
+						for (int j = 0; j < items.size(); j++) {
+							if (bankId == items.get(j).getBankId())
 								numOfGatheredNecessaryItems++;
 						}
-						if(numOfNecessaryItems==numOfGatheredNecessaryItems){}
-						//	Log.v("BANK ROBED!",String.valueOf(bankId));		
-						//TODO Announce to others, add money to thief, check end game
+						if (numOfNecessaryItems == numOfGatheredNecessaryItems) {
+						}
+						// Log.v("BANK ROBED!",String.valueOf(bankId));
+						// TODO Announce to others, add money to thief, check
+						// end game
 					}
 
 				}
@@ -211,16 +212,16 @@ public class GameService extends Service implements LocationListener {
 			for (int i = 0; i < items.size(); i++) {
 				object = items.get(i);
 				if (calculateDistance(newCoordinates, object.getLatlng()) < 10.0) {
-					if(!gatheredItems.contains(object)){
+					if (!gatheredItems.contains(object)) {
 						gatheredItems.add(object);
-						//TODO : remove it from map
-						if(object.getName().contains("Pancir")){
+						removeMapObject(object);
+						if (object.getName().contains("Pancir")) {
 							buletproof = true;
-							//TODO: Show button
+							// TODO: Show button
 						}
-						if(object.getName().contains("Ometac")){
+						if (object.getName().contains("Ometac")) {
 							jammer = true;
-							//TODO: Show button
+							// TODO: Show button
 						}
 					}
 
@@ -229,11 +230,11 @@ public class GameService extends Service implements LocationListener {
 		}
 	}
 
-	private void refillAmmo() {		
-		if( ammo != MAX_AMMO )
+	private void refillAmmo() {
+		if (ammo != MAX_AMMO)
 			ammo = MAX_AMMO;
-		//Log.v("REFILL AMO",String.valueOf(ammo));
-		
+		// Log.v("REFILL AMO",String.valueOf(ammo));
+
 		Intent i = new Intent("BULLETS_UPDATE");
 		i.putExtra("remainingBullets", ammo);
 		sendBroadcast(i);
@@ -248,8 +249,13 @@ public class GameService extends Service implements LocationListener {
 	private void updateMapObject(ObjectOnMap object) {
 		Intent i = new Intent("UPDATE_MAP_OBJECT_TAG");
 		i.putExtra("object", object);
-		//i.putExtra("objectId", object.getId());
-		//i.putExtra("location", object.getLatlng());
+		sendBroadcast(i);
+
+	}
+	
+	private void removeMapObject(ObjectOnMap object) {
+		Intent i = new Intent("REMOVE_MAP_OBJECT_TAG");
+		i.putExtra("object", object);
 		sendBroadcast(i);
 
 	}
@@ -284,59 +290,8 @@ public class GameService extends Service implements LocationListener {
 			String action = intent.getAction();
 
 			if (action.equals(GCMBaseIntentService.TAG)) {
-				Bundle message = intent.getExtras();
-				//Log.v("GCM Received", message.toString());
-				if (message.containsKey(GCM_ANNOUNCE_TAG)) {
-					// numberOfPolicemen++;
-					/*Log.v("GCM Received",
-							"Player added: "
-									+ message.getString(GCM_ANNOUNCE_TAG));*/
-					// RETURN FOR MULTIPLE DEVICE!
-					players.add(new ObjectOnMap(0, 0, message
-							.getString(GCM_ANNOUNCE_TAG), "policeman"
-							+ String.valueOf(numberOfPolicemen), 0, "player"));
+				processGcmEvent(intent, context);
 
-				} else if (message.containsKey("player_locations")) {
-					//Log.v("player locations", "");
-					String playerId = null;
-					LatLng newLocation = null;
-					ArrayList<String> player_ids = new ArrayList<String>();
-					try {
-						JSONArray jsonArray = new JSONArray(
-								message.getString("player_locations"));
-						JSONObject jsonObject;
-					/*	Log.v("GCM Primio",
-								"Poruka: "
-										+ message.getString("player_locations"));*/
-						int length = jsonArray.length();
-						for (int i = 0; i < length; i++) {
-							jsonObject = jsonArray.getJSONObject(i);
-							playerId = jsonObject.getString("player_id");
-							player_ids.add(playerId);
-							newLocation = new LatLng(
-									jsonObject.getDouble("latitude"),
-									jsonObject.getDouble("longitude"));
-							for (int j = 0; j < players.size(); j++) {
-								String id = players.get(j).getId();
-								if (id.equals(playerId)) {
-									players.get(j).setLatlng(newLocation);
-									updateMapObject(players.get(j));
-								}
-							}
-						}
-						if (length < players.size()) {
-							for (int i = 0; i < players.size(); i++) {
-								if (!player_ids
-										.contains(players.get(i).getId())) {
-									//Log.v("GCM Obrisao", players.get(i).getId());
-									players.remove(i);
-
-								}
-							}
-						}
-					} catch (JSONException e) {
-					}
-				}
 			} else if (action.equals("REQ_INITIALISE_DATA")) {
 
 				updateMapView(mapCenter);
@@ -346,11 +301,9 @@ public class GameService extends Service implements LocationListener {
 				j.putExtra("mapCenter", mapCenter);
 				j.putExtra("buildings", buildings);
 				sendBroadcast(j);
-			}
-			else if (action.equals("SHOT_IS_FIRED")) {
-				
+			} else if (action.equals("SHOT_IS_FIRED")) {
+
 				ammo--;
-				//Log.v("ammo",String.valueOf(ammo));
 				Intent i = new Intent("BULLETS_UPDATE");
 				i.putExtra("remainingBullets", ammo);
 				sendBroadcast(i);
@@ -365,6 +318,54 @@ public class GameService extends Service implements LocationListener {
 				+ Math.cos(deg2rad(p1.latitude))
 				* Math.cos(deg2rad(p2.latitude)) * Math.cos(deg2rad(theta));
 		return (rad2deg(Math.acos(dist)) * 111189.57696);
+	}
+
+	protected void processGcmEvent(Intent intent, Context context) {
+		{
+			Bundle message = intent.getExtras();
+			if (message.containsKey(GCM_ANNOUNCE_TAG)) {
+				// numberOfPolicemen++;
+				// RETURN FOR MULTIPLE DEVICE!
+				players.add(new ObjectOnMap(0, 0, message
+						.getString(GCM_ANNOUNCE_TAG), "policeman"
+						+ String.valueOf(numberOfPolicemen), 0, "player"));
+
+			} else if (message.containsKey("player_locations")) {
+				String playerId = null;
+				LatLng newLocation = null;
+				ArrayList<String> player_ids = new ArrayList<String>();
+				try {
+					JSONArray jsonArray = new JSONArray(
+							message.getString("player_locations"));
+					JSONObject jsonObject;
+					int length = jsonArray.length();
+					for (int i = 0; i < length; i++) {
+						jsonObject = jsonArray.getJSONObject(i);
+						playerId = jsonObject.getString("player_id");
+						player_ids.add(playerId);
+						newLocation = new LatLng(
+								jsonObject.getDouble("latitude"),
+								jsonObject.getDouble("longitude"));
+						for (int j = 0; j < players.size(); j++) {
+							String id = players.get(j).getId();
+							if (id.equals(playerId)) {
+								players.get(j).setLatlng(newLocation);
+								updateMapObject(players.get(j));
+							}
+						}
+					}
+					if (length < players.size()) {
+						for (int i = 0; i < players.size(); i++) {
+							if (!player_ids.contains(players.get(i).getId())) {
+								players.remove(i);
+							}
+						}
+					}
+				} catch (JSONException e) {
+				}
+			}
+		}
+
 	}
 
 	private static double deg2rad(double deg) {
