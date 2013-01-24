@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -49,8 +50,8 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 		String[] maps = new String[result.size()];
 		result.keySet().toArray(maps);
 		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item, maps);
-
+				//android.R.layout.simple_spinner_item, maps);
+				R.layout.spinner_item,maps);
 		listOfMaps.setAdapter(arrayAdapter);
 		createGameBbutton = (Button) findViewById(R.id.startGame);
 		createGameBbutton.setOnClickListener(this);
@@ -74,19 +75,32 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 					Toast.LENGTH_LONG).show();
 			
 			String selected = (String) listOfMaps.getSelectedItem();
-			LatLng mapCenter = result.get(selected);
+			
+			HttpHelper.flushParameters();
+			HttpHelper.addParameter("game_name", gameName.getText().toString());
+			String returned = HttpHelper.sendValuesToUrl(HttpHelper.CHECK_EXISTING_GAMES);
+			Log.v("Create Game", "Vratio je: "+returned);
+			if(returned.contains("not")){
+				LatLng mapCenter = result.get(selected);
 			Intent gameIntent = new Intent(context, GameService.class);
-			gameIntent.putExtra("gameName", gameName.getText().toString());
+				gameIntent.putExtra("gameName", gameName.getText().toString());
 			gameIntent.putExtra("mapId", Integer.parseInt(selected.split("\\.")[0]));
-			gameIntent.putExtra("mapCenter", mapCenter);
-			gameIntent.putExtra("role", "thief");
-			gameIntent.putExtra("dataBundle", dataBundle);
-			startService(gameIntent);
+				gameIntent.putExtra("mapCenter", mapCenter);
+				gameIntent.putExtra("role", "thief");
+				gameIntent.putExtra("dataBundle", dataBundle);
+				startService(gameIntent);
 			
 			Intent i = new Intent(context, MapActivity.class);
-			startActivity(i);
-			finish();
+				startActivity(i);
+				finish();
 			
+			}
+			else if(returned.contains("exists")){
+					Toast.makeText(getBaseContext(), "Igra sa tim imenom vec postoji, unesite drugo ime.",
+						Toast.LENGTH_SHORT).show();
+			} else 
+				Toast.makeText(getBaseContext(), "Greska na na serveru pokusajte kasnije.",
+						Toast.LENGTH_SHORT).show();
 		}
 	}
 }

@@ -43,7 +43,8 @@ public class HttpHelper {
 	private static final String MAP_LIST_URL = "mapList.php";
 	private static final String GAME_LIST_URL = "gamelist.php";
 	private static final String BUILDING_ITEMS_LIST_URL = "buildingList.php";
-	
+	public static final String CHECK_EXISTING_GAMES = "checkExistingGames.php";
+
 	private static final String GCM_GOOGLE_URL = "https://android.googleapis.com/gcm/send";
 
 	//public static String SERVER_URL = "http://android-test-rig.comuf.com/";
@@ -199,7 +200,7 @@ public class HttpHelper {
                 gameHashMap.put(result, id);
 		    }
 		} catch (JSONException e) {
-		    e.printStackTrace();
+		    //e.printStackTrace();
 		}    	
     	return gameHashMap;
     }

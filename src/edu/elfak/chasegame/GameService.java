@@ -18,8 +18,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 //import android.util.Log;
 
@@ -46,6 +48,12 @@ public class GameService extends Service implements LocationListener {
 
 	private final long TIME_DIFFERENCE = 5000;
 	public static final String GCM_ANNOUNCE_TAG = "announce";
+	public static final String GCM_POLICEWIN_TAG = "police won";
+	public static final String GCM_CANSTART_TAG = "game can start";
+	public static final String GCM_TIMEISUP_TAG = "time is up";
+	public static final String GCM_START_TAG = "start";
+
+
 	private static final int MAX_AMMO = 3;
 
 	private LatLng mapCenter;
@@ -55,13 +63,14 @@ public class GameService extends Service implements LocationListener {
 	private boolean gameStarted;
 	private boolean gameCanStart;
 	public static boolean isRuning = false;
-
+	public CountDownTimer gameTime;
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		isRuning = true;
 		gameStarted = false;
-
+		gameCanStart = false;
+		
 		buildings = new ArrayList<ObjectOnMap>();
 		items = new ArrayList<ObjectOnMap>();
 		players = new ArrayList<ObjectOnMap>();
@@ -83,7 +92,7 @@ public class GameService extends Service implements LocationListener {
 		playerName = ib.getBundle("dataBundle").getString("playerName");
 
 		numberOfPolicemen = 0;
-
+		ArrayList<String> receivers = new ArrayList<String>();
 		if (isThief) {
 			players.add(new ObjectOnMap(0, 0, registrationId, role, 0, "player"));
 
@@ -113,10 +122,18 @@ public class GameService extends Service implements LocationListener {
 				players.add(new ObjectOnMap(0, 0, cop_3Id, "policeman3", 0,
 						"player"));
 				numberOfPolicemen++;
+				//game can start now
+				for (int i = 0; i < players.size(); i++) {
+					String id = players.get(i).getId();
+					if (!id.equals(registrationId))
+						receivers.add(id);
+				}
+				HttpHelper.sendGcmMessage(GCM_CANSTART_TAG, registrationId,
+						receivers);
 			}
 
 			// let other players be informed about new player
-			ArrayList<String> receivers = new ArrayList<String>();
+			
 			for (int i = 0; i < players.size(); i++) {
 				String id = players.get(i).getId();
 				if (!id.equals(registrationId))
@@ -150,19 +167,42 @@ public class GameService extends Service implements LocationListener {
 		return START_STICKY;
 	}
 
+	public void startGame(){
+		gameTime = new CountDownTimer(7200000, 360000) {
+		     public void onTick(long millisUntilFinished) {
+		    	 for (int j = 0; j < players.size(); j++) {
+					updateMapObject(players.get(j));
+				}
+		     }
+
+		     public void onFinish() {
+		 		ArrayList<String> receivers = new ArrayList<String>();
+		    	 for (int i = 0; i < players.size(); i++) {
+						String id = players.get(i).getId();
+						if (!id.equals(registrationId))
+							receivers.add(id);
+					}
+					HttpHelper.sendGcmMessage(GCM_TIMEISUP_TAG, registrationId,
+							receivers);
+					Toast.makeText(getBaseContext(), "Vreme je isteklo, lopov je uspesno pobegao.",
+							Toast.LENGTH_LONG).show();
+		     }
+		  };
+	}
+	
 	@Override
 	public void onLocationChanged(Location location) {
 		LatLng newCoordinates;
 		newCoordinates = new LatLng(location.getLatitude(),
 				location.getLongitude());
-		updateMapView(newCoordinates);
+		
 
 		checkAndProcessColision(newCoordinates);
 
 		// TODO check timer !
 		if (TIME_DIFFERENCE < (location.getTime() - timeOfLastLocation)) {
 			// this location is 10s "away" from last one
-
+			updateMapView(newCoordinates);
 			timeOfLastLocation = location.getTime();
 
 			HttpHelper.flushParameters();
@@ -243,6 +283,8 @@ public class GameService extends Service implements LocationListener {
 
 	private void updateMapView(LatLng latLng) {
 		Intent i = new Intent("UPDATE_MAP_TAG");
+		i.putExtra("thiefDistance", getDistanceFromThief());
+		i.putExtra("policemanDistance", getDistanceFromPoliceman());
 		i.putExtra("location", latLng);
 		sendBroadcast(i);
 	}
@@ -305,8 +347,26 @@ public class GameService extends Service implements LocationListener {
 				j.putExtra("buildings", buildings);
 				sendBroadcast(j);
 			} else if (action.equals("SHOT_IS_FIRED")) {
-
 				ammo--;
+				//TODO: proveri da li je pogodak i da ako jeste objavi pobedu
+				if(!buletproof){
+					ArrayList<Double> distance = getDistanceFromThief();
+					if(distance.get(0)<=30){
+						ArrayList<String> receivers = new ArrayList<String>();
+						for (int i = 0; i < players.size(); i++) {
+							String id = players.get(i).getId();
+							if (!id.equals(registrationId))
+								receivers.add(id);
+						}
+						HttpHelper.sendGcmMessage(GCM_POLICEWIN_TAG, registrationId,
+								receivers);
+						Toast.makeText(getBaseContext(), "Policija je pobedila, lopov je uspesno uhvacen.",
+								Toast.LENGTH_LONG).show();
+						gameTime.cancel();
+					}
+				}
+				else Log.v("SHOT_IS_FIRED","Aktiviran je pancir");
+				//nastavak
 				Intent i = new Intent("BULLETS_UPDATE");
 				i.putExtra("remainingBullets", ammo);
 				sendBroadcast(i);
@@ -362,7 +422,22 @@ public class GameService extends Service implements LocationListener {
 						.getString(GCM_ANNOUNCE_TAG), "policeman"
 						+ String.valueOf(numberOfPolicemen), 0, "player"));
 
-			} else if (message.containsKey("player_locations")) {
+			}else if(message.containsKey(GCM_POLICEWIN_TAG)){
+				Toast.makeText(getBaseContext(), "Policija je pobedila, lopov je uspesno uhvacen.",
+						Toast.LENGTH_LONG).show();
+				gameTime.cancel();
+			}else if(message.containsKey(GCM_CANSTART_TAG)){
+				gameCanStart=true;
+				Toast.makeText(getBaseContext(), "Igra moze da pocne, idite do svoje startne lokacije.",
+						Toast.LENGTH_LONG).show();
+			}else if(message.containsKey(GCM_TIMEISUP_TAG)){
+				Toast.makeText(getBaseContext(), "Vreme je isteklo, lopov je uspesno pobegao.",
+						Toast.LENGTH_LONG).show();
+			}else if(message.containsKey(GCM_START_TAG)){
+				Toast.makeText(getBaseContext(), "Game starts :)",
+						Toast.LENGTH_LONG).show();
+			}
+			else if (message.containsKey("player_locations")) {
 				String playerId = null;
 				LatLng newLocation = null;
 				ArrayList<String> player_ids = new ArrayList<String>();
@@ -382,7 +457,11 @@ public class GameService extends Service implements LocationListener {
 							String id = players.get(j).getId();
 							if (id.equals(playerId)) {
 								players.get(j).setLatlng(newLocation);
-								updateMapObject(players.get(j));
+								if(isThief && j==0){
+									updateMapObject(players.get(j));
+								}else if(!isThief && j!=0){
+									updateMapObject(players.get(j));
+								}
 							}
 						}
 					}
@@ -391,6 +470,24 @@ public class GameService extends Service implements LocationListener {
 							if (!player_ids.contains(players.get(i).getId())) {
 								players.remove(i);
 							}
+							gameCanStart = false;
+						}
+					}else
+					{
+						//provera za pocetak igre i pocetak ako su svi na pocetnim lokacijama
+						if(isThief && gameCanStart && gameCanStartCheck()){
+							gameStarted=true;
+							Toast.makeText(getBaseContext(), "Game starts :)",
+									Toast.LENGTH_LONG).show();
+							startGame();
+							ArrayList<String> receivers = new ArrayList<String>();
+					    	for (int i = 0; i < players.size(); i++) {
+								String id = players.get(i).getId();
+								if (!id.equals(registrationId))
+									receivers.add(id);
+								}
+							HttpHelper.sendGcmMessage(GCM_START_TAG, registrationId,
+										receivers);
 						}
 					}
 				} catch (JSONException e) {
@@ -400,6 +497,25 @@ public class GameService extends Service implements LocationListener {
 
 	}
 
+	public boolean gameCanStartCheck(){
+		LatLng policeLoc = new LatLng(0,0);
+		LatLng safehouseLoc = new LatLng(0,0);
+		for(int i=0; i<buildings.size();i++){
+			if(buildings.get(i).isPoliceStation())
+				policeLoc = buildings.get(i).getLatlng();
+			else if(buildings.get(i).isSafeHouse())
+				safehouseLoc = buildings.get(i).getLatlng();
+		}
+		if(calculateDistance(players.get(0).getLatlng(),safehouseLoc)<=10){
+			for(int i=1;i<players.size();i++){
+				if(calculateDistance(players.get(i).getLatlng(),policeLoc)>10)
+					return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
 	private static double deg2rad(double deg) {
 		return (deg * Math.PI / 180.0);
 	}
