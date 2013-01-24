@@ -70,7 +70,7 @@ public class GameService extends Service implements LocationListener {
 		isRuning = true;
 		gameStarted = false;
 		gameCanStart = false;
-		
+		timeOfLastLocation = System.currentTimeMillis();
 		buildings = new ArrayList<ObjectOnMap>();
 		items = new ArrayList<ObjectOnMap>();
 		players = new ArrayList<ObjectOnMap>();
@@ -387,11 +387,15 @@ public class GameService extends Service implements LocationListener {
 	{
 		ArrayList<Double> distance = new ArrayList<Double>();
 		LatLng myLocation = players.get(numberOfPolicemen).getLatlng();
+		boolean found = false;
 		for (int j = 0; j < players.size(); j++) {
 			if(myLocation!=players.get(j).getLatlng() && players.get(j).getName().equals("thief")){
 				distance.add(calculateDistance(myLocation,players.get(j).getLatlng()));
+				found = true;
 			}
 		}
+		if(!found)
+			distance.add(200.0);
 		return distance;
 	}
 	
@@ -403,11 +407,15 @@ public class GameService extends Service implements LocationListener {
 		}
 		else{
 			LatLng myLocation = players.get(numberOfPolicemen).getLatlng();
+			boolean found = false;
 			for (int j = 0; j < players.size(); j++) {
 				if(players.get(j).getName().equals("thief")){
 					distance.add(calculateDistance(myLocation,players.get(j).getLatlng()));
+					found = true;
 				}
 			}
+			if(!found)
+				distance.add(200.0);
 		}
 		return distance;
 	}

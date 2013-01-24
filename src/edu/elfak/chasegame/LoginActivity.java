@@ -124,9 +124,9 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 			if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 				showGPSDisabledAlertToUser();
-			} else if(!isOnline()){
+			}/* else if(!isOnline()){
 				showIternetDisabledAlertToUser();
-			}
+			}*/
 			else
 			{
 				ExecutorService transThread = Executors.newSingleThreadExecutor();
