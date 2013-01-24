@@ -174,21 +174,21 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 			DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
     		int padding = (int)((12 * displayMetrics.density) + 0.5);
     		//thief icon
-    		double x;
+    		int x;
     		if (thiefDistance.get(0)<200)
-    			x = thiefDistance.get(0);
-    		else x = 200;
-    		int leftPadding = (int)(((12+x) * displayMetrics.density) + 0.5);
-    		radarThiefIcon.setPadding(leftPadding, padding, 0, 0);
+    			x = (int)(thiefDistance.get(0)*0.93);
+    		else x = (int)(200*0.93);
+    		//int leftPadding = 18; //(int)(((12+x) * displayMetrics.density) + 0.5);
+    		radarThiefIcon.setPadding(x+18, padding, 0, 0);
     		//Log.v("TEST","thief="+x);
     		//policeman icons
     		for (int j = 0; j < policemanDistance.size(); j++) {
     			if (policemanDistance.get(j)<200)
-        			x = policemanDistance.get(j);
-        		else x = 200;
-        		leftPadding = (int)(((12+x) * displayMetrics.density) + 0.5);
-        		radarCopIcons.get(j).setPadding(leftPadding, padding, 0, 0);
-        		//Log.v("TEST","policeman"+j+"="+x);
+        			x = (int)(policemanDistance.get(j)*0.93);
+        		else x = (int)(200*0.93);
+        		//leftPadding = (int)(((12+x) * displayMetrics.density) + 0.5);
+        		radarCopIcons.get(j).setPadding(x+18, padding, 0, 0);
+        		Log.v("TEST","policeman"+j+"="+x);
     		}
 		}
 		

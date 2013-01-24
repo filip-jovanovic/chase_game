@@ -99,7 +99,7 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyALaFaRIh5sMVffHCeJUZC4j5aub5oPjsc" />
+            android:value="AIzaSyC-qfgXH5Aw2RtrKy48-dqZsyCpNYhMLVM" />
 
         <activity
             android:name="edu.elfak.chasegame.LocationReceiver"
