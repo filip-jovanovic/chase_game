@@ -1,11 +1,13 @@
 package edu.elfak.chasegame;
 
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
@@ -17,6 +19,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.EditText;
@@ -24,8 +27,10 @@ import android.widget.EditText;
 public class CreateGameActivity extends Activity implements OnClickListener {
 	private EditText gameName;
 	private Spinner listOfMaps;
+	Button createGameBbutton;
 	private Bundle dataBundle;
 	private HashMap<String, LatLng> result;
+	private Context context;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,41 +52,41 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 				android.R.layout.simple_spinner_item, maps);
 
 		listOfMaps.setAdapter(arrayAdapter);
-		View button = findViewById(R.id.startGame);
-		button.setOnClickListener(this);
+		createGameBbutton = (Button) findViewById(R.id.startGame);
+		createGameBbutton.setOnClickListener(this);
 
 		gameName = (EditText) findViewById(R.id.gameName);
+		context = this;
+	}
 
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setMessage("Ucitavanje mape ...");
+	public void onResume(){
+		createGameBbutton.setOnClickListener(this);
+		super.onResume();
 	}
 
 	@Override
 	public void onClick(View arg0) {
-		if (gameName.getText().toString().compareTo("") == 0)
+		if (gameName.getText().toString().length() == 0)
 			Toast.makeText(getBaseContext(), "Unesi tekst", Toast.LENGTH_SHORT)
 					.show();
-		else {
-
-			progressDialog.show();
-
+		else {		
+			Toast.makeText(getBaseContext(), "Ucitavanje mape u toku ...",
+					Toast.LENGTH_LONG).show();
+			
 			String selected = (String) listOfMaps.getSelectedItem();
 			LatLng mapCenter = result.get(selected);
-			Intent gameIntent = new Intent(this, GameService.class);
+			Intent gameIntent = new Intent(context, GameService.class);
 			gameIntent.putExtra("gameName", gameName.getText().toString());
-			gameIntent.putExtra("mapId",
-					Integer.parseInt(selected.split("\\.")[0]));
+			gameIntent.putExtra("mapId", Integer.parseInt(selected.split("\\.")[0]));
 			gameIntent.putExtra("mapCenter", mapCenter);
 			gameIntent.putExtra("role", "thief");
 			gameIntent.putExtra("dataBundle", dataBundle);
 			startService(gameIntent);
-
-			Intent i = new Intent(this, MapActivity.class);
-			// i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			
+			Intent i = new Intent(context, MapActivity.class);
 			startActivity(i);
 			finish();
+			
 		}
 	}
-
-	ProgressDialog progressDialog;
 }

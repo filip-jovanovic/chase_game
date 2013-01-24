@@ -19,6 +19,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 //import android.util.Log;
 
@@ -200,8 +201,8 @@ public class GameService extends Service implements LocationListener {
 						}
 						if (numOfNecessaryItems == numOfGatheredNecessaryItems) {
 						}
-						// Log.v("BANK ROBED!",String.valueOf(bankId));
-						// TODO Announce to others, add money to thief, check
+						 Log.v("BANK ROBED!",String.valueOf(bankId));
+						//TODO Announce to others, add money to thief, check
 						// end game
 					}
 

@@ -8,9 +8,12 @@ import org.json.JSONObject;
 
 import com.google.android.gms.maps.model.LatLng;
 
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
@@ -21,13 +24,15 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class JoinGameActivity extends Activity implements OnClickListener, OnItemClickListener{
 
 	private HashMap<String, String> gamesHashMap;
 	private Bundle dataBundle;
-	private ProgressDialog progressDialog;
+	private Context context;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -55,10 +60,8 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 		
 		View but = findViewById(R.id.createGameButton);
         but.setOnClickListener(this);
-        
-        progressDialog = new ProgressDialog(this);
-		progressDialog.setMessage("Ucitavanje mape ...");
-		
+	
+        context = this;
 	}
 
 	@Override
@@ -71,16 +74,18 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 	
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		progressDialog.show();
 		
-		String gameId =  gamesHashMap.get(((TextView)arg1).getText().toString());
+		Toast.makeText(getBaseContext(), "Ucitavanje mape u toku ...",
+				Toast.LENGTH_LONG).show();
+		
+   	 String gameId =  gamesHashMap.get(((TextView)arg1).getText().toString());
 		
 		HttpHelper.flushParameters();
 		HttpHelper.addParameter("game_id", gameId);
 		HttpHelper.addParameter("player_id", dataBundle.getString("registrationId"));
 		String res = HttpHelper.sendValuesToUrl(HttpHelper.UPDATE_GAME_URL);
 		
-		Intent gameIntent = new Intent(this, GameService.class);
+		Intent gameIntent = new Intent(context, GameService.class);
 		
 		try {
 			JSONObject jsonGame = new JSONObject(res);
@@ -106,9 +111,11 @@ public class JoinGameActivity extends Activity implements OnClickListener, OnIte
 		
     	startService(gameIntent);
 
-    	Intent i = new Intent(this, MapActivity.class);
-    	//i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    	startActivity(i);	
+     	Intent i = new Intent(context, MapActivity.class);
+     	//i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+     	startActivity(i);	
     	finish();
 	}
+	
+
 }

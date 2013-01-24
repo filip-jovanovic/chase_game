@@ -4,9 +4,10 @@ chase_game
 TODO : 
 -- Ikonica za aplikaciju
 -- Dugme - disabled i clicked png
-** Filip ** Ukljuci GPS i Internet pri Loginu
-** Filip ** Wait dialog - izbaci , baci toast da se ucitava igra, disable click na igre
-** Filip ** Testiraj pljacku, javi svima da li je opljackano i promeni ikonu u banci, dodaj novac lopovu
+-- Ukljuci GPS i Internet pri Loginu
+-- Wait dialog - izbaci , baci toast da se ucitava igra, disable click na igre
+-- Testiraj pljacku,  javi svima da li je opljackano i promeni ikonu u banci, dodaj novac lopovu
+
 ** Filip ** Lopov aktivira pancir/ometac, javlja policajcima da ima pancir/ometac; tamjer i dugme
 ** Filip ** Prikazivanje pancira i ometaca na mapi
 ** Filip ** Setuje i brise bulletproof i jammer
