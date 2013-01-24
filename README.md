@@ -2,8 +2,8 @@ chase_game
 ==========
 
 TODO : 
-** Filip ** Ikonica za aplikaciju
-** Filip ** Dugme - disabled i clicked png
+-- Ikonica za aplikaciju
+-- Dugme - disabled i clicked png
 ** Filip ** Ukljuci GPS i Internet pri Loginu
 ** Filip ** Wait dialog - izbaci , baci toast da se ucitava igra, disable click na igre
 ** Filip ** Testiraj pljacku, javi svima da li je opljackano i promeni ikonu u banci, dodaj novac lopovu
