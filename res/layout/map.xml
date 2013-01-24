@@ -110,10 +110,33 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" >
+        android:layout_height="match_parent" >
+
+        <ImageView
+            android:id="@+id/radarCop3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="12dp"
+            android:paddingTop="12dp"
+            android:src="@drawable/radarpoliceman" />
+
+        <ImageView
+            android:id="@+id/radarCop2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="12dp"
+            android:paddingTop="12dp"
+            android:src="@drawable/radarpoliceman" />
+
+        <ImageView
+            android:id="@+id/radarCop1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="12dp"
+            android:paddingTop="12dp"
+            android:src="@drawable/radarpoliceman" />
 
         <ImageView
             android:id="@+id/radarThief"
@@ -122,6 +145,7 @@
             android:paddingLeft="12dp"
             android:paddingTop="12dp"
             android:src="@drawable/radarthief" />
-    </LinearLayout>
+
+    </RelativeLayout>
 
 </FrameLayout>

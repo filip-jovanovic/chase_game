@@ -46,6 +46,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	private ImageView bullet;
 	private ImageButton shootButton;
 	private ImageView radarThiefIcon;
+	private ArrayList<ImageView> radarCopIcons;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +65,10 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		screenLockButton = (ToggleButton) findViewById(R.id.screenLockButton);
 		
 		radarThiefIcon = (ImageView) findViewById(R.id.radarThief);
-		
+		radarCopIcons = new ArrayList<ImageView>();
+		radarCopIcons.add((ImageView) findViewById(R.id.radarCop1));
+		radarCopIcons.add((ImageView) findViewById(R.id.radarCop2));
+		radarCopIcons.add((ImageView) findViewById(R.id.radarCop3));
 		
 		View imBut;
 		if(GameService.isThief){
@@ -88,6 +92,16 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 			imBut.setVisibility(View.GONE);
 			shootButton = (ImageButton) findViewById(R.id.shootButton);
 			shootButton.setOnClickListener(this);
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch(v.getId()){
+		case(R.id.shootButton):
+			sendBroadcast(new Intent("SHOT_IS_FIRED"));
+		//	Log.v("","Shot");
+			break;
 		}
 	}
 	
@@ -156,25 +170,40 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	
 	private class MapUpdateReceiver extends BroadcastReceiver {
 	    
-
+		public void updateRadar(Context context, ArrayList<Double> thiefDistance, ArrayList<Double> policemanDistance){
+			DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+    		int padding = (int)((12 * displayMetrics.density) + 0.5);
+    		//thief icon
+    		double x;
+    		if (thiefDistance.get(0)<200)
+    			x = thiefDistance.get(0);
+    		else x = 200;
+    		int leftPadding = (int)(((12+x) * displayMetrics.density) + 0.5);
+    		radarThiefIcon.setPadding(leftPadding, padding, 0, 0);
+    		//Log.v("TEST","thief="+x);
+    		//policeman icons
+    		for (int j = 0; j < policemanDistance.size(); j++) {
+    			if (policemanDistance.get(j)<200)
+        			x = policemanDistance.get(j);
+        		else x = 200;
+        		leftPadding = (int)(((12+x) * displayMetrics.density) + 0.5);
+        		radarCopIcons.get(j).setPadding(leftPadding, padding, 0, 0);
+        		//Log.v("TEST","policeman"+j+"="+x);
+    		}
+		}
+		
+		@SuppressWarnings("unchecked")
 		@Override
 	    public void onReceive(Context context, Intent intent) {
 	    	String action = intent.getAction();
 	    	
-	    	if(action.equals("UPDATE_MAP_TAG")&&(screenLockButton.isChecked())){
-	    		LatLng latLng = (LatLng) intent.getExtras().get("location");
-	    		double distance = GameService.calculateDistance(
-	    				mMap.getCameraPosition().target, latLng);
-	    		mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-	    		DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-	    		int padding = (int)((12 * displayMetrics.density) + 0.5);
-
-	    		if(radarThiefIcon.getPaddingLeft()>212)
-	    			radarThiefIcon.setPadding(padding, padding, 0, 0);
-	    		else 
-	    			
-	    			radarThiefIcon.setPadding(radarThiefIcon.getPaddingLeft()+padding, padding, 0, 0);
-	        	
+	    	if(action.equals("UPDATE_MAP_TAG")){
+	    		if((screenLockButton.isChecked())){
+	    			LatLng latLng = (LatLng) intent.getExtras().get("location");
+	    			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+	    		}
+	    		updateRadar(context,(ArrayList<Double>)intent.getExtras().get("thiefDistance")
+	    						   ,(ArrayList<Double>)intent.getExtras().get("policemanDistance"));    		
 	    	}
 	    	else if(action.equals("UPDATE_MAP_OBJECT_TAG")){
 		    	ObjectOnMap player = (ObjectOnMap) intent.getExtras().get("object");
@@ -253,16 +282,5 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	    	}
 	    }
 	}
-
-	@Override
-	public void onClick(View v) {
-		switch(v.getId()){
-		case(R.id.shootButton):
-			sendBroadcast(new Intent("SHOT_IS_FIRED"));
-		//	Log.v("","Shot");
-			break;
-		}
-	}
-
 }
 
