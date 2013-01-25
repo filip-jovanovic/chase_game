@@ -38,7 +38,7 @@ public class GameService extends Service implements LocationListener {
 	private int mapId;
 	public int gameId;
 	public int numberOfPolicemen;
-
+	public int playerPosition;
 	private long timeOfLastLocation;
 
 	private String gameName;
@@ -101,6 +101,7 @@ public class GameService extends Service implements LocationListener {
 		playerName = ib.getBundle("dataBundle").getString("playerName");
 
 		numberOfPolicemen = 0;
+		playerPosition = 0;
 		ArrayList<String> receivers = new ArrayList<String>();
 		if (isThief) {
 
@@ -151,6 +152,7 @@ public class GameService extends Service implements LocationListener {
 				String id = players.get(i).getId();
 				if (!id.equals(registrationId))
 					receivers.add(id);
+				else playerPosition = i;
 			}
 			HttpHelper.sendGcmMessage(GCM_ANNOUNCE_TAG, registrationId,
 					receivers);
@@ -471,10 +473,11 @@ public class GameService extends Service implements LocationListener {
 				sendBroadcast(in);
 				
 			} else if (message.containsKey(GCM_BULLETPROOF_VALUE_TAG)) {
-				if (message.getBoolean(GCM_BULLETPROOF_VALUE_TAG))
+				if (message.getString(GCM_BULLETPROOF_VALUE_TAG).equals("true"))
 					bulletproof = true;
 				else
 					bulletproof = false;
+				Log.v("Pancir",message.getString(GCM_BULLETPROOF_VALUE_TAG));
 
 			} else if (message.containsKey(GCM_POLICEWIN_TAG)) {
 				Toast.makeText(getBaseContext(),
@@ -527,6 +530,11 @@ public class GameService extends Service implements LocationListener {
 								players.remove(i);
 							}
 							gameCanStart = false;
+						}
+						for (int i = 0; i < players.size(); i++) {
+							String id = players.get(i).getId();
+							if (id.equals(registrationId))
+								playerPosition = i;
 						}
 					} else {
 						// provera za pocetak igre i pocetak ako su svi na
@@ -583,7 +591,7 @@ public class GameService extends Service implements LocationListener {
 
 	public ArrayList<Double> getDistanceFromPoliceman() {
 		ArrayList<Double> distance = new ArrayList<Double>();
-		LatLng myLocation = players.get(numberOfPolicemen).getLatlng();
+		LatLng myLocation = players.get(playerPosition).getLatlng();
 		boolean found = false;
 		for (int j = 0; j < players.size(); j++) {
 			if (myLocation != players.get(j).getLatlng()
@@ -600,10 +608,10 @@ public class GameService extends Service implements LocationListener {
 
 	public ArrayList<Double> getDistanceFromThief() {
 		ArrayList<Double> distance = new ArrayList<Double>();
-		if (players.get(numberOfPolicemen).getName().equals("thief")) {
+		if (players.get(playerPosition).getName().equals("thief")) {
 			distance.add(Double.valueOf(0.0));
 		} else {
-			LatLng myLocation = players.get(numberOfPolicemen).getLatlng();
+			LatLng myLocation = players.get(playerPosition).getLatlng();
 			boolean found = false;
 			for (int j = 0; j < players.size(); j++) {
 				if (players.get(j).getName().equals("thief")) {
