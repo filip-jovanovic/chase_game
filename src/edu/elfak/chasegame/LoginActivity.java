@@ -48,7 +48,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		// register device for Google Cloud Messaging
 		GCMRegistrar.checkDevice(this);
 		GCMRegistrar.checkManifest(this);
-
+		GCMRegistrar.unregister(this);
 		registrationId = GCMRegistrar.getRegistrationId(this);
 
 		if (registrationId.equals("")) {
@@ -101,7 +101,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	}
 
 	public void onDestroy() {
-		GCMRegistrar.onDestroy(this);
+		//GCMRegistrar.onDestroy(this);
 		if(gcmRegisterReceiver!=null)
 			unregisterReceiver(gcmRegisterReceiver);
 		super.onDestroy();

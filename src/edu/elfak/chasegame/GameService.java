@@ -40,13 +40,15 @@ public class GameService extends Service implements LocationListener {
 	public int numberOfPolicemen;
 	public int playerPosition;
 	private long timeOfLastLocation;
+	//za testiranje
+	public int test = 0;
 
 	private String gameName;
 	private String provider;
 	private String playerName;
 	public String registrationId;
 	private LocationManager locationManager;
-	public static boolean isThief;
+	public static boolean isThief = false;
 
 	private final long TIME_DIFFERENCE = 5000;
 	public static final String GCM_ANNOUNCE_TAG = "announce";
@@ -156,8 +158,22 @@ public class GameService extends Service implements LocationListener {
 			}
 			HttpHelper.sendGcmMessage(GCM_ANNOUNCE_TAG, registrationId,
 					receivers);
+			gameCanStart=true;
 		}
 
+		//TESTINGGGGGGGGGGGGGGGGGGG
+		for (int i = 0; i < players.size(); i++) {
+			String id = players.get(i).getId();
+			if (!id.equals(registrationId))
+				receivers.add(id);
+			else playerPosition = i;
+		}
+		HttpHelper.sendGcmMessage(GCM_ANNOUNCE_TAG, registrationId,
+				receivers);
+		gameCanStart=true;
+		
+		//end TESTINGGGGG
+		
 		// populate items and buildings from server
 		ArrayList<ObjectOnMap> allObjects = HttpHelper.getObjectsList(String
 				.valueOf(mapId));
@@ -183,7 +199,7 @@ public class GameService extends Service implements LocationListener {
 	}
 
 	public void startGame() {
-		gameTimer = new CountDownTimer(7200000, 360000) {
+		gameTimer = new CountDownTimer(7200000, 18000) {//360000) {
 			public void onTick(long millisUntilFinished) {
 				if (!jammer && isThief) {
 					for (int j = 0; j < players.size(); j++) {
@@ -191,6 +207,7 @@ public class GameService extends Service implements LocationListener {
 					}
 				} else
 					jammer = false;
+				Log.v("TICK",String.valueOf((test++)));
 			}
 
 			public void onFinish() {
@@ -417,7 +434,9 @@ public class GameService extends Service implements LocationListener {
 			} else if (action.equals("SHOT_IS_FIRED")) {
 				ammo--;
 				// proveri da li je pogodak i da ako jeste objavi pobedu
-				if (!bulletproof && gameStarted) {
+				if (!bulletproof
+						//&& gameStarted
+						) {
 					ArrayList<Double> distance = getDistanceFromThief();
 					if (distance.get(0) <= 30) {
 						ArrayList<String> receivers = new ArrayList<String>();
