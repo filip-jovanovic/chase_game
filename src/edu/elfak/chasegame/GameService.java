@@ -42,7 +42,8 @@ public class GameService extends Service implements LocationListener {
 	private long timeOfLastLocation;
 	//za testiranje
 	public int test = 0;
-
+	public int deleteTest = 0;
+	
 	private String gameName;
 	private String provider;
 	private String playerName;
@@ -540,16 +541,23 @@ public class GameService extends Service implements LocationListener {
 						}
 					}
 					if (length < players.size()) {
-						for (int i = 0; i < players.size(); i++) {
-							if (!player_ids.contains(players.get(i).getId())) {
-								players.remove(i);
+						if (deleteTest++>4){
+							for (int i = 0; i < players.size(); i++) {
+								if (!player_ids.contains(players.get(i).getId())) {
+									players.remove(i);
+									Log.v("BRISANJE","OBRISAO JE ");
+								}
+								gameCanStart = false;
 							}
-							gameCanStart = false;
+							for (int i = 0; i < players.size(); i++) {
+								String id = players.get(i).getId();
+								if (id.equals(registrationId))
+									playerPosition = i;
+							}
 						}
-						for (int i = 0; i < players.size(); i++) {
-							String id = players.get(i).getId();
-							if (id.equals(registrationId))
-								playerPosition = i;
+						else 
+						{
+							deleteTest=0;
 						}
 					} else {
 						// provera za pocetak igre i pocetak ako su svi na
