@@ -158,21 +158,17 @@ public class GameService extends Service implements LocationListener {
 			}
 			HttpHelper.sendGcmMessage(GCM_ANNOUNCE_TAG, registrationId,
 					receivers);
-			gameCanStart=true;
-		}
 
-		//TESTINGGGGGGGGGGGGGGGGGGG
-		for (int i = 0; i < players.size(); i++) {
-			String id = players.get(i).getId();
-			if (!id.equals(registrationId))
-				receivers.add(id);
-			else playerPosition = i;
+			//TESTINGGGGGGGGGGGGGGGGGGG
+			HttpHelper.sendGcmMessage(GCM_CANSTART_TAG, registrationId,
+					receivers);
+			gameCanStart=true;
+			Toast.makeText(getBaseContext(),
+					"Igra moze da pocne, idite do svoje startne lokacije."+String.valueOf(gameCanStart),
+					Toast.LENGTH_LONG).show();
+			
+			//end TESTINGGGGG
 		}
-		HttpHelper.sendGcmMessage(GCM_ANNOUNCE_TAG, registrationId,
-				receivers);
-		gameCanStart=true;
-		
-		//end TESTINGGGGG
 		
 		// populate items and buildings from server
 		ArrayList<ObjectOnMap> allObjects = HttpHelper.getObjectsList(String
@@ -223,7 +219,7 @@ public class GameService extends Service implements LocationListener {
 						"Vreme je isteklo, lopov je uspesno pobegao.",
 						Toast.LENGTH_LONG).show();
 			}
-		};
+		}.start();
 	}
 
 	@Override
@@ -558,7 +554,7 @@ public class GameService extends Service implements LocationListener {
 					} else {
 						// provera za pocetak igre i pocetak ako su svi na
 						// pocetnim lokacijama
-						if (isThief && gameCanStart && gameCanStartCheck()) {
+						if (isThief && gameCanStart && gameCanStartCheck() && !gameStarted) {
 							Toast.makeText(getBaseContext(), "Game starts :)",
 									Toast.LENGTH_LONG).show();
 							startGame();
