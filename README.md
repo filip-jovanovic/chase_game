@@ -6,12 +6,17 @@ TODO :
 -- Dugme - disabled i clicked png
 -- Ukljuci GPS i Internet pri Loginu
 -- Wait dialog - izbaci , baci toast da se ucitava igra, disable click na igre
--- Testiraj pljacku,  javi svima da li je opljackano i promeni ikonu u banci, dodaj novac lopovu
 
+
+
+
+** Filip ** Da se resetuje igra kada se svi vrate na pocetak posle kraja igre
+
+-- Testiraj pljacku,  javi svima da li je opljackano i promeni ikonu u banci, dodaj novac lopovu
 ** Filip ** Lopov aktivira pancir/ometac, javlja policajcima da ima pancir/ometac; tamjer i dugme
+
 ** Filip ** Prikazivanje pancira i ometaca na mapi
 ** Filip ** Setuje i brise bulletproof i jammer
-** Filip ** Da se resetuje igra kada se svi vrate na pocetak posle kraja igre
 ** Filip ** Lopov sme da pokuplja iteme kad igra pocne
 ** Filip ** Policajac ne vidi iteme
 
@@ -24,3 +29,4 @@ TODO :
 # Srecko ## Kada prodje 2h igra je gotova
 # Srecko ## Napravi tajmer za update lokacije na 6 min
 
+++ policajac sme da puca tek 
