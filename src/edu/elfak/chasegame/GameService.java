@@ -349,7 +349,7 @@ public class GameService extends Service implements LocationListener {
 			} else if (action.equals("SHOT_IS_FIRED")) {
 				ammo--;
 				//TODO: proveri da li je pogodak i da ako jeste objavi pobedu
-				if(!buletproof){
+				if(!buletproof && gameStarted){
 					ArrayList<Double> distance = getDistanceFromThief();
 					if(distance.get(0)<=30){
 						ArrayList<String> receivers = new ArrayList<String>();
@@ -362,7 +362,7 @@ public class GameService extends Service implements LocationListener {
 								receivers);
 						Toast.makeText(getBaseContext(), "Policija je pobedila, lopov je uspesno uhvacen.",
 								Toast.LENGTH_LONG).show();
-						gameTime.cancel();
+						//gameTime.cancel();
 					}
 				}
 				else Log.v("SHOT_IS_FIRED","Aktiviran je pancir");
@@ -389,13 +389,13 @@ public class GameService extends Service implements LocationListener {
 		LatLng myLocation = players.get(numberOfPolicemen).getLatlng();
 		boolean found = false;
 		for (int j = 0; j < players.size(); j++) {
-			if(myLocation!=players.get(j).getLatlng() && players.get(j).getName().equals("thief")){
+			if(myLocation!=players.get(j).getLatlng() && !players.get(j).getName().equals("thief")){
 				distance.add(calculateDistance(myLocation,players.get(j).getLatlng()));
 				found = true;
 			}
 		}
 		if(!found)
-			distance.add(200.0);
+			distance.add(0.0);
 		return distance;
 	}
 	
@@ -415,7 +415,7 @@ public class GameService extends Service implements LocationListener {
 				}
 			}
 			if(!found)
-				distance.add(200.0);
+				distance.add(0.0);
 		}
 		return distance;
 	}
@@ -433,7 +433,7 @@ public class GameService extends Service implements LocationListener {
 			}else if(message.containsKey(GCM_POLICEWIN_TAG)){
 				Toast.makeText(getBaseContext(), "Policija je pobedila, lopov je uspesno uhvacen.",
 						Toast.LENGTH_LONG).show();
-				gameTime.cancel();
+				//gameTime.cancel();
 			}else if(message.containsKey(GCM_CANSTART_TAG)){
 				gameCanStart=true;
 				Toast.makeText(getBaseContext(), "Igra moze da pocne, idite do svoje startne lokacije.",
@@ -465,11 +465,11 @@ public class GameService extends Service implements LocationListener {
 							String id = players.get(j).getId();
 							if (id.equals(playerId)) {
 								players.get(j).setLatlng(newLocation);
-								if(isThief && j==0){
+								//if(isThief && j==0){
 									updateMapObject(players.get(j));
-								}else if(!isThief && j!=0){
-									updateMapObject(players.get(j));
-								}
+								//}else if(!isThief && j!=0){
+									//updateMapObject(players.get(j));
+								//}
 							}
 						}
 					}
@@ -484,7 +484,6 @@ public class GameService extends Service implements LocationListener {
 					{
 						//provera za pocetak igre i pocetak ako su svi na pocetnim lokacijama
 						if(isThief && gameCanStart && gameCanStartCheck()){
-							gameStarted=true;
 							Toast.makeText(getBaseContext(), "Game starts :)",
 									Toast.LENGTH_LONG).show();
 							startGame();
@@ -496,6 +495,7 @@ public class GameService extends Service implements LocationListener {
 								}
 							HttpHelper.sendGcmMessage(GCM_START_TAG, registrationId,
 										receivers);
+							gameStarted=true;
 						}
 					}
 				} catch (JSONException e) {
