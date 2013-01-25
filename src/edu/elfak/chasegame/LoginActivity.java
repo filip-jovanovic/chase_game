@@ -100,9 +100,11 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 	}
 
-	public void OnDestroy() {
+	public void onDestroy() {
 		GCMRegistrar.onDestroy(this);
-		unregisterReceiver(gcmRegisterReceiver);
+		if(gcmRegisterReceiver!=null)
+			unregisterReceiver(gcmRegisterReceiver);
+		super.onDestroy();
 	}
 
 	@Override

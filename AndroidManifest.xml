@@ -95,7 +95,7 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyC-qfgXH5Aw2RtrKy48-dqZsyCpNYhMLVM" />
+            android:value="AIzaSyALaFaRIh5sMVffHCeJUZC4j5aub5oPjsc" />
 
         <service
             android:name="edu.elfak.chasegame.GameService"

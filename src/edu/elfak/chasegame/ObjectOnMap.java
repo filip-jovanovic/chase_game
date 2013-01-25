@@ -125,4 +125,9 @@ public class ObjectOnMap implements Parcelable {
 	public int getBankId(){
 		return value;
 	}
+
+	public void setValue(int i) {
+		value = i;
+		
+	}
 }
