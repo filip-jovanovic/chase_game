@@ -49,9 +49,6 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	private View jammerButton;
 	private View vestButton;
 	
-	static boolean  jammerButtonEnabled =  false;
-	static boolean vestButtonEnabled = false;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -69,7 +66,11 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		screenLockButton = (ToggleButton) findViewById(R.id.screenLockButton);
 		jammerButton =  findViewById(R.id.jammerButton);
 		vestButton = findViewById(R.id.vestButton);
-
+		
+		jammerButton.setOnClickListener(this);
+		vestButton.setOnClickListener(this);
+		
+		
 		radarThiefIcon = (ImageView) findViewById(R.id.radarThief);
 		radarCopIcons = new ArrayList<ImageView>();
 		radarCopIcons.add((ImageView) findViewById(R.id.radarCop1));
@@ -80,24 +81,14 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		if(GameService.isThief){
 			imBut =  findViewById(R.id.shootButton);
 			imBut.setVisibility(View.GONE);
-			imBut =  findViewById(R.id.jammerButton);
-			imBut.setVisibility(View.VISIBLE);
-			imBut = findViewById(R.id.vestButton);
-			imBut.setVisibility(View.VISIBLE);
 			imBut = findViewById(R.id.bullet1);
 			imBut.setVisibility(View.GONE);
 			imBut = findViewById(R.id.bullet2);
 			imBut.setVisibility(View.GONE);
 			imBut = findViewById(R.id.bullet3);
 			imBut.setVisibility(View.GONE);
-			jammerButton.setOnClickListener(this);
-			vestButton.setOnClickListener(this);
 		}
 		else{
-			imBut =  findViewById(R.id.jammerButton);
-			imBut.setVisibility(View.GONE);
-			imBut = findViewById(R.id.vestButton);
-			imBut.setVisibility(View.GONE);
 			shootButton = (ImageButton) findViewById(R.id.shootButton);
 			shootButton.setOnClickListener(this);
 		}
@@ -110,11 +101,11 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 			sendBroadcast(new Intent("SHOT_IS_FIRED"));
 			break;
 		case(R.id.vestButton):
-			 vestButton.setVisibility(View.GONE);
+			 vestButton.setEnabled(false);
 			sendBroadcast(new Intent("BECAME_BULLETPROOF"));
 			break;
 		case(R.id.jammerButton):
-			jammerButton.setVisibility(View.GONE);
+			jammerButton.setEnabled(false);
 			sendBroadcast(new Intent("ACTIVATE_JAMMER"));
 		}
 	}
@@ -162,7 +153,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		intentFilter.addAction("UPDATE_MAP_OBJECT_TAG");
 		intentFilter.addAction("REMOVE_MAP_OBJECT_TAG");
 		intentFilter.addAction("UPDATE_MAP_TAG");
-		intentFilter.addAction("DRAW_ITEMS_TAG");
+		intentFilter.addAction("INITIALISE_MAP");
 		intentFilter.addAction("BULLETS_UPDATE_TAG");
 		intentFilter.addAction("ENABLE_VEST_BUTTON_TAG");
 		intentFilter.addAction("ENABLE_JAMMER_BUTTON_TAG");
@@ -170,11 +161,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		
 		if(itemMarkers.size()==0)
 			sendBroadcast(new Intent("REQ_INITIALISE_DATA"));
-	
-		jammerButton.setEnabled(jammerButtonEnabled);
-		vestButton.setEnabled(vestButtonEnabled);
-		Log.v("JAMMER BUTTON","" + jammerButtonEnabled);
-		
+
 		super.onResume();
 	}
 	
@@ -268,11 +255,9 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	    		itemMarkers.remove(item.getId());	    		
 	    	}
 	    	else if(action.equals("ENABLE_VEST_BUTTON_TAG")){
-	    		vestButtonEnabled = true;
 				vestButton.setEnabled(true);
 	    	}
 	    	else if(action.equals("ENABLE_JAMMER_BUTTON_TAG")){
-	    		jammerButtonEnabled =  true;
 				jammerButton.setEnabled(true);
 	    	}
 	    	else if(action.equals("BANK_ROBBED_UPDATE_MAP")){ 
@@ -288,13 +273,20 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.bank_robed));
 				mMap.addMarker(markerOptions); 		
 	    	}
-	    	else if(action.equals("DRAW_ITEMS_TAG")){
+	    	else if(action.equals("INITIALISE_MAP")){
 	    		ArrayList<ObjectOnMap> items = intent.getExtras().getParcelableArrayList("items");
 	    		ArrayList<ObjectOnMap> buildings = intent.getExtras().getParcelableArrayList("buildings");
 	    		if(items.size()>0)
 	    				drawItems(items);
 	    		drawItems(buildings);
 	    		boundaries = drawBoundaries((LatLng) intent.getExtras().get("mapCenter"), mMap);
+	    		if(GameService.isThief)
+	    		{
+	    			vestButton.setEnabled(intent.getExtras().getBoolean("vestAvailable"));
+	    			jammerButton.setEnabled(intent.getExtras().getBoolean("jammerAvailable"));
+	    		}
+	    		
+	    		
 	    	}
 	    	else if(action.equals("BULLETS_UPDATE_TAG")){
 	    		int remainingBullets = intent.getExtras().getInt("remainingBullets");

@@ -34,7 +34,9 @@ public class GameService extends Service implements LocationListener {
 
 	private ArrayList<ObjectOnMap> gatheredItems;
 	private ArrayList<ObjectOnMap> robbedBanks;
-
+	
+	public static boolean isRuning = false; // da li je servis pokrenut
+	
 	private int mapId;
 	public int gameId;
 	public int numberOfPolicemen;
@@ -49,6 +51,7 @@ public class GameService extends Service implements LocationListener {
 	private String playerName;
 	public String registrationId;
 	private LocationManager locationManager;
+	
 	public static boolean isThief;
 
 	private final long TIME_DIFFERENCE = 5000;
@@ -58,19 +61,23 @@ public class GameService extends Service implements LocationListener {
 	public static final String GCM_TIMEISUP_TAG = "time is up";
 	public static final String GCM_START_TAG = "start";
 	private static final String GCM_BULLETPROOF_VALUE_TAG = "isBulletproof";
-	private static final int MAX_AMMO = 3;
+
 	private static final String GCM_BANK_ROBBED_UPDATE_MAP = "bankIsRobbed";
 
-	private LatLng mapCenter;
-	private int ammo;
-	private boolean bulletproof;
-	private boolean jammer;
 	private boolean gameStarted;
 	private boolean gameCanStart;
-	public static boolean isRuning = false;
+
 	public CountDownTimer gameTimer;
+	private LatLng mapCenter;
+	
+	private static final int MAX_AMMO = 3;
+	private int ammo;
+	private boolean bulletproofActive;
+	private boolean jammerActive;
 	private Handler vestHandler;
 	private int moneyGathered;
+	private boolean vestAvailable;
+	private boolean jammerAvailable;
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -78,7 +85,10 @@ public class GameService extends Service implements LocationListener {
 		isRuning = true;
 		gameStarted = false;
 		gameCanStart = false;
-		jammer = false;
+		jammerActive = false;
+		bulletproofActive = false;
+		jammerAvailable = false;
+		vestAvailable = false;
 		moneyGathered = 0;
 
 		timeOfLastLocation = System.currentTimeMillis();
@@ -195,7 +205,7 @@ public class GameService extends Service implements LocationListener {
 				for (int j = 0; j < players.size(); j++) {
 					updateMapObject(players.get(j));
 				}
-				if(!jammer){
+				if(!jammerActive){
 					//baci gcm obavesti policiju
 					ArrayList<String> receivers = new ArrayList<String>();
 					for (int i = 0; i < players.size(); i++) {
@@ -206,7 +216,7 @@ public class GameService extends Service implements LocationListener {
 					}
 				}
 				else
-					jammer = false;
+					jammerActive = false;
 				Log.v("TICK",String.valueOf((test++)));
 			}
 
@@ -309,12 +319,12 @@ public class GameService extends Service implements LocationListener {
 						gatheredItems.add(object);
 						removeMapObject(object);
 						if (object.getName().contains("Pancir")) {
-
+							vestAvailable = true;
 							Intent intent = new Intent("ENABLE_VEST_BUTTON_TAG");
 							sendBroadcast(intent);
 						} else if (object.getName().contains("Ometac")) {
-							Intent intent = new Intent(
-									"ENABLE_JAMMER_BUTTON_TAG");
+							jammerAvailable = true;
+							Intent intent = new Intent("ENABLE_JAMMER_BUTTON_TAG");
 							sendBroadcast(intent);
 						}
 					}
@@ -325,7 +335,7 @@ public class GameService extends Service implements LocationListener {
 	}
 
 	private void becameBulletproof() {
-		bulletproof = true;
+		bulletproofActive = true;
 		vestHandler = new Handler();
 		ArrayList<String> receivers = new ArrayList<String>();
 		for (int i = 0; i < players.size(); i++) {
@@ -340,7 +350,7 @@ public class GameService extends Service implements LocationListener {
 	private Runnable announceBulletproofEnd = new Runnable() {
 		@Override
 		public void run() {
-			bulletproof = false;
+			bulletproofActive = false;
 			ArrayList<String> receivers = new ArrayList<String>();
 			for (int i = 0; i < players.size(); i++) {
 				String id = players.get(i).getId();
@@ -415,21 +425,28 @@ public class GameService extends Service implements LocationListener {
 			} else if (action.equals("REQ_INITIALISE_DATA")) {
 
 				updateMapView(mapCenter);
-				Intent j = new Intent("DRAW_ITEMS_TAG");
+				Intent j = new Intent("INITIALISE_MAP");
 				ArrayList<ObjectOnMap> visibleItems = new ArrayList<ObjectOnMap>(
 						items);
-				if (isThief)
+				if (isThief){
 					visibleItems.removeAll(gatheredItems);
+					j.putExtra("vestAvailable", vestAvailable);
+					j.putExtra("jammerAvailable", jammerAvailable);
+				}
 				else
-					visibleItems = new ArrayList<ObjectOnMap>();
+					visibleItems = new ArrayList<ObjectOnMap>(); // ako je policajac ne vidi predmete
+				
 				j.putExtra("items", visibleItems);
 				j.putExtra("mapCenter", mapCenter);
 				j.putExtra("buildings", buildings);
+				
 				sendBroadcast(j);
+				
+				
 			} else if (action.equals("SHOT_IS_FIRED")) {
 				ammo--;
 				// proveri da li je pogodak i da ako jeste objavi pobedu
-				if (!bulletproof
+				if (!bulletproofActive
 						//TODO: && gameStarted
 						) {
 					ArrayList<Double> distance = getDistanceFromThief();
@@ -456,8 +473,10 @@ public class GameService extends Service implements LocationListener {
 				sendBroadcast(i);
 			} else if (action.equals("BECAME_BULLETPROOF")) {
 				becameBulletproof();
+				vestAvailable = false;
 			} else if (action.equals("ACTIVATE_JAMMER")) {
-				jammer = true;
+				jammerActive = true;
+				jammerAvailable = false;
 			}
 		}
 	};
@@ -487,10 +506,11 @@ public class GameService extends Service implements LocationListener {
 				sendBroadcast(in);
 				
 			} else if (message.containsKey(GCM_BULLETPROOF_VALUE_TAG)) {
-				if (message.getString(GCM_BULLETPROOF_VALUE_TAG).equals("true"))
-					bulletproof = true;
+				if (message.getString(GCM_BULLETPROOF_VALUE_TAG).equals("true")){
+					bulletproofActive = true;
+				}
 				else
-					bulletproof = false;
+					bulletproofActive = false;
 				Log.v("Pancir",message.getString(GCM_BULLETPROOF_VALUE_TAG));
 
 			} else if (message.containsKey(GCM_POLICEWIN_TAG)) {
