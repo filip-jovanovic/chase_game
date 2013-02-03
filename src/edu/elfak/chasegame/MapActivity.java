@@ -35,7 +35,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	private GoogleMap mMap;
 	private MapUpdateReceiver dataUpdateReceiver;
 	private HashMap<String, Marker> playerMarkers;
-	private HashMap<String, Marker> itemMarkers;
+	private HashMap<String, Marker> allMarkers;
 	private Polygon boundaries;
 	IntentFilter intentFilter;
 	private ToggleButton screenLockButton;
@@ -61,7 +61,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 		
 		playerMarkers = new HashMap<String, Marker>();
-		itemMarkers = new HashMap<String, Marker>();
+		allMarkers = new HashMap<String, Marker>();
 			
 		screenLockButton = (ToggleButton) findViewById(R.id.screenLockButton);
 		jammerButton =  findViewById(R.id.jammerButton);
@@ -141,8 +141,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 			}
 				
 			Marker marker = mMap.addMarker(markerOptions);
-			Log.v("MARKER ADDED",marker.getId() +" "  + marker.getTitle() + " "  + marker.getPosition().toString());		
-			itemMarkers.put(items.get(i).getId(), marker);
+			Log.v("MARKER ADDED",marker.getId() +" " + items.get(i).getId() +"  "  + marker.getTitle() + " "  + marker.getPosition().toString());		
+			allMarkers.put(items.get(i).getName(), marker);
 		}
 	}
 	
@@ -159,7 +159,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		intentFilter.addAction("ENABLE_JAMMER_BUTTON_TAG");
 		registerReceiver(dataUpdateReceiver, intentFilter);
 		
-		if(itemMarkers.size()==0)
+		if(allMarkers.size()==0)
 			sendBroadcast(new Intent("REQ_INITIALISE_DATA"));
 
 		super.onResume();
@@ -247,12 +247,12 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	    	}	
 	    	else if(action.equals("REMOVE_MAP_OBJECT_TAG")){
 		    	ObjectOnMap item = (ObjectOnMap) intent.getExtras().get("object");
-	    		Marker m = itemMarkers.get(item.getId());
+	    		Marker m = allMarkers.get(item.getName());
 	    		Log.v("MARKER DELETE",item.getId() +" "  + m.getTitle() + " "  + m.getPosition().toString());
 	    		m.setVisible(false);
 	    		m.remove();
 	    		
-	    		itemMarkers.remove(item.getId());	    		
+	    		allMarkers.remove(item.getName());	    		
 	    	}
 	    	else if(action.equals("ENABLE_VEST_BUTTON_TAG")){
 				vestButton.setEnabled(true);
@@ -262,7 +262,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	    	}
 	    	else if(action.equals("BANK_ROBBED_UPDATE_MAP")){ 
 	    		ObjectOnMap bank = (ObjectOnMap) intent.getExtras().get("bank");
-	    		Marker m = itemMarkers.get(bank.getId());
+	    		Marker m = allMarkers.get(bank.getName());
 	    		m.setVisible(false);
 	    		m.remove();
 	    		
