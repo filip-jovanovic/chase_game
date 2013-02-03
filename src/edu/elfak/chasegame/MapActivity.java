@@ -3,8 +3,10 @@ package edu.elfak.chasegame;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -17,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -272,6 +275,16 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				markerOptions.title(bank.getName());
 				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.bank_robed));
 				mMap.addMarker(markerOptions); 		
+				//alert dialog
+				AlertDialog alertDialog = new AlertDialog.Builder(MapActivity.this).create();
+				alertDialog.setTitle("Obavestenje");
+				alertDialog.setMessage("Opljacka na je banka: ");
+				alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+					  public void onClick(DialogInterface dialog, int which) {
+					         Toast.makeText(getApplicationContext(), "Uhvatite lopova :)", Toast.LENGTH_SHORT).show();
+					  }
+				});
+				alertDialog.show();
 	    	}
 	    	else if(action.equals("INITIALISE_MAP")){
 	    		ArrayList<ObjectOnMap> items = intent.getExtras().getParcelableArrayList("items");

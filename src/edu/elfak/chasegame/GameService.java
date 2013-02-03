@@ -505,18 +505,7 @@ public class GameService extends Service implements LocationListener {
 				
 				Intent in = new Intent("BANK_ROBBED_UPDATE_MAP");
 				intent.putExtra("bank", object);
-				sendBroadcast(in);
-				//alert dialog
-				AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-				alertDialog.setTitle("Obavestenje");
-				alertDialog.setMessage("Opljacka na je banka: "+object.getName());
-				alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-					  public void onClick(DialogInterface dialog, int which) {
-					         Toast.makeText(getApplicationContext(), "Uhvatite lopova :)", Toast.LENGTH_SHORT).show();
-					  }
-				});
-				alertDialog.show();
-				
+				sendBroadcast(in);				
 			} else if (message.containsKey(GCM_BULLETPROOF_VALUE_TAG)) {
 				if (message.getString(GCM_BULLETPROOF_VALUE_TAG).equals("true")){
 					bulletproofActive = true;
