@@ -1,17 +1,10 @@
 package edu.elfak.chasegame;
 
 import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.google.android.gms.maps.model.LatLng;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -60,6 +53,7 @@ public class CreateGameActivity extends Activity implements OnClickListener {
 		context = this;
 	}
 
+	@Override
 	public void onResume(){
 		createGameBbutton.setOnClickListener(this);
 		super.onResume();

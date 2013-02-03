@@ -76,6 +76,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		loginFlag = false;
 	}
 
+	@Override
 	public void onResume() {
 		registrationId = GCMRegistrar.getRegistrationId(this);
 		if (registrationId.equals("")) {
@@ -100,6 +101,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 	}
 
+	@Override
 	public void onDestroy() {
 		//GCMRegistrar.onDestroy(this);
 		if(gcmRegisterReceiver!=null)
@@ -235,6 +237,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				.setCancelable(false)
 				.setPositiveButton("Settings",
 						new DialogInterface.OnClickListener() {
+							@Override
 							public void onClick(DialogInterface dialog, int id) {
 								Intent callGPSSettingIntent = new Intent(
 										android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -243,6 +246,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 						});
 		alertDialogBuilder.setNegativeButton("Cancel",
 				new DialogInterface.OnClickListener() {
+					@Override
 					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
 					}
@@ -259,6 +263,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				.setCancelable(false)
 				.setPositiveButton("Settings",
 						new DialogInterface.OnClickListener() {
+							@Override
 							public void onClick(DialogInterface dialog, int id) {
 								Intent callInternetSettingIntent = new Intent(
 										android.provider.Settings.ACTION_WIRELESS_SETTINGS);
@@ -267,6 +272,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 						});
 		alertDialogBuilder.setNegativeButton("Cancel",
 				new DialogInterface.OnClickListener() {
+					@Override
 					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
 					}

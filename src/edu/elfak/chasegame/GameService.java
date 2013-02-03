@@ -196,6 +196,7 @@ public class GameService extends Service implements LocationListener {
 
 	public void startGame() {
 		gameTimer = new CountDownTimer(7200000, 18000) {//360000) {
+			@Override
 			public void onTick(long millisUntilFinished) {
 				if (!jammer && isThief) {
 					for (int j = 0; j < players.size(); j++) {
@@ -206,6 +207,7 @@ public class GameService extends Service implements LocationListener {
 				Log.v("TICK",String.valueOf((test++)));
 			}
 
+			@Override
 			public void onFinish() {
 				ArrayList<String> receivers = new ArrayList<String>();
 				for (int i = 0; i < players.size(); i++) {
@@ -288,12 +290,9 @@ public class GameService extends Service implements LocationListener {
 								if (!id.equals(registrationId))
 									receivers.add(id);
 							}
-							HttpHelper.sendGcmMessage(GCM_BANK_ROBBED_UPDATE_MAP, object.getId(), receivers);
-							
+							HttpHelper.sendGcmMessage(GCM_BANK_ROBBED_UPDATE_MAP, object.getId(), receivers);							
 						}
-
 					}
-
 				}
 			}
 		}
@@ -324,9 +323,7 @@ public class GameService extends Service implements LocationListener {
 
 	private void becameBulletproof() {
 		bulletproof = true;
-
 		vestHandler = new Handler();
-
 		ArrayList<String> receivers = new ArrayList<String>();
 		for (int i = 0; i < players.size(); i++) {
 			String id = players.get(i).getId();
@@ -334,11 +331,11 @@ public class GameService extends Service implements LocationListener {
 				receivers.add(id);
 		}
 		HttpHelper.sendGcmMessage(GCM_BULLETPROOF_VALUE_TAG, "true", receivers);
-
 		vestHandler.postDelayed(announceBulletproofEnd, 900000);
 	}
 
 	private Runnable announceBulletproofEnd = new Runnable() {
+		@Override
 		public void run() {
 			bulletproof = false;
 			ArrayList<String> receivers = new ArrayList<String>();
@@ -355,7 +352,7 @@ public class GameService extends Service implements LocationListener {
 	private void refillAmmo() {
 		if (ammo != MAX_AMMO)
 			ammo = MAX_AMMO;
-		Intent i = new Intent("BULLETS_UPDATE");
+		Intent i = new Intent("BULLETS_UPDATE_TAG");
 		i.putExtra("remainingBullets", ammo);
 		sendBroadcast(i);
 	}
@@ -415,8 +412,7 @@ public class GameService extends Service implements LocationListener {
 			} else if (action.equals("REQ_INITIALISE_DATA")) {
 
 				updateMapView(mapCenter);
-
-				Intent j = new Intent("DRAW_ITEMS");
+				Intent j = new Intent("DRAW_ITEMS_TAG");
 				ArrayList<ObjectOnMap> visibleItems = new ArrayList<ObjectOnMap>(
 						items);
 				if (isThief)
@@ -452,7 +448,7 @@ public class GameService extends Service implements LocationListener {
 				} else
 					Log.v("SHOT_IS_FIRED", "Aktiviran je pancir");
 				// nastavak
-				Intent i = new Intent("BULLETS_UPDATE");
+				Intent i = new Intent("BULLETS_UPDATE_TAG");
 				i.putExtra("remainingBullets", ammo);
 				sendBroadcast(i);
 			} else if (action.equals("BECAME_BULLETPROOF")) {

@@ -162,8 +162,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		intentFilter.addAction("UPDATE_MAP_OBJECT_TAG");
 		intentFilter.addAction("REMOVE_MAP_OBJECT_TAG");
 		intentFilter.addAction("UPDATE_MAP_TAG");
-		intentFilter.addAction("DRAW_ITEMS");
-		intentFilter.addAction("BULLETS_UPDATE");
+		intentFilter.addAction("DRAW_ITEMS_TAG");
+		intentFilter.addAction("BULLETS_UPDATE_TAG");
 		intentFilter.addAction("ENABLE_VEST_BUTTON_TAG");
 		intentFilter.addAction("ENABLE_JAMMER_BUTTON_TAG");
 		registerReceiver(dataUpdateReceiver, intentFilter);
@@ -288,7 +288,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.bank_robed));
 				mMap.addMarker(markerOptions); 		
 	    	}
-	    	else if(action.equals("DRAW_ITEMS")){
+	    	else if(action.equals("DRAW_ITEMS_TAG")){
 	    		ArrayList<ObjectOnMap> items = intent.getExtras().getParcelableArrayList("items");
 	    		ArrayList<ObjectOnMap> buildings = intent.getExtras().getParcelableArrayList("buildings");
 	    		if(items.size()>0)
@@ -296,7 +296,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	    		drawItems(buildings);
 	    		boundaries = drawBoundaries((LatLng) intent.getExtras().get("mapCenter"), mMap);
 	    	}
-	    	else if(action.equals("BULLETS_UPDATE")){
+	    	else if(action.equals("BULLETS_UPDATE_TAG")){
 	    		int remainingBullets = intent.getExtras().getInt("remainingBullets");
 		    	if(remainingBullets == 3){
 		    		bullet = (ImageView) findViewById(R.id.bullet1);
