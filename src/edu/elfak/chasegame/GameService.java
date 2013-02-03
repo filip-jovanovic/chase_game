@@ -9,9 +9,11 @@ import org.json.JSONObject;
 import com.google.android.gcm.GCMBaseIntentService;
 import com.google.android.gms.maps.model.LatLng;
 
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
@@ -504,6 +506,16 @@ public class GameService extends Service implements LocationListener {
 				Intent in = new Intent("BANK_ROBBED_UPDATE_MAP");
 				intent.putExtra("bank", object);
 				sendBroadcast(in);
+				//alert dialog
+				AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+				alertDialog.setTitle("Obavestenje");
+				alertDialog.setMessage("Opljacka na je banka: "+object.getName());
+				alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+					  public void onClick(DialogInterface dialog, int which) {
+					         Toast.makeText(getApplicationContext(), "Uhvatite lopova :)", Toast.LENGTH_SHORT).show();
+					  }
+				});
+				alertDialog.show();
 				
 			} else if (message.containsKey(GCM_BULLETPROOF_VALUE_TAG)) {
 				if (message.getString(GCM_BULLETPROOF_VALUE_TAG).equals("true")){

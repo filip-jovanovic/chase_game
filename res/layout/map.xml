@@ -146,6 +146,23 @@
             android:paddingTop="12dp"
             android:src="@drawable/radarthief" />
 
+        <TextView
+            android:id="@+id/textViewNovac1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/radarCop3"
+            android:text="0" />
+
+        <TextView
+            android:id="@+id/textViewNovac2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/textView1"
+            android:layout_alignBottom="@+id/textView1"
+            android:layout_toLeftOf="@+id/textView1"
+            android:text="Opljackano: " />
+
     </RelativeLayout>
 
 </FrameLayout>
