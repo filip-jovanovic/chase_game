@@ -290,9 +290,9 @@ public class GameService extends Service implements LocationListener {
 							if (bankId == gatheredItems.get(j).getBankId())
 								numOfGatheredNecessaryItems++;
 						}
-						Log.v("debug", "bank id : " + bankId );
-						Log.v("debug", numOfNecessaryItems + " " + numOfGatheredNecessaryItems );
-						if (numOfNecessaryItems == numOfGatheredNecessaryItems) {
+						
+						//if (numOfNecessaryItems == numOfGatheredNecessaryItems) 
+						{
 							Log.v("BANK ROBED!", String.valueOf(bankId));
 							
 							robbedBanks.add(object);
@@ -300,6 +300,8 @@ public class GameService extends Service implements LocationListener {
 							Intent intent = new Intent("BANK_ROBBED_UPDATE_MAP");
 							intent.putExtra("bank", object);
 							sendBroadcast(intent);
+							
+							Toast.makeText(this, "Banka je opljackana. Prikupljeno je jos " + object.getValue() + "$ !" , Toast.LENGTH_LONG).show();
 							
 							buildings.remove(object);
 							object.setValue(object.getValue() * (-1));
@@ -324,6 +326,10 @@ public class GameService extends Service implements LocationListener {
 								}
 								HttpHelper.sendGcmMessage(GCM_THIEF_WIN_TAG, String.valueOf(moneyGathered), receivers);
 								
+								Intent victory = new Intent("DISPLAY_DIALOG");
+								victory.putExtra("title", "Cestitamo! Pobedili ste!");
+								sendBroadcast(victory);
+								//gameTimer.cancel();
 							}
 								
 							//TODO: proveri da li je svota dovoljna za pobedu ako jeste objavi kraj igre - GCM poruka i dijalog (GCM_THIEF_WIN_TAG)
@@ -491,10 +497,9 @@ public class GameService extends Service implements LocationListener {
 						}
 						HttpHelper.sendGcmMessage(GCM_POLICEWIN_TAG,
 								registrationId, receivers);
-						Toast.makeText(
-								getBaseContext(),
-								"Policija je pobedila, lopov je uspesno uhvacen.",
-								Toast.LENGTH_LONG).show();
+						Intent i = new Intent("DISPLAY_DIALOG");
+						i.putExtra("title", "Bravo! Policija je pobedila, lopov je uspesno uhvacen!");
+						sendBroadcast(i);
 						// TODO: gameTime.cancel();
 					}
 				} else
@@ -542,10 +547,6 @@ public class GameService extends Service implements LocationListener {
 				Log.v("Pancir",message.getString(GCM_BULLETPROOF_VALUE_TAG));
 
 			} else if (message.containsKey(GCM_POLICEWIN_TAG)) {
-				Toast.makeText(getBaseContext(),
-						"Policija je pobedila, lopov je uspesno uhvacen.",
-						Toast.LENGTH_LONG).show();
-				gameTimer.cancel();
 				Intent i = new Intent("DISPLAY_DIALOG");
 				i.putExtra("title", "Policija je pobedila, lopov je uspesno uhvacen!");
 				sendBroadcast(i);
@@ -556,7 +557,6 @@ public class GameService extends Service implements LocationListener {
 				Intent i = new Intent("DISPLAY_DIALOG");
 				i.putExtra("title", "Lopov je pobedio!");
 				sendBroadcast(i);
-				gameTimer.cancel();
 			} else if (message.containsKey(GCM_CANSTART_TAG)) {
 				gameCanStart = true;
 				Toast.makeText(getBaseContext(),

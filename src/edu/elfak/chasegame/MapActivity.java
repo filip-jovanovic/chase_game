@@ -17,6 +17,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -57,6 +58,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 
 	private int moneyGathered;
 	private int remainingBullets = 3;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -67,7 +69,9 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 
 		mMap = ((SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.map)).getMap();
-
+		
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		
 		mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 		SnippetAdapter sa = new SnippetAdapter(getLayoutInflater());
 		mMap.setInfoWindowAdapter(sa);
@@ -107,17 +111,19 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		}
 	}
 
-	private void drawMarkers(ArrayList<ObjectOnMap> buildings, ArrayList<ObjectOnMap> items) {
-		ArrayList<ObjectOnMap> allObjects =  new ArrayList<ObjectOnMap>(buildings);
+	private void drawMarkers(ArrayList<ObjectOnMap> buildings,
+			ArrayList<ObjectOnMap> items) {
+		ArrayList<ObjectOnMap> allObjects = new ArrayList<ObjectOnMap>(
+				buildings);
 		allObjects.addAll(items);
-		
+
 		for (int i = 0; i < allObjects.size(); i++) {
 			ObjectOnMap object = allObjects.get(i);
 			MarkerOptions markerOptions = new MarkerOptions();
 			markerOptions.visible(true);
 			markerOptions.position(object.getLatlng());
 			markerOptions.title(object.getName());
-			
+
 			if (object.getType().equals("item")) {
 				if (object.getName().equals("Pancir"))
 					markerOptions.icon(BitmapDescriptorFactory
@@ -130,35 +136,35 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 							.fromResource(R.drawable.wooden_crate));
 			}
 
-			else {
-				if (object.isBank()) {
-					if(GameService.isThief){
-						String  snippet = "";
-					for(ObjectOnMap nesessaryItem : items){						
-						if(nesessaryItem.getBankId() == Integer.valueOf(object.getId()))
-							snippet +=  nesessaryItem.getName() + " \n"; 
+			else if (object.isBank()) {
+				if (GameService.isThief) {
+					String snippet = "";
+					for (ObjectOnMap nesessaryItem : items) {
+						if (nesessaryItem.getBankId() == Integer.valueOf(object
+								.getId()))
+							snippet += nesessaryItem.getName() + " \n";
 					}
-						markerOptions.snippet(snippet);
-					}
-
-					if (object.getValue() > 0)
-						markerOptions.icon(BitmapDescriptorFactory
-								.fromResource(R.drawable.dollar_icon));
-					else
-						markerOptions.icon(BitmapDescriptorFactory
-								.fromResource(R.drawable.bank_robed));
-				
+					markerOptions.snippet(snippet);
 				}
-				if (object.isPoliceStation())
-					markerOptions.icon(BitmapDescriptorFactory
-							.fromResource(R.drawable.policestation));
-				if (object.isSafeHouse())
-					markerOptions.icon(BitmapDescriptorFactory
-							.fromResource(R.drawable.safehouse));
-			}
 
-			Marker marker = mMap.addMarker(markerOptions);
-			allMarkers.put(allObjects.get(i).getName(), marker);
+				if (object.getValue() > 0)
+					markerOptions.icon(BitmapDescriptorFactory
+							.fromResource(R.drawable.dollar_icon));
+				else
+					markerOptions.icon(BitmapDescriptorFactory
+							.fromResource(R.drawable.bank_robed));
+
+			} else if (object.isPoliceStation())
+				markerOptions.icon(BitmapDescriptorFactory
+						.fromResource(R.drawable.policestation));
+			else if (object.isSafeHouse() && GameService.isThief)
+				markerOptions.icon(BitmapDescriptorFactory
+						.fromResource(R.drawable.safehouse));
+			
+			if (!(object.isSafeHouse() && GameService.isThief)) {
+				Marker marker = mMap.addMarker(markerOptions);
+				allMarkers.put(allObjects.get(i).getName(), marker);
+			}
 		}
 	}
 
@@ -185,7 +191,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		if (GameService.isThief) {
 			jammerButton.setVisibility(View.VISIBLE);
 			vestButton.setVisibility(View.VISIBLE);
-			gatheredMoneyTextView.setText(String.valueOf(GameService.moneyGathered));
+			gatheredMoneyTextView.setText(String
+					.valueOf(GameService.moneyGathered));
 			gatheredMoneyTextView.setVisibility(View.VISIBLE);
 			gatheredMoneyTextView2.setVisibility(View.VISIBLE);
 		} else {
@@ -227,32 +234,33 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 
 	}
 
+	private void endGameFromMap() {
+		stopService(new Intent(this, GameService.class));
+		finish();
+	}
+
 	private class MapUpdateReceiver extends BroadcastReceiver {
-		public void endGameDialog(String title){
-			AlertDialog alertDialog = new AlertDialog.Builder(
-					MapActivity.this).create();
+		public void endGameDialog(String title) {
+			AlertDialog alertDialog = new AlertDialog.Builder(MapActivity.this)
+					.create();
 			alertDialog.setTitle("Igra je zavrsena!");
 			alertDialog.setMessage(title);
 			alertDialog.setButton("Izadji",
 					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int which) {
-							Toast.makeText(getApplicationContext(),
-									"Exit",
-									Toast.LENGTH_SHORT).show();
+						public void onClick(DialogInterface dialog, int which) {
+							endGameFromMap();
 						}
 					});
 			alertDialog.setButton2("Restartuj igru",
 					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int which) {
-							Toast.makeText(getApplicationContext(),
-									"Restart",
+						public void onClick(DialogInterface dialog, int which) {
+							Toast.makeText(getApplicationContext(), "Restart",
 									Toast.LENGTH_SHORT).show();
 						}
 					});
 			alertDialog.show();
 		}
+
 		public void updateRadar(Context context,
 				ArrayList<Double> thiefDistance,
 				ArrayList<Double> policemanDistance) {
@@ -327,8 +335,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				m.remove();
 
 				allMarkers.remove(item.getName());
-				
-				
+
 			} else if (action.equals("ENABLE_VEST_BUTTON_TAG")) {
 				vestButton.setEnabled(true);
 			} else if (action.equals("DISPLAY_DIALOG")) {
@@ -341,13 +348,14 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				Marker m = allMarkers.get(bank.getName());
 				m.setVisible(false);
 				m.remove();
-
+				
 				MarkerOptions markerOptions = new MarkerOptions();
 				markerOptions.visible(true);
 				markerOptions.position(bank.getLatlng());
 				markerOptions.title(bank.getName());
 				markerOptions.icon(BitmapDescriptorFactory
 						.fromResource(R.drawable.bank_robed));
+				markerOptions.snippet(null);
 				mMap.addMarker(markerOptions);
 				// alert dialog
 				if (!GameService.isThief) {
@@ -399,7 +407,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				}
 
 			} else if (action.equals("BULLETS_UPDATE_TAG")) {
-				setRemainingBullets(intent.getExtras().getInt("remainingBullets"));
+				setRemainingBullets(intent.getExtras().getInt(
+						"remainingBullets"));
 				remainingBullets = GameService.ammo;
 			}
 		}
