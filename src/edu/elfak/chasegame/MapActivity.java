@@ -233,7 +233,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 					MapActivity.this).create();
 			alertDialog.setTitle("Igra je zavrsena!");
 			alertDialog.setMessage(title);
-			alertDialog.setButton("Exit",
+			alertDialog.setButton("Izadji",
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int which) {
@@ -242,7 +242,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 									Toast.LENGTH_SHORT).show();
 						}
 					});
-			alertDialog.setButton("Restart",
+			alertDialog.setButton2("Restartuj igru",
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int which) {
