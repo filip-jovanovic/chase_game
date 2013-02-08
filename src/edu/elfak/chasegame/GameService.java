@@ -71,7 +71,7 @@ public class GameService extends Service implements LocationListener {
 	private LatLng mapCenter;
 	
 	private static final int MAX_AMMO = 3;
-	private int ammo;
+	public static int ammo = MAX_AMMO;
 	private boolean bulletproofActive;
 	private boolean jammerActive;
 	private Handler vestHandler;
