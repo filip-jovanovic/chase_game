@@ -25,6 +25,7 @@ import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -68,7 +69,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				.findFragmentById(R.id.map)).getMap();
 
 		mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
+		SnippetAdapter sa = new SnippetAdapter(getLayoutInflater());
+		mMap.setInfoWindowAdapter(sa);
 		playerMarkers = new HashMap<String, Marker>();
 		allMarkers = new HashMap<String, Marker>();
 
@@ -105,13 +107,17 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		}
 	}
 
-	private void drawItems(ArrayList<ObjectOnMap> items) {
-		for (int i = 0; i < items.size(); i++) {
-			ObjectOnMap object = items.get(i);
+	private void drawMarkers(ArrayList<ObjectOnMap> buildings, ArrayList<ObjectOnMap> items) {
+		ArrayList<ObjectOnMap> allObjects =  new ArrayList<ObjectOnMap>(buildings);
+		allObjects.addAll(items);
+		
+		for (int i = 0; i < allObjects.size(); i++) {
+			ObjectOnMap object = allObjects.get(i);
 			MarkerOptions markerOptions = new MarkerOptions();
 			markerOptions.visible(true);
-			markerOptions.position(items.get(i).getLatlng());
-			markerOptions.title(items.get(i).getName());
+			markerOptions.position(object.getLatlng());
+			markerOptions.title(object.getName());
+			
 			if (object.getType().equals("item")) {
 				if (object.getName().equals("Pancir"))
 					markerOptions.icon(BitmapDescriptorFactory
@@ -126,14 +132,23 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 
 			else {
 				if (object.isBank()) {
+					if(GameService.isThief){
+						String  snippet = "";
+					for(ObjectOnMap nesessaryItem : items){						
+						if(nesessaryItem.getBankId() == Integer.valueOf(object.getId()))
+							snippet +=  nesessaryItem.getName() + " \n"; 
+					}
+						markerOptions.snippet(snippet);
+					}
+
 					if (object.getValue() > 0)
 						markerOptions.icon(BitmapDescriptorFactory
 								.fromResource(R.drawable.dollar_icon));
 					else
 						markerOptions.icon(BitmapDescriptorFactory
 								.fromResource(R.drawable.bank_robed));
+				
 				}
-
 				if (object.isPoliceStation())
 					markerOptions.icon(BitmapDescriptorFactory
 							.fromResource(R.drawable.policestation));
@@ -143,10 +158,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 			}
 
 			Marker marker = mMap.addMarker(markerOptions);
-			Log.v("MARKER ADDED", marker.getId() + " " + items.get(i).getId()
-					+ "  " + marker.getTitle() + " "
-					+ marker.getPosition().toString());
-			allMarkers.put(items.get(i).getName(), marker);
+			allMarkers.put(allObjects.get(i).getName(), marker);
 		}
 	}
 
@@ -172,8 +184,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		if (GameService.isThief) {
 			jammerButton.setVisibility(View.VISIBLE);
 			vestButton.setVisibility(View.VISIBLE);
-
-			gatheredMoneyTextView.setText(String.valueOf(moneyGathered));
+			gatheredMoneyTextView.setText(String.valueOf(GameService.moneyGathered));
 			gatheredMoneyTextView.setVisibility(View.VISIBLE);
 			gatheredMoneyTextView2.setVisibility(View.VISIBLE);
 		} else {
@@ -337,9 +348,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 						.getParcelableArrayList("items");
 				ArrayList<ObjectOnMap> buildings = intent.getExtras()
 						.getParcelableArrayList("buildings");
-				if (items.size() > 0)
-					drawItems(items);
-				drawItems(buildings);
+				drawMarkers(buildings, items);
 				boundaries = drawBoundaries(
 						(LatLng) intent.getExtras().get("mapCenter"), mMap);
 				if (GameService.isThief) {

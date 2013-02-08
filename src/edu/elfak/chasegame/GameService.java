@@ -57,11 +57,12 @@ public class GameService extends Service implements LocationListener {
 	private final long TIME_DIFFERENCE = 5000;
 	public static final String GCM_ANNOUNCE_TAG = "announce";
 	public static final String GCM_POLICEWIN_TAG = "police won";
+	public static final String GCM_THIEF_WIN_TAG = "thief won";
 	public static final String GCM_CANSTART_TAG = "game can start";
 	public static final String GCM_TIMEISUP_TAG = "time is up";
 	public static final String GCM_START_TAG = "start";
-	private static final String GCM_BULLETPROOF_VALUE_TAG = "isBulletproof";
-
+	public static final String GCM_BULLETPROOF_VALUE_TAG = "isBulletproof";
+	public static final String GCM_PLAYER_EXITED = "player exited";
 	private static final String GCM_BANK_ROBBED_UPDATE_MAP = "bankIsRobbed";
 
 	private boolean gameStarted;
@@ -71,6 +72,9 @@ public class GameService extends Service implements LocationListener {
 	private LatLng mapCenter;
 	
 	private static final int MAX_AMMO = 3;
+	private static final int MONEY_LIMIT = 0;
+
+
 	public static int ammo = MAX_AMMO;
 	private boolean bulletproofActive;
 	private boolean jammerActive;
@@ -272,7 +276,7 @@ public class GameService extends Service implements LocationListener {
 					if (!isThief)
 						refillAmmo();
 				} else if (object.isSafeHouse()) {
-					//TODO:  Nisam siguran sta se ovde desava...
+					//TODO:  Nista se ne desava
 				} else if (object.isBank()&&(object.getValue()>0)) {
 					if (isThief && (!gatheredItems.contains(object))) {
 						int bankId = Integer.valueOf(object.getId());
@@ -290,10 +294,9 @@ public class GameService extends Service implements LocationListener {
 						Log.v("debug", numOfNecessaryItems + " " + numOfGatheredNecessaryItems );
 						if (numOfNecessaryItems == numOfGatheredNecessaryItems) {
 							Log.v("BANK ROBED!", String.valueOf(bankId));
-							// TODO Proveri kraj igre
-							moneyGathered += object.getValue();
+							
 							robbedBanks.add(object);
-
+							
 							Intent intent = new Intent("BANK_ROBBED_UPDATE_MAP");
 							intent.putExtra("bank", object);
 							sendBroadcast(intent);
@@ -308,7 +311,22 @@ public class GameService extends Service implements LocationListener {
 								if (!id.equals(registrationId))
 									receivers.add(id);
 							}
-							HttpHelper.sendGcmMessage(GCM_BANK_ROBBED_UPDATE_MAP, object.getId(), receivers);							
+							HttpHelper.sendGcmMessage(GCM_BANK_ROBBED_UPDATE_MAP, object.getId(), receivers);
+							
+							moneyGathered += object.getValue();
+							
+							if(moneyGathered>=MONEY_LIMIT){
+								receivers = new ArrayList<String>();
+								for (int j = 0; j < players.size(); j++) {
+									String id = players.get(j).getId();
+									if (!id.equals(registrationId))
+										receivers.add(id);
+								}
+								HttpHelper.sendGcmMessage(GCM_THIEF_WIN_TAG, String.valueOf(moneyGathered), receivers);
+								
+							}
+								
+							//TODO: proveri da li je svota dovoljna za pobedu ako jeste objavi kraj igre - GCM poruka i dijalog (GCM_THIEF_WIN_TAG)
 						}
 					}
 				}
@@ -415,7 +433,9 @@ public class GameService extends Service implements LocationListener {
 		HttpHelper.sendValuesToUrl(HttpHelper.EXIT_GAME);
 		if(gameTimer!=null)
 			gameTimer.cancel();
-		Log.v("Service ended", "onDestroy method called");
+		
+		// TODO: GCM poruka i Exit dijalog za policajce kada lopov napusti igru
+
 	}
 	
 	public void onLowMemory(){
@@ -528,7 +548,12 @@ public class GameService extends Service implements LocationListener {
 				Toast.makeText(getBaseContext(),
 						"Policija je pobedila, lopov je uspesno uhvacen.",
 						Toast.LENGTH_LONG).show();
-				//TODO: gameTime.cancel();
+						gameTimer.cancel();
+			} else if (message.containsKey(GCM_THIEF_WIN_TAG)) {
+				Toast.makeText(getBaseContext(),
+						"Lopov je pobedio!",
+						Toast.LENGTH_LONG).show();
+					gameTimer.cancel();
 			} else if (message.containsKey(GCM_CANSTART_TAG)) {
 				gameCanStart = true;
 				Toast.makeText(getBaseContext(),
@@ -542,6 +567,22 @@ public class GameService extends Service implements LocationListener {
 			} else if (message.containsKey(GCM_START_TAG)) {
 				Toast.makeText(getBaseContext(), "Game starts :)",
 						Toast.LENGTH_LONG).show();
+			} else if (message.containsKey("player_exited")) {
+				Log.v("exited",message.toString());
+				String playerId = message.getString("player_exited");
+				if(playerId.equals(players.get(0)))
+				{
+					Toast.makeText(getBaseContext(), "Lopov je napustio igru.",
+							Toast.LENGTH_LONG).show();
+				}
+				else
+				{
+					{
+						Toast.makeText(getBaseContext(), "Policajac je napustio igru",
+								Toast.LENGTH_LONG).show();
+					}
+				}
+				
 			} else if (message.containsKey("player_locations")) {
 				String playerId = null;
 				LatLng newLocation = null;
