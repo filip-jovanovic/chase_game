@@ -75,12 +75,13 @@ public class GameService extends Service implements LocationListener {
 	private boolean bulletproofActive;
 	private boolean jammerActive;
 	private Handler vestHandler;
-	private int moneyGathered;
+	public static int moneyGathered;
 	private boolean vestAvailable;
 	private boolean jammerAvailable;
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		
 		isThief = false;
 		isRuning = true;
 		gameStarted = false;

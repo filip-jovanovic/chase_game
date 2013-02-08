@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -47,13 +48,18 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	private ImageButton shootButton;
 	private ImageView radarThiefIcon;
 	private ArrayList<ImageView> radarCopIcons;
-	
+	private TextView gatheredMoneyTextView;
+	private TextView gatheredMoneyTextView2;
 	
 	private View jammerButton;
 	private View vestButton;
 	
+	private int moneyGathered;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		
+		moneyGathered = 0;
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
@@ -73,6 +79,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		jammerButton.setOnClickListener(this);
 		vestButton.setOnClickListener(this);
 		
+		gatheredMoneyTextView =  (TextView) findViewById(R.id.textViewNovac1);
+		gatheredMoneyTextView2 =  (TextView) findViewById(R.id.textViewNovac2);
 		
 		radarThiefIcon = (ImageView) findViewById(R.id.radarThief);
 		radarCopIcons = new ArrayList<ImageView>();
@@ -165,7 +173,16 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		
 		if(allMarkers.size()==0)
 			sendBroadcast(new Intent("REQ_INITIALISE_DATA"));
-
+		
+		if(GameService.isThief){
+			gatheredMoneyTextView.setText(String.valueOf(moneyGathered));
+			gatheredMoneyTextView.setVisibility(View.VISIBLE);
+			gatheredMoneyTextView2.setVisibility(View.VISIBLE);
+		}
+		else{
+			gatheredMoneyTextView.setVisibility(View.GONE);
+			gatheredMoneyTextView2.setVisibility(View.GONE);
+		}	
 		super.onResume();
 	}
 	
@@ -277,17 +294,24 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.bank_robed));
 				mMap.addMarker(markerOptions); 		
 				//alert dialog
-				AlertDialog alertDialog = new AlertDialog.Builder(MapActivity.this).create();
-				alertDialog.setTitle("Obavestenje");
-				alertDialog.setMessage("Opljackana je banka!");
-				alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-					  public void onClick(DialogInterface dialog, int which) {
-					         Toast.makeText(getApplicationContext(), "Uhvatite lopova :)", Toast.LENGTH_SHORT).show();
-					  }
-				});
-				alertDialog.show();
+				if(!GameService.isThief){
+					AlertDialog alertDialog = new AlertDialog.Builder(MapActivity.this).create();
+					alertDialog.setTitle("Obavestenje");
+					alertDialog.setMessage("Opljackana je banka!");
+					alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+						  public void onClick(DialogInterface dialog, int which) {
+						         Toast.makeText(getApplicationContext(), "Uhvatite lopova :)", Toast.LENGTH_SHORT).show();
+						  }
+					});
+					alertDialog.show();
+				}
+				else{
+					moneyGathered = (GameService.moneyGathered);
+					gatheredMoneyTextView.setText(String.valueOf(moneyGathered));
+				}
 	    	}
 	    	else if(action.equals("INITIALISE_MAP")){
+	    		moneyGathered = (GameService.moneyGathered);
 	    		ArrayList<ObjectOnMap> items = intent.getExtras().getParcelableArrayList("items");
 	    		ArrayList<ObjectOnMap> buildings = intent.getExtras().getParcelableArrayList("buildings");
 	    		if(items.size()>0)
@@ -298,6 +322,20 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	    		{
 	    			vestButton.setEnabled(intent.getExtras().getBoolean("vestAvailable"));
 	    			jammerButton.setEnabled(intent.getExtras().getBoolean("jammerAvailable"));
+	    			
+	    			View imBut;
+	    			imBut =  findViewById(R.id.shootButton);
+	    			imBut.setVisibility(View.GONE);
+	    			imBut = findViewById(R.id.bullet1);
+	    			imBut.setVisibility(View.GONE);
+	    			imBut = findViewById(R.id.bullet2);
+	    			imBut.setVisibility(View.GONE);
+	    			imBut = findViewById(R.id.bullet3);
+	    			imBut.setVisibility(View.GONE);
+	    		}
+	    		else
+	    		{
+	    			
 	    		}
 	    		
 	    		
