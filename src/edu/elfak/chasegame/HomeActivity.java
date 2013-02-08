@@ -74,7 +74,6 @@ public class HomeActivity extends Activity implements OnClickListener {
 				
 				break;
 			case(R.id.stop_game_button):
-				
 				stopService(new Intent(this, GameService.class));
 				Button buttonStop = (Button)findViewById(R.id.stop_game_button);
 				Button button = (Button)findViewById(R.id.create_game_button);

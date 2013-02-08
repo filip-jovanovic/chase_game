@@ -123,7 +123,7 @@ public class ObjectOnMap implements Parcelable {
 	}
 	
 	public int getBankId(){
-		return value;
+		return bankId;
 	}
 
 	public void setValue(int i) {

@@ -160,6 +160,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		intentFilter.addAction("BULLETS_UPDATE_TAG");
 		intentFilter.addAction("ENABLE_VEST_BUTTON_TAG");
 		intentFilter.addAction("ENABLE_JAMMER_BUTTON_TAG");
+		intentFilter.addAction("BANK_ROBBED_UPDATE_MAP");
 		registerReceiver(dataUpdateReceiver, intentFilter);
 		
 		if(allMarkers.size()==0)
@@ -278,7 +279,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				//alert dialog
 				AlertDialog alertDialog = new AlertDialog.Builder(MapActivity.this).create();
 				alertDialog.setTitle("Obavestenje");
-				alertDialog.setMessage("Opljacka na je banka: ");
+				alertDialog.setMessage("Opljackana je banka!");
 				alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
 					  public void onClick(DialogInterface dialog, int which) {
 					         Toast.makeText(getApplicationContext(), "Uhvatite lopova :)", Toast.LENGTH_SHORT).show();

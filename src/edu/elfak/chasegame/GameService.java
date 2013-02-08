@@ -9,11 +9,9 @@ import org.json.JSONObject;
 import com.google.android.gcm.GCMBaseIntentService;
 import com.google.android.gms.maps.model.LatLng;
 
-import android.app.AlertDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
@@ -200,6 +198,7 @@ public class GameService extends Service implements LocationListener {
 		return START_STICKY;
 	}
 
+
 	public void startGame() {
 		gameTimer = new CountDownTimer(7200000, 10000) {//360000) {
 			@Override
@@ -273,18 +272,21 @@ public class GameService extends Service implements LocationListener {
 						refillAmmo();
 				} else if (object.isSafeHouse()) {
 					//TODO:  Nisam siguran sta se ovde desava...
-				} else if (object.isBank()) {
+				} else if (object.isBank()&&(object.getValue()>0)) {
 					if (isThief && (!gatheredItems.contains(object))) {
 						int bankId = Integer.valueOf(object.getId());
 						int numOfNecessaryItems = 0, numOfGatheredNecessaryItems = 0;
 						for (int j = 0; j < items.size(); j++) {
+							Log.v("debug", "bank id itema : " + items.get(j).getBankId() +" "+ items.get(j).getName() );
 							if (bankId == items.get(j).getBankId())
 								numOfNecessaryItems++;
 						}
-						for (int j = 0; j < items.size(); j++) {
-							if (bankId == items.get(j).getBankId())
+						for (int j = 0; j < gatheredItems.size(); j++) {
+							if (bankId == gatheredItems.get(j).getBankId())
 								numOfGatheredNecessaryItems++;
 						}
+						Log.v("debug", "bank id : " + bankId );
+						Log.v("debug", numOfNecessaryItems + " " + numOfGatheredNecessaryItems );
 						if (numOfNecessaryItems == numOfGatheredNecessaryItems) {
 							Log.v("BANK ROBED!", String.valueOf(bankId));
 							// TODO Proveri kraj igre
@@ -409,8 +411,15 @@ public class GameService extends Service implements LocationListener {
 		HttpHelper.addParameter("game_id", String.valueOf(gameId));
 		HttpHelper.addParameter("player_id", registrationId);
 		HttpHelper.addParameter("place", String.valueOf(numberOfPolicemen));
-
 		HttpHelper.sendValuesToUrl(HttpHelper.EXIT_GAME);
+		if(gameTimer!=null)
+			gameTimer.cancel();
+		Log.v("Service ended", "onDestroy method called");
+	}
+	
+	public void onLowMemory(){
+		Toast.makeText(this, "Low memory, service killed!", Toast.LENGTH_LONG);
+		Log.v("Service killed!", "Reason: Low memory");
 	}
 
 	// broadcast receiver that handles messages from GCM
