@@ -525,16 +525,13 @@ public class GameService extends Service implements LocationListener {
 			} else if (message.containsKey(GCM_BANK_ROBBED_UPDATE_MAP)) {
 				ObjectOnMap object = null;
 				for(int i = 0; i< buildings.size(); i++){
-					if(buildings.get(i).getId().equals(message.get(GCM_BANK_ROBBED_UPDATE_MAP)))
+					if(buildings.get(i).getId().equals(message.get(GCM_BANK_ROBBED_UPDATE_MAP))){
+						buildings.get(i).setValue(buildings.get(i).getValue()*(-1));
 						object = buildings.get(i);
+					}
 				}
-				
-				buildings.remove(object);
-				object.setValue(object.getValue() * (-1));
-				buildings.add(object);
-				
 				Intent in = new Intent("BANK_ROBBED_UPDATE_MAP");
-				intent.putExtra("bank", object);
+				in.putExtra("bank", object);
 				sendBroadcast(in);				
 			} else if (message.containsKey(GCM_BULLETPROOF_VALUE_TAG)) {
 				if (message.getString(GCM_BULLETPROOF_VALUE_TAG).equals("true")){
