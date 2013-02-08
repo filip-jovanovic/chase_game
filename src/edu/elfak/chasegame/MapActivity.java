@@ -175,6 +175,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		intentFilter.addAction("ENABLE_VEST_BUTTON_TAG");
 		intentFilter.addAction("ENABLE_JAMMER_BUTTON_TAG");
 		intentFilter.addAction("BANK_ROBBED_UPDATE_MAP");
+		intentFilter.addAction("DISPLAY_DIALOG");
 		registerReceiver(dataUpdateReceiver, intentFilter);
 
 		View imBut;
@@ -227,9 +228,31 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	}
 
 	private class MapUpdateReceiver extends BroadcastReceiver {
-
-		
-
+		public void endGameDialog(String title){
+			AlertDialog alertDialog = new AlertDialog.Builder(
+					MapActivity.this).create();
+			alertDialog.setTitle("Igra je zavrsena!");
+			alertDialog.setMessage(title);
+			alertDialog.setButton("Exit",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,
+								int which) {
+							Toast.makeText(getApplicationContext(),
+									"Exit",
+									Toast.LENGTH_SHORT).show();
+						}
+					});
+			alertDialog.setButton("Restart",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,
+								int which) {
+							Toast.makeText(getApplicationContext(),
+									"Restart",
+									Toast.LENGTH_SHORT).show();
+						}
+					});
+			alertDialog.show();
+		}
 		public void updateRadar(Context context,
 				ArrayList<Double> thiefDistance,
 				ArrayList<Double> policemanDistance) {
@@ -304,8 +327,13 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				m.remove();
 
 				allMarkers.remove(item.getName());
+				
+				
 			} else if (action.equals("ENABLE_VEST_BUTTON_TAG")) {
 				vestButton.setEnabled(true);
+			} else if (action.equals("DISPLAY_DIALOG")) {
+				String title = (String) intent.getExtras().getString("title");
+				endGameDialog(title);
 			} else if (action.equals("ENABLE_JAMMER_BUTTON_TAG")) {
 				jammerButton.setEnabled(true);
 			} else if (action.equals("BANK_ROBBED_UPDATE_MAP")) {

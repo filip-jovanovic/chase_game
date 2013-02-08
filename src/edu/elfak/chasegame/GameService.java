@@ -545,12 +545,18 @@ public class GameService extends Service implements LocationListener {
 				Toast.makeText(getBaseContext(),
 						"Policija je pobedila, lopov je uspesno uhvacen.",
 						Toast.LENGTH_LONG).show();
-						gameTimer.cancel();
+				gameTimer.cancel();
+				Intent i = new Intent("DISPLAY_DIALOG");
+				i.putExtra("title", "Policija je pobedila, lopov je uspesno uhvacen!");
+				sendBroadcast(i);
 			} else if (message.containsKey(GCM_THIEF_WIN_TAG)) {
 				Toast.makeText(getBaseContext(),
 						"Lopov je pobedio!",
-						Toast.LENGTH_LONG).show();
-					gameTimer.cancel();
+				Toast.LENGTH_LONG).show();
+				Intent i = new Intent("DISPLAY_DIALOG");
+				i.putExtra("title", "Lopov je pobedio!");
+				sendBroadcast(i);
+				gameTimer.cancel();
 			} else if (message.containsKey(GCM_CANSTART_TAG)) {
 				gameCanStart = true;
 				Toast.makeText(getBaseContext(),
@@ -561,16 +567,22 @@ public class GameService extends Service implements LocationListener {
 				Toast.makeText(getBaseContext(),
 						"Vreme je isteklo, lopov je uspesno pobegao.",
 						Toast.LENGTH_LONG).show();
+				Intent i = new Intent("DISPLAY_DIALOG");
+				i.putExtra("title", "Vreme je isteklo, lopov je uspesno pobegao!");
+				sendBroadcast(i);
 			} else if (message.containsKey(GCM_START_TAG)) {
 				Toast.makeText(getBaseContext(), "Game starts :)",
 						Toast.LENGTH_LONG).show();
 			} else if (message.containsKey("player_exited")) {
 				Log.v("exited",message.toString());
 				String playerId = message.getString("player_exited");
-				if(playerId.equals(players.get(0)))
+				if(playerId.equals(players.get(0).getId()))
 				{
 					Toast.makeText(getBaseContext(), "Lopov je napustio igru.",
 							Toast.LENGTH_LONG).show();
+					Intent i = new Intent("DISPLAY_DIALOG");
+					i.putExtra("title", "Lopov je napustio igru!");
+					sendBroadcast(i);
 				}
 				else
 				{
