@@ -144,6 +144,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 								.getId()))
 							snippet += nesessaryItem.getName() + " \n";
 					}
+					snippet += "Novac u banci: \n"
+							+ String.valueOf(object.getValue()) + "";
 					markerOptions.snippet(snippet);
 				}
 
@@ -157,11 +159,14 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 			} else if (object.isPoliceStation())
 				markerOptions.icon(BitmapDescriptorFactory
 						.fromResource(R.drawable.policestation));
-			else if (object.isSafeHouse() && GameService.isThief)
+			else if (object.isSafeHouse() && GameService.isThief) {
 				markerOptions.icon(BitmapDescriptorFactory
 						.fromResource(R.drawable.safehouse));
+				Marker marker = mMap.addMarker(markerOptions);
+				allMarkers.put(allObjects.get(i).getName(), marker);
+			}
 
-			if (!(object.isSafeHouse() && GameService.isThief)) {
+			if (!(object.isSafeHouse() && !GameService.isThief)) {
 				Marker marker = mMap.addMarker(markerOptions);
 				allMarkers.put(allObjects.get(i).getName(), marker);
 			}
@@ -256,8 +261,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {
-								Toast.makeText(getApplicationContext(),
-										"Restart", Toast.LENGTH_SHORT).show();
+								sendBroadcast(new Intent("GAME_RESTART"));
 							}
 						});
 			}
@@ -270,7 +274,6 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 			DisplayMetrics displayMetrics = context.getResources()
 					.getDisplayMetrics();
 			int padding = (int) ((12 * displayMetrics.density) + 0.5);
-			// thief icon
 			int x;
 			double density = 0.62 * displayMetrics.density;
 			int displacement = (int) (12 * displayMetrics.density);
@@ -278,20 +281,14 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				x = (int) (thiefDistance.get(0) * density);
 			else
 				x = (int) (200 * density);
-			// int leftPadding = 18; //(int)(((12+x) * displayMetrics.density) +
-			// 0.5);
 			radarThiefIcon.setPadding(x + displacement, padding, 0, 0);
-			// Log.v("TEST","thief="+x);
-			// policeman icons
 			for (int j = 0; j < policemanDistance.size(); j++) {
 				if (policemanDistance.get(j) < 200)
 					x = (int) (policemanDistance.get(j) * density);
 				else
 					x = (int) (200 * density);
-				// leftPadding = (int)(((12+x) * displayMetrics.density) + 0.5);
 				radarCopIcons.get(j)
 						.setPadding(x + displacement, padding, 0, 0);
-				Log.v("TEST", "policeman" + j + "=" + displayMetrics.density);
 			}
 		}
 
@@ -332,8 +329,6 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				ObjectOnMap item = (ObjectOnMap) intent.getExtras().get(
 						"object");
 				Marker m = allMarkers.get(item.getName());
-				Log.v("MARKER DELETE", item.getId() + " " + m.getTitle() + " "
-						+ m.getPosition().toString());
 				m.setVisible(false);
 				m.remove();
 
@@ -385,6 +380,10 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 							.setText(String.valueOf(moneyGathered));
 				}
 			} else if (action.equals("INITIALISE_MAP")) {
+				
+				mMap.clear();
+				allMarkers = new HashMap<String, Marker>();
+
 				moneyGathered = (GameService.moneyGathered);
 				ArrayList<ObjectOnMap> items = intent.getExtras()
 						.getParcelableArrayList("items");
@@ -409,7 +408,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 					imBut = findViewById(R.id.bullet3);
 					imBut.setVisibility(View.GONE);
 				} else {
-
+					remainingBullets = GameService.ammo;
+					setRemainingBullets(remainingBullets);
 				}
 
 			} else if (action.equals("BULLETS_UPDATE_TAG")) {

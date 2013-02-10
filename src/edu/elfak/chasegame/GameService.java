@@ -107,6 +107,7 @@ public class GameService extends Service implements LocationListener {
 		intentFilter.addAction("SHOT_IS_FIRED");
 		intentFilter.addAction("BECAME_BULLETPROOF");
 		intentFilter.addAction("ACTIVATE_JAMMER");
+		intentFilter.addAction("GAME_RESTART");
 		registerReceiver(broadcastReceiver, intentFilter);
 
 		Bundle ib = intent.getExtras();
@@ -316,10 +317,8 @@ public class GameService extends Service implements LocationListener {
 								String id = players.get(j).getId();
 								if (!id.equals(registrationId))
 									receivers.add(id);
-							}
-											
-							//TODO: proveri da li je svota dovoljna za pobedu ako jeste objavi kraj igre - GCM poruka i dijalog (GCM_THIEF_WIN_TAG)
-							
+							}											
+							//TODO: proveri da li je svota dovoljna za pobedu ako jeste objavi kraj igre - GCM poruka i dijalog (GCM_THIEF_WIN_TAG)		
 							if(moneyGathered>=MONEY_LIMIT){
 								HttpHelper.sendGcmMessage(GCM_THIEF_WIN_TAG, String.valueOf(moneyGathered), receivers);
 								
@@ -330,9 +329,7 @@ public class GameService extends Service implements LocationListener {
 							}
 							else{
 								HttpHelper.sendGcmMessage(GCM_BANK_ROBBED_UPDATE_MAP, object.getId(), receivers);
-							}
-								
-							
+							}	
 						}
 					}
 				}
@@ -510,6 +507,35 @@ public class GameService extends Service implements LocationListener {
 			} else if (action.equals("ACTIVATE_JAMMER")) {
 				jammerActive = true;
 				jammerAvailable = false;
+			}	else if (action.equals("GAME_RESTART")) {
+				//TODO
+				gameStarted = false;
+				gameCanStart = true;
+				jammerActive = false;
+				bulletproofActive = false;
+				jammerAvailable = false;
+				vestAvailable = false;
+				moneyGathered = 0;
+				ammo = MAX_AMMO;
+				
+				for(ObjectOnMap object : buildings){
+					if(object.isBank())
+						if(object.getValue()<0)
+							object.setValue(object.getValue()*(-1));
+				}
+				
+				items.addAll(gatheredItems);
+				gatheredItems = new ArrayList<ObjectOnMap>();
+				
+				if(isThief&&gameTimer!=null)
+					gameTimer.cancel();
+				
+				if(isThief&&vestHandler!=null)
+					vestHandler.removeCallbacks(announceBulletproofEnd);
+				
+				Toast.makeText(getBaseContext(),
+						"Igra moze da pocne, idite do svoje startne lokacije."+String.valueOf(gameCanStart),
+						Toast.LENGTH_LONG).show();
 			}
 		}
 	};

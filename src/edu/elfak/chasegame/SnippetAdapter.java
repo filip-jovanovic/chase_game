@@ -43,9 +43,10 @@ public View getInfoContents(Marker marker) {
   tv.setText(marker.getTitle());
   tv=(TextView)popup.findViewById(R.id.snippet);
   tv.setText(marker.getSnippet());
-  if(marker.getSnippet()==null)
-	  popup.findViewById(R.id.caption).setVisibility(View.GONE);
-
+  //if(marker.getSnippet().startsWith(" Novac u banci: "))
+  //if(marker.getSnippet()==null)
+	//  popup.findViewById(R.id.caption).setVisibility(View.GONE);
+  
   return(popup);
 }
 }
