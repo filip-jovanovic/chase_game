@@ -60,6 +60,7 @@ public class GameService extends Service implements LocationListener {
 	public static final String GCM_THIEF_WIN_TAG = "thief won";
 	public static final String GCM_CANSTART_TAG = "game can start";
 	public static final String GCM_TIMEISUP_TAG = "time is up";
+	public static final String GCM_SHOW_THIEF_TAG = "show thief";
 	public static final String GCM_START_TAG = "start";
 	public static final String GCM_BULLETPROOF_VALUE_TAG = "isBulletproof";
 	public static final String GCM_PLAYER_EXITED = "player exited";
@@ -218,8 +219,9 @@ public class GameService extends Service implements LocationListener {
 						String id = players.get(i).getId();
 						if (!id.equals(registrationId))
 							receivers.add(id);
-						else playerPosition = i;
 					}
+					HttpHelper.sendGcmMessage(GCM_SHOW_THIEF_TAG, registrationId,
+							receivers);
 				}
 				else
 					jammerActive = false;
@@ -546,6 +548,11 @@ public class GameService extends Service implements LocationListener {
 				Intent i = new Intent("DISPLAY_DIALOG");
 				i.putExtra("title", "Policija je pobedila, lopov je uspesno uhvacen!");
 				sendBroadcast(i);
+			} else if (message.containsKey(GCM_SHOW_THIEF_TAG)) {
+				Intent i = new Intent("DISPLAY_DIALOG");
+				i.putExtra("title", "Policija je pobedila, lopov je uspesno uhvacen!");
+				sendBroadcast(i);
+				updateMapObject(players.get(0));
 			} else if (message.containsKey(GCM_THIEF_WIN_TAG)) {
 				Toast.makeText(getBaseContext(),
 						"Lopov je pobedio!",
