@@ -316,7 +316,7 @@ public class GameService extends Service implements LocationListener {
 							HttpHelper.sendGcmMessage(GCM_BANK_ROBBED_UPDATE_MAP, object.getId(), receivers);
 							
 							moneyGathered += object.getValue();
-							
+							//TODO: proveri da li je svota dovoljna za pobedu ako jeste objavi kraj igre - GCM poruka i dijalog (GCM_THIEF_WIN_TAG)
 							if(moneyGathered>=MONEY_LIMIT){
 								receivers = new ArrayList<String>();
 								for (int j = 0; j < players.size(); j++) {
@@ -332,7 +332,7 @@ public class GameService extends Service implements LocationListener {
 								//gameTimer.cancel();
 							}
 								
-							//TODO: proveri da li je svota dovoljna za pobedu ako jeste objavi kraj igre - GCM poruka i dijalog (GCM_THIEF_WIN_TAG)
+							
 						}
 					}
 				}
@@ -426,7 +426,6 @@ public class GameService extends Service implements LocationListener {
 
 	@Override
 	public void onDestroy() {
-
 		super.onDestroy();
 		unregisterReceiver(broadcastReceiver);
 		locationManager.removeUpdates(this);
@@ -439,9 +438,6 @@ public class GameService extends Service implements LocationListener {
 		HttpHelper.sendValuesToUrl(HttpHelper.EXIT_GAME);
 		if(gameTimer!=null)
 			gameTimer.cancel();
-		
-		// TODO: GCM poruka i Exit dijalog za policajce kada lopov napusti igru
-
 	}
 	
 	public void onLowMemory(){
