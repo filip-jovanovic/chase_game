@@ -357,7 +357,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				markerOptions.icon(BitmapDescriptorFactory
 						.fromResource(R.drawable.bank_robed));
 				markerOptions.snippet(null);
-				mMap.addMarker(markerOptions);
+				allMarkers.put(bank.getName(), mMap.addMarker(markerOptions));
 				// alert dialog
 				if (!GameService.isThief) {
 					AlertDialog alertDialog = new AlertDialog.Builder(
@@ -386,13 +386,15 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 						.getParcelableArrayList("items");
 				ArrayList<ObjectOnMap> buildings = intent.getExtras()
 						.getParcelableArrayList("buildings");
-				if(!allMarkers.isEmpty()){
+				if (!allMarkers.isEmpty()) {
 					for (ObjectOnMap object : buildings) {
-						allMarkers.get(object.getName()).setVisible(false);
-						allMarkers.get(object.getName()).remove();
+						if (allMarkers.containsKey(object.getName())) {
+							allMarkers.get(object.getName()).setVisible(false);
+							allMarkers.get(object.getName()).remove();
+						}
 					}
 					for (ObjectOnMap object : items) {
-						if(allMarkers.containsKey(object.getName())){
+						if (allMarkers.containsKey(object.getName())) {
 							allMarkers.get(object.getName()).setVisible(false);
 							allMarkers.get(object.getName()).remove();
 						}
