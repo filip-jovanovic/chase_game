@@ -206,7 +206,7 @@ public class GameService extends Service implements LocationListener {
 
 
 	public void startGame() {
-		gameTimer = new CountDownTimer(7200000, 10000) {//360000) {
+		gameTimer = new CountDownTimer(50000, 10000) {//360000) {
 			@Override
 			public void onTick(long millisUntilFinished) {
 				for (int j = 0; j < players.size(); j++) {
@@ -238,9 +238,9 @@ public class GameService extends Service implements LocationListener {
 				}
 				HttpHelper.sendGcmMessage(GCM_TIMEISUP_TAG, registrationId,
 						receivers);
-				Toast.makeText(getBaseContext(),
-						"Vreme je isteklo, lopov je uspesno pobegao.",
-						Toast.LENGTH_LONG).show();
+				Intent victory = new Intent("DISPLAY_DIALOG");
+				victory.putExtra("title", "Vreme je isteklo, uspesno ste pobegli policiji!");
+				sendBroadcast(victory);
 			}
 		}.start();
 	}
@@ -553,14 +553,8 @@ public class GameService extends Service implements LocationListener {
 				i.putExtra("title", "Policija je pobedila, lopov je uspesno uhvacen!");
 				sendBroadcast(i);
 			} else if (message.containsKey(GCM_SHOW_THIEF_TAG)) {
-				Intent i = new Intent("DISPLAY_DIALOG");
-				i.putExtra("title", "Policija je pobedila, lopov je uspesno uhvacen!");
-				sendBroadcast(i);
 				updateMapObject(players.get(0));
 			} else if (message.containsKey(GCM_THIEF_WIN_TAG)) {
-				Toast.makeText(getBaseContext(),
-						"Lopov je pobedio!",
-				Toast.LENGTH_LONG).show();
 				Intent i = new Intent("DISPLAY_DIALOG");
 				i.putExtra("title", "Lopov je pobedio!");
 				sendBroadcast(i);
@@ -571,9 +565,6 @@ public class GameService extends Service implements LocationListener {
 						Toast.LENGTH_LONG).show();
 				Log.v("IGRA MOZE DA POCNE", "POCNI");
 			} else if (message.containsKey(GCM_TIMEISUP_TAG)) {
-				Toast.makeText(getBaseContext(),
-						"Vreme je isteklo, lopov je uspesno pobegao.",
-						Toast.LENGTH_LONG).show();
 				Intent i = new Intent("DISPLAY_DIALOG");
 				i.putExtra("title", "Vreme je isteklo, lopov je uspesno pobegao!");
 				sendBroadcast(i);
@@ -585,8 +576,6 @@ public class GameService extends Service implements LocationListener {
 				String playerId = message.getString("player_exited");
 				if(playerId.equals(players.get(0).getId()))
 				{
-					Toast.makeText(getBaseContext(), "Lopov je napustio igru.",
-							Toast.LENGTH_LONG).show();
 					Intent i = new Intent("DISPLAY_DIALOG");
 					i.putExtra("title", "Lopov je napustio igru!");
 					sendBroadcast(i);
