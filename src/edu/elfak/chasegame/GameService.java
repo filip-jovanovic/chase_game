@@ -208,7 +208,7 @@ public class GameService extends Service implements LocationListener {
 	}
 
 	public void startGame() {
-		gameTimer = new CountDownTimer(50000, 10000) {// 360000) {
+		gameTimer = new CountDownTimer(7200000, 10000) {// 360000) {
 			@Override
 			public void onTick(long millisUntilFinished) {
 				for (int j = 0; j < players.size(); j++) {
@@ -546,7 +546,7 @@ public class GameService extends Service implements LocationListener {
 						gameTimer.cancel();
 					if (vestHandler != null)
 						vestHandler.removeCallbacks(announceBulletproofEnd);
-					items.addAll(gatheredItems);
+					//items.addAll(gatheredItems);
 					gatheredItems = new ArrayList<ObjectOnMap>();
 				}
 				Toast.makeText(
@@ -554,6 +554,21 @@ public class GameService extends Service implements LocationListener {
 						"Igra moze da pocne, idite do svoje startne lokacije."
 								+ String.valueOf(gameCanStart),
 						Toast.LENGTH_LONG).show();
+				//restart
+				updateMapView(mapCenter);
+				Intent j = new Intent("INITIALISE_MAP");
+				ArrayList<ObjectOnMap> visibleItems = new ArrayList<ObjectOnMap>(
+						items);
+				if (isThief) {
+					visibleItems.removeAll(gatheredItems);
+					j.putExtra("vestAvailable", vestAvailable);
+					j.putExtra("jammerAvailable", jammerAvailable);
+				} else
+					visibleItems = new ArrayList<ObjectOnMap>(); 
+				j.putExtra("items", visibleItems);
+				j.putExtra("mapCenter", mapCenter);
+				j.putExtra("buildings", buildings);
+				sendBroadcast(j);
 			}
 		}
 	};

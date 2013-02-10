@@ -380,15 +380,26 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 							.setText(String.valueOf(moneyGathered));
 				}
 			} else if (action.equals("INITIALISE_MAP")) {
-				
-				mMap.clear();
-				allMarkers = new HashMap<String, Marker>();
 
 				moneyGathered = (GameService.moneyGathered);
 				ArrayList<ObjectOnMap> items = intent.getExtras()
 						.getParcelableArrayList("items");
 				ArrayList<ObjectOnMap> buildings = intent.getExtras()
 						.getParcelableArrayList("buildings");
+				if(!allMarkers.isEmpty()){
+					for (ObjectOnMap object : buildings) {
+						allMarkers.get(object.getName()).setVisible(false);
+						allMarkers.get(object.getName()).remove();
+					}
+					for (ObjectOnMap object : items) {
+						if(allMarkers.containsKey(object.getName())){
+							allMarkers.get(object.getName()).setVisible(false);
+							allMarkers.get(object.getName()).remove();
+						}
+					}
+				}
+				allMarkers = new HashMap<String, Marker>();
+
 				drawMarkers(buildings, items);
 				boundaries = drawBoundaries(
 						(LatLng) intent.getExtras().get("mapCenter"), mMap);
