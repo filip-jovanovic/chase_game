@@ -69,9 +69,9 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 
 		mMap = ((SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.map)).getMap();
-		
+
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		
+
 		mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 		SnippetAdapter sa = new SnippetAdapter(getLayoutInflater());
 		mMap.setInfoWindowAdapter(sa);
@@ -160,7 +160,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 			else if (object.isSafeHouse() && GameService.isThief)
 				markerOptions.icon(BitmapDescriptorFactory
 						.fromResource(R.drawable.safehouse));
-			
+
 			if (!(object.isSafeHouse() && GameService.isThief)) {
 				Marker marker = mMap.addMarker(markerOptions);
 				allMarkers.put(allObjects.get(i).getName(), marker);
@@ -240,7 +240,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	}
 
 	private class MapUpdateReceiver extends BroadcastReceiver {
-		public void endGameDialog(String title) {
+		public void endGameDialog(String title, boolean noRestart) {
 			AlertDialog alertDialog = new AlertDialog.Builder(MapActivity.this)
 					.create();
 			alertDialog.setTitle("Igra je zavrsena!");
@@ -251,13 +251,16 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 							endGameFromMap();
 						}
 					});
-			alertDialog.setButton2("Restartuj igru",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							Toast.makeText(getApplicationContext(), "Restart",
-									Toast.LENGTH_SHORT).show();
-						}
-					});
+			if (!noRestart) {
+				alertDialog.setButton2("Restartuj igru",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int which) {
+								Toast.makeText(getApplicationContext(),
+										"Restart", Toast.LENGTH_SHORT).show();
+							}
+						});
+			}
 			alertDialog.show();
 		}
 
@@ -340,7 +343,10 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				vestButton.setEnabled(true);
 			} else if (action.equals("DISPLAY_DIALOG")) {
 				String title = (String) intent.getExtras().getString("title");
-				endGameDialog(title);
+				boolean noRestart = false;
+				if (intent.getExtras().containsKey("norestart"))
+					noRestart = true;
+				endGameDialog(title, noRestart);
 			} else if (action.equals("ENABLE_JAMMER_BUTTON_TAG")) {
 				jammerButton.setEnabled(true);
 			} else if (action.equals("BANK_ROBBED_UPDATE_MAP")) {
@@ -348,7 +354,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				Marker m = allMarkers.get(bank.getName());
 				m.setVisible(false);
 				m.remove();
-				
+
 				MarkerOptions markerOptions = new MarkerOptions();
 				markerOptions.visible(true);
 				markerOptions.position(bank.getLatlng());

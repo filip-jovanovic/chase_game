@@ -321,12 +321,6 @@ public class GameService extends Service implements LocationListener {
 							//TODO: proveri da li je svota dovoljna za pobedu ako jeste objavi kraj igre - GCM poruka i dijalog (GCM_THIEF_WIN_TAG)
 							
 							if(moneyGathered>=MONEY_LIMIT){
-								receivers = new ArrayList<String>();
-								for (int j = 0; j < players.size(); j++) {
-									String id = players.get(j).getId();
-									if (!id.equals(registrationId))
-										receivers.add(id);
-								}
 								HttpHelper.sendGcmMessage(GCM_THIEF_WIN_TAG, String.valueOf(moneyGathered), receivers);
 								
 								Intent victory = new Intent("DISPLAY_DIALOG");
@@ -578,6 +572,7 @@ public class GameService extends Service implements LocationListener {
 				{
 					Intent i = new Intent("DISPLAY_DIALOG");
 					i.putExtra("title", "Lopov je napustio igru!");
+					i.putExtra("norestart",true);
 					sendBroadcast(i);
 				}
 				else
