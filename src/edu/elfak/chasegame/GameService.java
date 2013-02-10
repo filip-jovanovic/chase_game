@@ -73,7 +73,7 @@ public class GameService extends Service implements LocationListener {
 	private LatLng mapCenter;
 	
 	private static final int MAX_AMMO = 3;
-	private static final int MONEY_LIMIT = 0;
+	private static final int MONEY_LIMIT = 35000;
 
 
 	public static int ammo = MAX_AMMO;
@@ -305,6 +305,8 @@ public class GameService extends Service implements LocationListener {
 							
 							Toast.makeText(this, "Banka je opljackana. Prikupljeno je jos " + object.getValue() + "$ !" , Toast.LENGTH_LONG).show();
 							
+							moneyGathered += object.getValue();
+							
 							buildings.remove(object);
 							object.setValue(object.getValue() * (-1));
 							buildings.add(object);
@@ -315,10 +317,9 @@ public class GameService extends Service implements LocationListener {
 								if (!id.equals(registrationId))
 									receivers.add(id);
 							}
-							HttpHelper.sendGcmMessage(GCM_BANK_ROBBED_UPDATE_MAP, object.getId(), receivers);
-							
-							moneyGathered += object.getValue();
+											
 							//TODO: proveri da li je svota dovoljna za pobedu ako jeste objavi kraj igre - GCM poruka i dijalog (GCM_THIEF_WIN_TAG)
+							
 							if(moneyGathered>=MONEY_LIMIT){
 								receivers = new ArrayList<String>();
 								for (int j = 0; j < players.size(); j++) {
@@ -332,6 +333,9 @@ public class GameService extends Service implements LocationListener {
 								victory.putExtra("title", "Cestitamo! Pobedili ste!");
 								sendBroadcast(victory);
 								//gameTimer.cancel();
+							}
+							else{
+								HttpHelper.sendGcmMessage(GCM_BANK_ROBBED_UPDATE_MAP, object.getId(), receivers);
 							}
 								
 							
