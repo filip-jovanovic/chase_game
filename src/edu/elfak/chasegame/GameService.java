@@ -44,7 +44,7 @@ public class GameService extends Service implements LocationListener {
 	private long timeOfLastLocation;
 	// za testiranje
 	public int test = 0;
-	public int deleteTest = 0;
+	public int playerAbsent = 0;
 
 	private String gameName;
 	private String provider;
@@ -54,7 +54,7 @@ public class GameService extends Service implements LocationListener {
 
 	public static boolean isThief;
 
-	private final long TIME_DIFFERENCE = 5000;
+	private final long TIME_DIFFERENCE = 10000;
 	public static final String GCM_ANNOUNCE_TAG = "announce";
 	public static final String GCM_POLICEWIN_TAG = "police won";
 	public static final String GCM_THIEF_WIN_TAG = "thief won";
@@ -208,7 +208,7 @@ public class GameService extends Service implements LocationListener {
 	}
 
 	public void startGame() {
-		gameTimer = new CountDownTimer(7200000, 10000) {// 360000) {
+		gameTimer = new CountDownTimer(7200000, 360000) {
 			@Override
 			public void onTick(long millisUntilFinished) {
 				for (int j = 0; j < players.size(); j++) {
@@ -280,7 +280,7 @@ public class GameService extends Service implements LocationListener {
 					if (!isThief)
 						refillAmmo();
 				} else if (object.isSafeHouse()) {
-					// TODO: Nista se ne desava
+					// Nista se ne desava
 				} else if (object.isBank() && (object.getValue() > 0)) {
 					if (isThief && (!gatheredItems.contains(object))) {
 						int bankId = Integer.valueOf(object.getId());
@@ -297,9 +297,7 @@ public class GameService extends Service implements LocationListener {
 								numOfGatheredNecessaryItems++;
 						}
 
-						// if (numOfNecessaryItems ==
-						// numOfGatheredNecessaryItems)
-						{
+						if (numOfNecessaryItems == numOfGatheredNecessaryItems) {
 							Log.v("BANK ROBED!", String.valueOf(bankId));
 
 							robbedBanks.add(object);
@@ -326,9 +324,6 @@ public class GameService extends Service implements LocationListener {
 								if (!id.equals(registrationId))
 									receivers.add(id);
 							}
-							// TODO: proveri da li je svota dovoljna za pobedu
-							// ako jeste objavi kraj igre - GCM poruka i dijalog
-							// (GCM_THIEF_WIN_TAG)
 							if (moneyGathered >= MONEY_LIMIT) {
 								HttpHelper.sendGcmMessage(GCM_THIEF_WIN_TAG,
 										String.valueOf(moneyGathered),
@@ -338,7 +333,7 @@ public class GameService extends Service implements LocationListener {
 								victory.putExtra("title",
 										"Cestitamo! Pobedili ste!");
 								sendBroadcast(victory);
-								// gameTimer.cancel();
+								gameTimer.cancel();
 							} else {
 								HttpHelper.sendGcmMessage(
 										GCM_BANK_ROBBED_UPDATE_MAP,
@@ -349,10 +344,7 @@ public class GameService extends Service implements LocationListener {
 				}
 			}
 		}
-		if (isThief
-		// TODO: && gameStarted // Lopov ne moze da pokuplja iteme pre pocetka
-		// igre
-		) {
+		if (isThief && gameStarted) {
 			for (int i = 0; i < items.size(); i++) {
 				object = items.get(i);
 				if (calculateDistance(newCoordinates, object.getLatlng()) < 10.0) {
@@ -454,7 +446,6 @@ public class GameService extends Service implements LocationListener {
 	}
 
 	public void onLowMemory() {
-		Toast.makeText(this, "Low memory, service killed!", Toast.LENGTH_LONG);
 		Log.v("Service killed!", "Reason: Low memory");
 	}
 
@@ -480,10 +471,7 @@ public class GameService extends Service implements LocationListener {
 					j.putExtra("vestAvailable", vestAvailable);
 					j.putExtra("jammerAvailable", jammerAvailable);
 				} else
-					visibleItems = new ArrayList<ObjectOnMap>(); // ako je
-																	// policajac
-																	// ne vidi
-																	// predmete
+					visibleItems = new ArrayList<ObjectOnMap>();
 
 				j.putExtra("items", visibleItems);
 				j.putExtra("mapCenter", mapCenter);
@@ -493,10 +481,7 @@ public class GameService extends Service implements LocationListener {
 
 			} else if (action.equals("SHOT_IS_FIRED")) {
 				ammo--;
-				// proveri da li je pogodak i da ako jeste objavi pobedu
-				if (!bulletproofActive
-				// TODO: && gameStarted
-				) {
+				if (!bulletproofActive && gameStarted) {
 					ArrayList<Double> distance = getDistanceFromThief();
 					if (distance.get(0) <= 30) {
 						ArrayList<String> receivers = new ArrayList<String>();
@@ -511,7 +496,6 @@ public class GameService extends Service implements LocationListener {
 						i.putExtra("title",
 								"Bravo! Policija je pobedila, lopov je uspesno uhvacen!");
 						sendBroadcast(i);
-						// TODO: gameTime.cancel();
 					}
 				} else
 					Log.v("SHOT_IS_FIRED", "Aktiviran je pancir");
@@ -526,7 +510,6 @@ public class GameService extends Service implements LocationListener {
 				jammerActive = true;
 				jammerAvailable = false;
 			} else if (action.equals("GAME_RESTART")) {
-				// TODO
 				gameStarted = false;
 				gameCanStart = true;
 				jammerActive = false;
@@ -546,7 +529,6 @@ public class GameService extends Service implements LocationListener {
 						gameTimer.cancel();
 					if (vestHandler != null)
 						vestHandler.removeCallbacks(announceBulletproofEnd);
-					//items.addAll(gatheredItems);
 					gatheredItems = new ArrayList<ObjectOnMap>();
 				}
 				Toast.makeText(
@@ -554,7 +536,7 @@ public class GameService extends Service implements LocationListener {
 						"Igra moze da pocne, idite do svoje startne lokacije."
 								+ String.valueOf(gameCanStart),
 						Toast.LENGTH_LONG).show();
-				//restart
+
 				updateMapView(mapCenter);
 				Intent j = new Intent("INITIALISE_MAP");
 				ArrayList<ObjectOnMap> visibleItems = new ArrayList<ObjectOnMap>(
@@ -564,7 +546,7 @@ public class GameService extends Service implements LocationListener {
 					j.putExtra("vestAvailable", vestAvailable);
 					j.putExtra("jammerAvailable", jammerAvailable);
 				} else
-					visibleItems = new ArrayList<ObjectOnMap>(); 
+					visibleItems = new ArrayList<ObjectOnMap>();
 				j.putExtra("items", visibleItems);
 				j.putExtra("mapCenter", mapCenter);
 				j.putExtra("buildings", buildings);
@@ -577,7 +559,7 @@ public class GameService extends Service implements LocationListener {
 		{
 			Bundle message = intent.getExtras();
 			if (message.containsKey(GCM_ANNOUNCE_TAG)) {
-				// TODO: vidi sta uraditi sa numberOfPolicemen++;
+				// vidi sta uraditi sa numberOfPolicemen++;
 				players.add(new ObjectOnMap(0, 0, message
 						.getString(GCM_ANNOUNCE_TAG), "policeman"
 						+ String.valueOf(numberOfPolicemen), 0, "player"));
@@ -607,6 +589,9 @@ public class GameService extends Service implements LocationListener {
 				i.putExtra("title",
 						"Policija je pobedila, lopov je uspesno uhvacen!");
 				sendBroadcast(i);
+				if (isThief && gameTimer != null)
+					gameTimer.cancel();
+
 			} else if (message.containsKey(GCM_SHOW_THIEF_TAG)) {
 				updateMapObject(players.get(0));
 			} else if (message.containsKey(GCM_THIEF_WIN_TAG)) {
@@ -663,16 +648,16 @@ public class GameService extends Service implements LocationListener {
 							String id = players.get(j).getId();
 							if (id.equals(playerId)) {
 								players.get(j).setLatlng(newLocation);
-								// TODO: if(isThief && j==0){
-								updateMapObject(players.get(j));
-								// TODO: }else if(!isThief && j!=0){
-								// TODO: updateMapObject(players.get(j));
-								// TODO: }
+								if (isThief && j == 0) {
+									updateMapObject(players.get(j));
+								} else if (!isThief && j != 0) {
+									updateMapObject(players.get(j));
+								}
 							}
 						}
 					}
 					if (length < players.size()) {
-						if (deleteTest++ > 4) {
+						if (playerAbsent++ > 4) {
 							for (int i = 0; i < players.size(); i++) {
 								if (!player_ids
 										.contains(players.get(i).getId())) {
@@ -687,13 +672,11 @@ public class GameService extends Service implements LocationListener {
 									playerPosition = i;
 							}
 						} else {
-							deleteTest = 0;
+							playerAbsent = 0;
 						}
 					} else {
-						// provera za pocetak igre i pocetak ako su svi na
-						// pocetnim lokacijama
 						if (isThief && gameCanStartCheck() && !gameStarted) {
-							Toast.makeText(getBaseContext(), "Game starts :)",
+							Toast.makeText(getBaseContext(), "Igra je pocela.",
 									Toast.LENGTH_LONG).show();
 							startGame();
 							ArrayList<String> receivers = new ArrayList<String>();
