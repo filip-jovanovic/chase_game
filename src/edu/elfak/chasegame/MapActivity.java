@@ -42,11 +42,12 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 	private MapUpdateReceiver dataUpdateReceiver;
 	private HashMap<String, Marker> playerMarkers;
 	private HashMap<String, Marker> allMarkers;
-	private Polygon boundaries;
 	IntentFilter intentFilter;
 	private ToggleButton screenLockButton;
 
-	private ImageView bullet;
+	ImageView bullet1;
+	ImageView bullet2;
+	ImageView bullet3;
 	private ImageButton shootButton;
 	private ImageView radarThiefIcon;
 	private ArrayList<ImageView> radarCopIcons;
@@ -93,6 +94,10 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		radarCopIcons.add((ImageView) findViewById(R.id.radarCop1));
 		radarCopIcons.add((ImageView) findViewById(R.id.radarCop2));
 		radarCopIcons.add((ImageView) findViewById(R.id.radarCop3));
+
+		bullet1 = (ImageView) findViewById(R.id.bullet1);
+		bullet2 = (ImageView) findViewById(R.id.bullet2);
+		bullet3 = (ImageView) findViewById(R.id.bullet3);
 	}
 
 	@Override
@@ -117,8 +122,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				buildings);
 		allObjects.addAll(items);
 
-		for (int i = 0; i < allObjects.size(); i++) {
-			ObjectOnMap object = allObjects.get(i);
+		for (ObjectOnMap object : allObjects) {
 			MarkerOptions markerOptions = new MarkerOptions();
 			markerOptions.visible(true);
 			markerOptions.position(object.getLatlng());
@@ -138,15 +142,13 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 
 			else if (object.isBank()) {
 				if (GameService.isThief) {
-					//TODO:
 					String snippet = "";
 					for (ObjectOnMap nesessaryItem : items) {
 						if (nesessaryItem.getBankId() == Integer.valueOf(object
 								.getId()))
 							snippet += nesessaryItem.getName() + " \n";
 					}
-					snippet += "novac"
-							+ String.valueOf(object.getValue()) + "";
+					snippet += "novac" + String.valueOf(object.getValue()) + "";
 					markerOptions.snippet(snippet);
 				}
 
@@ -164,12 +166,12 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				markerOptions.icon(BitmapDescriptorFactory
 						.fromResource(R.drawable.safehouse));
 				Marker marker = mMap.addMarker(markerOptions);
-				allMarkers.put(allObjects.get(i).getName(), marker);
+				allMarkers.put(object.getName(), marker);
 			}
 
 			if (!(object.isSafeHouse() && !GameService.isThief)) {
 				Marker marker = mMap.addMarker(markerOptions);
-				allMarkers.put(allObjects.get(i).getName(), marker);
+				allMarkers.put(object.getName(), marker);
 			}
 		}
 	}
@@ -414,7 +416,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				allMarkers = new HashMap<String, Marker>();
 
 				drawMarkers(buildings, items);
-				boundaries = drawBoundaries(
+				drawBoundaries(
 						(LatLng) intent.getExtras().get("mapCenter"), mMap);
 				if (GameService.isThief) {
 					vestButton.setEnabled(intent.getExtras().getBoolean(
@@ -446,43 +448,34 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 
 	private void setRemainingBullets(int remainingBullets) {
 
-		if (remainingBullets == 3) {
-			bullet = (ImageView) findViewById(R.id.bullet1);
-			bullet.setAlpha(255);
-			bullet = (ImageView) findViewById(R.id.bullet2);
-			bullet.setAlpha(255);
-			bullet = (ImageView) findViewById(R.id.bullet3);
-			bullet.setAlpha(255);
+		switch (remainingBullets) {
+		case 3:
+			bullet1.setAlpha(255);
+			bullet2.setAlpha(255);
+			bullet3.setAlpha(255);
 			shootButton.setClickable(true);
 			shootButton.setEnabled(true);
-		}
-		if (remainingBullets == 2) {
-			bullet = (ImageView) findViewById(R.id.bullet1);
-			bullet.setAlpha(255);
-			bullet = (ImageView) findViewById(R.id.bullet2);
-			bullet.setAlpha(255);
-			bullet = (ImageView) findViewById(R.id.bullet3);
-			bullet.setAlpha(100);
-		}
-		if (remainingBullets == 1) {
-			bullet = (ImageView) findViewById(R.id.bullet1);
-			bullet.setAlpha(255);
-			bullet = (ImageView) findViewById(R.id.bullet2);
-			bullet.setAlpha(100);
-			bullet = (ImageView) findViewById(R.id.bullet3);
-			bullet.setAlpha(100);
-		}
-		if (remainingBullets == 0) {
-			bullet = (ImageView) findViewById(R.id.bullet1);
-			bullet.setAlpha(100);
-			bullet = (ImageView) findViewById(R.id.bullet2);
-			bullet.setAlpha(100);
-			bullet = (ImageView) findViewById(R.id.bullet3);
-			bullet.setAlpha(100);
+			break;
+		case 2:
+			bullet1.setAlpha(255);
+			bullet2.setAlpha(255);
+			bullet3.setAlpha(100);
+			break;
+		case 1:
+			bullet1.setAlpha(255);
+			bullet2.setAlpha(100);
+			bullet3.setAlpha(100);
+			break;
 
+		default:
+			bullet1.setAlpha(100);
+			bullet2.setAlpha(100);
+			bullet3.setAlpha(100);
 			shootButton.setClickable(false);
 			shootButton.setEnabled(false);
+			break;
 		}
+
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -493,25 +486,24 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 
 		if (GameService.isThief) {
 			List<String> listOfItems = new ArrayList<String>();
-			for (ObjectOnMap ob : GameService.getGatheredItems()){
+			for (ObjectOnMap ob : GameService.getGatheredItems()) {
 				String itemName = ob.getName();
-				if(!itemName.equals("pancir")&&!itemName.equals("ometac"))
+				if (!itemName.equals("pancir") && !itemName.equals("ometac"))
 					listOfItems.add(itemName);
 			}
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			
-			if(listOfItems.isEmpty()){
+
+			if (listOfItems.isEmpty()) {
 				builder.setTitle("Niste pokupili nijedan predmet.");
-			}
-			else{
-			CharSequence[] items = listOfItems
-					.toArray(new CharSequence[listOfItems.size()]);
-			
-			builder.setTitle("Prikupljeni predmeti:");
-			builder.setItems(items, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int item) {
-				}
-			});
+			} else {
+				CharSequence[] items = listOfItems
+						.toArray(new CharSequence[listOfItems.size()]);
+
+				builder.setTitle("Prikupljeni predmeti:");
+				builder.setItems(items, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+					}
+				});
 			}
 			AlertDialog alert = builder.create();
 			alert.show();
