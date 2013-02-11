@@ -34,7 +34,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 	static boolean loginFlag;
 	private String registrationId;
 	private String playerName;
-	private Intent messageIntent;
 	private GcmRegisterReceiver gcmRegisterReceiver;
 	private Button loginButton, signupButton;
 
@@ -205,7 +204,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 					progressDialog.show();
 				} else
 					progressDialog.dismiss();
-
 			}
 		});
 	}

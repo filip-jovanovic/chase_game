@@ -28,6 +28,27 @@ import android.widget.Toast;
 
 public class GameService extends Service implements LocationListener {
 
+	public static final String GCM_ANNOUNCE_TAG = "announce";
+	public static final String GCM_POLICEWIN_TAG = "police won";
+	public static final String GCM_THIEF_WIN_TAG = "thief won";
+	public static final String GCM_CANSTART_TAG = "game can start";
+	public static final String GCM_TIMEISUP_TAG = "time is up";
+	public static final String GCM_SHOW_THIEF_TAG = "show thief";
+	public static final String GCM_START_TAG = "start";
+	public static final String GCM_BULLETPROOF_VALUE_TAG = "isBulletproof";
+	public static final String GCM_PLAYER_EXITED = "player exited";
+	private static final String GCM_BANK_ROBBED_UPDATE_MAP = "bankIsRobbed";
+
+	private static final int MAX_AMMO = 3;
+	private static final int MONEY_LIMIT = 35000;
+	private static final int VEST_PERIOD = 900000;
+	private static final int LOCATION_UPDATE_PERIOD = 360000;
+	private static final long GAME_DURATION = 7200000;
+	private final long TIME_DIFFERENCE = 10000;
+	private static final double PICKUP_DISTANCE = 10.0;
+	private static final double KILL_DISTANCE = 30.0;
+	public static int ammo = MAX_AMMO;
+	
 	private ArrayList<ObjectOnMap> buildings;
 	private ArrayList<ObjectOnMap> items;
 	private ArrayList<ObjectOnMap> players;
@@ -36,7 +57,6 @@ public class GameService extends Service implements LocationListener {
 	public static ArrayList<ObjectOnMap> getGatheredItems() {
 		return gatheredItems;
 	}
-
 	private ArrayList<ObjectOnMap> robbedBanks;
 
 	public static boolean isRuning = false; // da li je servis pokrenut
@@ -52,38 +72,15 @@ public class GameService extends Service implements LocationListener {
 
 	private String gameName;
 	private String provider;
-	private String playerName;
 	public String registrationId;
 	private LocationManager locationManager;
 
 	public static boolean isThief;
-
-	private final long TIME_DIFFERENCE = 10000;
-	public static final String GCM_ANNOUNCE_TAG = "announce";
-	public static final String GCM_POLICEWIN_TAG = "police won";
-	public static final String GCM_THIEF_WIN_TAG = "thief won";
-	public static final String GCM_CANSTART_TAG = "game can start";
-	public static final String GCM_TIMEISUP_TAG = "time is up";
-	public static final String GCM_SHOW_THIEF_TAG = "show thief";
-	public static final String GCM_START_TAG = "start";
-	public static final String GCM_BULLETPROOF_VALUE_TAG = "isBulletproof";
-	public static final String GCM_PLAYER_EXITED = "player exited";
-	private static final String GCM_BANK_ROBBED_UPDATE_MAP = "bankIsRobbed";
-
+	
+	
 	private boolean gameStarted;
-	private boolean gameCanStart;
-
 	public CountDownTimer gameTimer;
 	private LatLng mapCenter;
-
-	private static final int MAX_AMMO = 3;
-	private static final int MONEY_LIMIT = 35000;
-	private static final int VEST_PERIOD = 900000;
-	private static final int LOCATION_UPDATE_PERIOD = 360000;
-	private static final long GAME_DURATION = 7200000;
-	private static final double PICKUP_DISTANCE = 10.0;
-	private static final double KILL_DISTANCE = 30.0;
-	public static int ammo = MAX_AMMO;
 	private boolean bulletproofActive;
 	private boolean jammerActive;
 	private Handler vestHandler;
@@ -97,7 +94,6 @@ public class GameService extends Service implements LocationListener {
 		isThief = false;
 		isRuning = true;
 		gameStarted = false;
-		gameCanStart = false;
 		jammerActive = false;
 		bulletproofActive = false;
 		jammerAvailable = false;
@@ -122,21 +118,19 @@ public class GameService extends Service implements LocationListener {
 		mapCenter = (LatLng) ib.get("mapCenter");
 		gameName = ib.getString("gameName");
 		String role = ib.getString("role");
-		if (role.compareTo("thief") == 0)
+		if (role.equals("thief"))
 			isThief = true;
 		registrationId = ib.getBundle("dataBundle").getString("registrationId");
-		playerName = ib.getBundle("dataBundle").getString("playerName");
+		ib.getBundle("dataBundle").getString("playerName");
 
 		numberOfPolicemen = 0;
 		playerPosition = 0;
-		ArrayList<String> receivers = new ArrayList<String>();
+		
 		if (isThief) {
 
 			gatheredItems = new ArrayList<ObjectOnMap>();
 			robbedBanks = new ArrayList<ObjectOnMap>();
-
 			players.add(new ObjectOnMap(0, 0, registrationId, role, 0, "player"));
-
 			HttpHelper.flushParameters();
 			HttpHelper.addParameter("name", gameName);
 			HttpHelper.addParameter("mapId", String.valueOf(mapId));
@@ -163,21 +157,16 @@ public class GameService extends Service implements LocationListener {
 				players.add(new ObjectOnMap(0, 0, cop_3Id, "policeman3", 0,
 						"player"));
 				numberOfPolicemen++;
-				// game can start now
-				for (int i = 0; i < players.size(); i++) {
-					String id = players.get(i).getId();
-					if (!id.equals(registrationId))
-						receivers.add(id);
-				}
+
 				HttpHelper.sendGcmMessage(GCM_CANSTART_TAG, registrationId,
-						receivers);
+						defaultReceivers());
 				Toast.makeText(
 						getBaseContext(),
 						"Igra moze da pocne, idite do svoje startne lokacije.",
 						Toast.LENGTH_LONG).show();
 			}
 			
-			receivers = new ArrayList<String>();
+			ArrayList<String> receivers = new ArrayList<String>();
 			for (int i = 0; i < players.size(); i++) {
 				String id = players.get(i).getId();
 				if (!id.equals(registrationId))
@@ -190,9 +179,7 @@ public class GameService extends Service implements LocationListener {
 		}
 		ArrayList<ObjectOnMap> allObjects = HttpHelper.getObjectsList(String
 				.valueOf(mapId));
-		ObjectOnMap ob = null;
-		for (int i = 0; i < allObjects.size(); i++) {
-			ob = allObjects.get(i);
+		for (ObjectOnMap ob : allObjects) {
 			if (ob.getType() == "building")
 				buildings.add(ob);
 			else
@@ -215,19 +202,12 @@ public class GameService extends Service implements LocationListener {
 		gameTimer = new CountDownTimer(GAME_DURATION, LOCATION_UPDATE_PERIOD) {
 			@Override
 			public void onTick(long millisUntilFinished) {
-				for (int j = 0; j < players.size(); j++) {
-					updateMapObject(players.get(j));
+				for (ObjectOnMap p : players) {
+					updateMapObject(p);
 				}
 				if (!jammerActive) {
-					// baci gcm obavesti policiju
-					ArrayList<String> receivers = new ArrayList<String>();
-					for (int i = 0; i < players.size(); i++) {
-						String id = players.get(i).getId();
-						if (!id.equals(registrationId))
-							receivers.add(id);
-					}
 					HttpHelper.sendGcmMessage(GCM_SHOW_THIEF_TAG,
-							registrationId, receivers);
+							registrationId, defaultReceivers());
 				} else
 					jammerActive = false;
 				Log.v("TICK", String.valueOf((test++)));
@@ -235,14 +215,8 @@ public class GameService extends Service implements LocationListener {
 
 			@Override
 			public void onFinish() {
-				ArrayList<String> receivers = new ArrayList<String>();
-				for (int i = 0; i < players.size(); i++) {
-					String id = players.get(i).getId();
-					if (!id.equals(registrationId))
-						receivers.add(id);
-				}
 				HttpHelper.sendGcmMessage(GCM_TIMEISUP_TAG, registrationId,
-						receivers);
+						defaultReceivers());
 				Intent victory = new Intent("DISPLAY_DIALOG");
 				victory.putExtra("title",
 						"Vreme je isteklo, uspesno ste pobegli policiji!");
@@ -275,10 +249,7 @@ public class GameService extends Service implements LocationListener {
 	}
 
 	private void checkAndProcessColision(LatLng newCoordinates) {
-		ObjectOnMap object = null;
-
-		for (int i = 0; i < buildings.size(); i++) {
-			object = buildings.get(i);
+		for (ObjectOnMap object : buildings) {
 			if (calculateDistance(newCoordinates, object.getLatlng()) < PICKUP_DISTANCE) {
 				if (object.isPoliceStation()) {
 					if (!isThief)
@@ -319,16 +290,10 @@ public class GameService extends Service implements LocationListener {
 							object.setValue(object.getValue() * (-1));
 							buildings.add(object);
 
-							ArrayList<String> receivers = new ArrayList<String>();
-							for (int j = 0; j < players.size(); j++) {
-								String id = players.get(j).getId();
-								if (!id.equals(registrationId))
-									receivers.add(id);
-							}
 							if (moneyGathered >= MONEY_LIMIT) {
 								HttpHelper.sendGcmMessage(GCM_THIEF_WIN_TAG,
 										String.valueOf(moneyGathered),
-										receivers);
+										defaultReceivers());
 
 								Intent victory = new Intent("DISPLAY_DIALOG");
 								victory.putExtra("title",
@@ -338,7 +303,7 @@ public class GameService extends Service implements LocationListener {
 							} else {
 								HttpHelper.sendGcmMessage(
 										GCM_BANK_ROBBED_UPDATE_MAP,
-										object.getId(), receivers);
+										object.getId(), defaultReceivers());
 							}
 						}
 					}
@@ -348,8 +313,7 @@ public class GameService extends Service implements LocationListener {
 		if (isThief 
 				&& gameStarted
 				) {
-			for (int i = 0; i < items.size(); i++) {
-				object = items.get(i);
+			for (ObjectOnMap object : items) {
 				if (calculateDistance(newCoordinates, object.getLatlng()) < PICKUP_DISTANCE) {
 					if (!gatheredItems.contains(object)) {
 						gatheredItems.add(object);
@@ -373,13 +337,7 @@ public class GameService extends Service implements LocationListener {
 	private void becameBulletproof() {
 		bulletproofActive = true;
 		vestHandler = new Handler();
-		ArrayList<String> receivers = new ArrayList<String>();
-		for (int i = 0; i < players.size(); i++) {
-			String id = players.get(i).getId();
-			if (!id.equals(registrationId))
-				receivers.add(id);
-		}
-		HttpHelper.sendGcmMessage(GCM_BULLETPROOF_VALUE_TAG, "true", receivers);
+		HttpHelper.sendGcmMessage(GCM_BULLETPROOF_VALUE_TAG, "true", defaultReceivers());
 		vestHandler.postDelayed(announceBulletproofEnd, VEST_PERIOD);
 	}
 
@@ -387,14 +345,8 @@ public class GameService extends Service implements LocationListener {
 		@Override
 		public void run() {
 			bulletproofActive = false;
-			ArrayList<String> receivers = new ArrayList<String>();
-			for (int i = 0; i < players.size(); i++) {
-				String id = players.get(i).getId();
-				if (!id.equals(registrationId))
-					receivers.add(id);
-			}
 			HttpHelper.sendGcmMessage(GCM_BULLETPROOF_VALUE_TAG, "false",
-					receivers);
+					defaultReceivers());
 		}
 	};
 
@@ -486,14 +438,8 @@ public class GameService extends Service implements LocationListener {
 				if (!bulletproofActive && gameStarted) {
 					ArrayList<Double> distance = getDistanceFromThief();
 					if (distance.get(0) <= KILL_DISTANCE) {
-						ArrayList<String> receivers = new ArrayList<String>();
-						for (int i = 0; i < players.size(); i++) {
-							String id = players.get(i).getId();
-							if (!id.equals(registrationId))
-								receivers.add(id);
-						}
 						HttpHelper.sendGcmMessage(GCM_POLICEWIN_TAG,
-								registrationId, receivers);
+								registrationId, defaultReceivers());
 						Intent i = new Intent("DISPLAY_DIALOG");
 						i.putExtra("title",
 								"Bravo! Policija je pobedila, lopov je uspesno uhvacen!");
@@ -515,7 +461,6 @@ public class GameService extends Service implements LocationListener {
 				jammerAvailable = false;
 			} else if (action.equals("GAME_RESTART")) {
 				gameStarted = false;
-				gameCanStart = true;
 				jammerActive = false;
 				bulletproofActive = false;
 				jammerAvailable = false;
@@ -602,7 +547,6 @@ public class GameService extends Service implements LocationListener {
 				i.putExtra("title", "Lopov je pobedio!");
 				sendBroadcast(i);
 			} else if (message.containsKey(GCM_CANSTART_TAG)) {
-				gameCanStart = true;
 				Toast.makeText(getBaseContext(),
 						"Igra moze da pocne, idite do svoje startne lokacije.",
 						Toast.LENGTH_LONG).show();
@@ -681,7 +625,6 @@ public class GameService extends Service implements LocationListener {
 									players.remove(i);
 									Log.v("BRISANJE", "OBRISAO JE ");
 								}
-								gameCanStart = false;
 							}
 							for (int i = 0; i < players.size(); i++) {
 								String id = players.get(i).getId();
@@ -696,14 +639,8 @@ public class GameService extends Service implements LocationListener {
 							Toast.makeText(getBaseContext(), "Igra je pocela.",
 									Toast.LENGTH_LONG).show();
 							startGame();
-							ArrayList<String> receivers = new ArrayList<String>();
-							for (int i = 0; i < players.size(); i++) {
-								String id = players.get(i).getId();
-								if (!id.equals(registrationId))
-									receivers.add(id);
-							}
 							HttpHelper.sendGcmMessage(GCM_START_TAG,
-									registrationId, receivers);
+									registrationId, defaultReceivers());
 							gameStarted = true;
 						}
 					}
@@ -726,9 +663,9 @@ public class GameService extends Service implements LocationListener {
 			else if (buildings.get(i).isSafeHouse())
 				safehouseLoc = buildings.get(i).getLatlng();
 		}
-		if (calculateDistance(players.get(0).getLatlng(), safehouseLoc) <= 10) {
+		if (calculateDistance(players.get(0).getLatlng(), safehouseLoc) <= PICKUP_DISTANCE) {
 			for (int i = 1; i < players.size(); i++) {
-				if (calculateDistance(players.get(i).getLatlng(), policeLoc) > 10)
+				if (calculateDistance(players.get(i).getLatlng(), policeLoc) > PICKUP_DISTANCE)
 					return false;
 			}
 			return true;
@@ -759,11 +696,9 @@ public class GameService extends Service implements LocationListener {
 		ArrayList<Double> distance = new ArrayList<Double>();
 		LatLng myLocation = players.get(playerPosition).getLatlng();
 		boolean found = false;
-		for (int j = 0; j < players.size(); j++) {
-			if (myLocation != players.get(j).getLatlng()
-					&& !players.get(j).getName().equals("thief")) {
-				distance.add(calculateDistance(myLocation, players.get(j)
-						.getLatlng()));
+		for (ObjectOnMap p : players) {
+			if (myLocation != p.getLatlng()	&& !p.getName().equals("thief")) {
+				distance.add(calculateDistance(myLocation, p.getLatlng()));
 				found = true;
 			}
 		}
@@ -779,10 +714,9 @@ public class GameService extends Service implements LocationListener {
 		} else {
 			LatLng myLocation = players.get(playerPosition).getLatlng();
 			boolean found = false;
-			for (int j = 0; j < players.size(); j++) {
-				if (players.get(j).getName().equals("thief")) {
-					distance.add(calculateDistance(myLocation, players.get(j)
-							.getLatlng()));
+			for (ObjectOnMap p : players) {
+				if (myLocation != p.getLatlng()	&& !p.getName().equals("thief")) {
+					distance.add(calculateDistance(myLocation, p.getLatlng()));
 					found = true;
 				}
 			}
