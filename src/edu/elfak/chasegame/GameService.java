@@ -165,8 +165,7 @@ public class GameService extends Service implements LocationListener {
 						receivers);
 				Toast.makeText(
 						getBaseContext(),
-						"Igra moze da pocne, idite do svoje startne lokacije."
-								+ String.valueOf(gameCanStart),
+						"Igra moze da pocne, idite do svoje startne lokacije.",
 						Toast.LENGTH_LONG).show();
 			}
 
@@ -535,8 +534,7 @@ public class GameService extends Service implements LocationListener {
 				}
 				Toast.makeText(
 						getBaseContext(),
-						"Igra moze da pocne, idite do svoje startne lokacije."
-								+ String.valueOf(gameCanStart),
+						"Igra moze da pocne, idite do svoje startne lokacije.",
 						Toast.LENGTH_LONG).show();
 
 				updateMapView(mapCenter);
@@ -625,8 +623,23 @@ public class GameService extends Service implements LocationListener {
 					sendBroadcast(i);
 				} else {
 					Toast.makeText(getBaseContext(),
-							"Policajac je napustio igru.", Toast.LENGTH_LONG)
-							.show();
+							"Policajac je napustio igru.", Toast.LENGTH_LONG).show();
+					numberOfPolicemen--;
+					Intent i = new Intent("REMOVE_PLAYER_TAG");
+					i.putExtra("playerID", playerId);
+					sendBroadcast(i);
+					for (int j = 0; j < players.size(); j++) {
+						String id = players.get(j).getId();
+						if (id.equals(playerId)) {
+							players.remove(j);
+							Log.v("BRISANJE", "OBRISAO JE ");
+							for (int k = 0; k < players.size(); k++) {
+								String idP = players.get(k).getId();
+								if (idP.equals(registrationId))
+									playerPosition = k;
+							}
+						}
+					}
 				}
 
 			} else if (message.containsKey("player_locations")) {

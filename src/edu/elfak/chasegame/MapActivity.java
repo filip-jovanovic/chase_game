@@ -185,6 +185,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 		intentFilter.addAction("ENABLE_JAMMER_BUTTON_TAG");
 		intentFilter.addAction("BANK_ROBBED_UPDATE_MAP");
 		intentFilter.addAction("DISPLAY_DIALOG");
+		intentFilter.addAction("REMOVE_PLAYER_TAG");
 		registerReceiver(dataUpdateReceiver, intentFilter);
 
 		View imBut;
@@ -342,6 +343,15 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 				endGameDialog(title, noRestart);
 			} else if (action.equals("ENABLE_JAMMER_BUTTON_TAG")) {
 				jammerButton.setEnabled(true);
+			} else if (action.equals("REMOVE_PLAYER_TAG")) {
+				String playerID = (String) intent.getExtras().getString(
+						"playerID");
+				Marker m = playerMarkers.get(playerID);
+				if (m != null) {
+					m.setVisible(false);
+					m.remove();
+					playerMarkers.remove(playerID);
+				}
 			} else if (action.equals("BANK_ROBBED_UPDATE_MAP")) {
 				ObjectOnMap bank = (ObjectOnMap) intent.getExtras().get("bank");
 				Marker m = allMarkers.get(bank.getName());
