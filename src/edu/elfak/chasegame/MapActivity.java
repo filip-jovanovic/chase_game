@@ -2,6 +2,7 @@ package edu.elfak.chasegame;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 //import android.util.Log;
 import android.util.DisplayMetrics;
+import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -136,13 +138,14 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 
 			else if (object.isBank()) {
 				if (GameService.isThief) {
+					//TODO:
 					String snippet = "";
 					for (ObjectOnMap nesessaryItem : items) {
 						if (nesessaryItem.getBankId() == Integer.valueOf(object
 								.getId()))
 							snippet += nesessaryItem.getName() + " \n";
 					}
-					snippet += "Novac u banci: \n"
+					snippet += "novac"
 							+ String.valueOf(object.getValue()) + "";
 					markerOptions.snippet(snippet);
 				}
@@ -480,6 +483,40 @@ public class MapActivity extends FragmentActivity implements OnClickListener {
 			shootButton.setClickable(false);
 			shootButton.setEnabled(false);
 		}
+	}
+
+	public boolean onCreateOptionsMenu(Menu menu) {
+		return true;
+	}
+
+	public boolean onPrepareOptionsMenu(Menu menu) {
+
+		if (GameService.isThief) {
+			List<String> listOfItems = new ArrayList<String>();
+			for (ObjectOnMap ob : GameService.getGatheredItems()){
+				String itemName = ob.getName();
+				if(!itemName.equals("pancir")&&!itemName.equals("ometac"))
+					listOfItems.add(itemName);
+			}
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			
+			if(listOfItems.isEmpty()){
+				builder.setTitle("Niste pokupili nijedan predmet.");
+			}
+			else{
+			CharSequence[] items = listOfItems
+					.toArray(new CharSequence[listOfItems.size()]);
+			
+			builder.setTitle("Prikupljeni predmeti:");
+			builder.setItems(items, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int item) {
+				}
+			});
+			}
+			AlertDialog alert = builder.create();
+			alert.show();
+		}
+		return true;
 	}
 
 }

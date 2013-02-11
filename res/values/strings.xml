@@ -12,14 +12,9 @@
      <string name="stop_game_button">End game</string>
     <string name="about_button">About</string>
     <string name="exit_button">Exit</string>
-    <string name="about_text"><i>Lorem Ipsum er rett og</i> slett dummytekst fra og for trykkeindustrien. 
-	    Lorem Ipsum har vært bransjens standard for dummytekst helt siden 1500-tallet, 
-	    da en ukjent boktrykker stokket en mengde bokstaver for å lage et prøveeksemplar av en bok. 
-	    Lorem Ipsum har tålt tidens tann usedvanlig godt, og har i tillegg til å bestå gjennom fem århundrer 
-	    også tålt spranget over til elektronisk typografi uten vesentlige endringer. 
-	    Lorem Ipsum ble gjort allment kjent i 1960-årene ved lanseringen av Letraset-ark med 
-	    avsnitt fra Lorem Ipsum, og senere med sideombrekkingsprogrammet Aldus PageMaker som tok 
-	    i bruk nettopp Lorem Ipsum for dummytekst.</string>
+    <string name="about_text">Ova igra je nastala kao studentski projekat u okviru kursa Mobilni 
+        i distribuirani informacioni sistemi na katedri za računarstvo i informatiku pri Elektronskom fakultetu u Nišu. 
+        Autori su Srećko Janicijević i Filip Jovanović.</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_new_game">NewGameActivity</string>

@@ -39,13 +39,24 @@ public View getInfoWindow(Marker marker) {
 public View getInfoContents(Marker marker) {
   View popup=inflater.inflate(R.layout.snippetlayout, null);
 
-  TextView tv=(TextView)popup.findViewById(R.id.title);
-  tv.setText(marker.getTitle());
-  tv=(TextView)popup.findViewById(R.id.snippet);
-  tv.setText(marker.getSnippet());
-  //if(marker.getSnippet().startsWith(" Novac u banci: "))
-  //if(marker.getSnippet()==null)
-	//  popup.findViewById(R.id.caption).setVisibility(View.GONE);
+  TextView snippetText=(TextView)popup.findViewById(R.id.title);
+  TextView amount=(TextView)popup.findViewById(R.id.bankamount);
+  
+  snippetText.setText(marker.getTitle());
+  snippetText=(TextView)popup.findViewById(R.id.snippet);
+ 
+  if(marker.getSnippet()!=null&&(amount.getText().length()==0)){
+	  String s[] = marker.getSnippet().split("\nnovac"); 
+	  snippetText.setText(s[0]);
+	  amount.setText(s[1]);
+  }
+  else{
+	  popup.findViewById(R.id.caption).setVisibility(View.GONE);
+	  popup.findViewById(R.id.bankamount).setVisibility(View.GONE);
+	  popup.findViewById(R.id.amountcaption).setVisibility(View.GONE);
+	 
+	  
+  }
   
   return(popup);
 }
