@@ -378,7 +378,7 @@ public class GameService extends Service implements LocationListener {
 				receivers.add(id);
 		}
 		HttpHelper.sendGcmMessage(GCM_BULLETPROOF_VALUE_TAG, "true", receivers);
-		vestHandler.postDelayed(announceBulletproofEnd, 900000);
+		vestHandler.postDelayed(announceBulletproofEnd, 60000);
 	}
 
 	private Runnable announceBulletproofEnd = new Runnable() {
@@ -439,7 +439,7 @@ public class GameService extends Service implements LocationListener {
 		HttpHelper.flushParameters();
 		HttpHelper.addParameter("game_id", String.valueOf(gameId));
 		HttpHelper.addParameter("player_id", registrationId);
-		HttpHelper.addParameter("place", String.valueOf(numberOfPolicemen));
+		HttpHelper.addParameter("place", String.valueOf(playerPosition));
 		HttpHelper.sendValuesToUrl(HttpHelper.EXIT_GAME);
 		if (gameTimer != null)
 			gameTimer.cancel();
@@ -559,7 +559,7 @@ public class GameService extends Service implements LocationListener {
 		{
 			Bundle message = intent.getExtras();
 			if (message.containsKey(GCM_ANNOUNCE_TAG)) {
-				// vidi sta uraditi sa numberOfPolicemen++;
+				numberOfPolicemen++;
 				players.add(new ObjectOnMap(0, 0, message
 						.getString(GCM_ANNOUNCE_TAG), "policeman"
 						+ String.valueOf(numberOfPolicemen), 0, "player"));
@@ -698,8 +698,7 @@ public class GameService extends Service implements LocationListener {
 	}
 
 	public boolean gameCanStartCheck() {
-		// TODO: promeni u 4 igraca
-		if (players.size() != 2) {
+		if (players.size() != 4) {
 			return false;
 		}
 		LatLng policeLoc = new LatLng(0, 0);

@@ -47,8 +47,8 @@ public class HttpHelper {
 
 	private static final String GCM_GOOGLE_URL = "https://android.googleapis.com/gcm/send";
 
-	public static String SERVER_URL = "http://android-test-rig.comuf.com/";
-	//public static String SERVER_URL = "http://android-test-rig2.netii.net/";
+	//public static String SERVER_URL = "http://android-test-rig.comuf.com/";
+	public static String SERVER_URL = "http://android-test-rig2.netii.net/";
 	
 	static InputStream is = null;
     static JSONObject jObj = null;
