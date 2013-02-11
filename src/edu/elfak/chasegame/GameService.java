@@ -497,7 +497,9 @@ public class GameService extends Service implements LocationListener {
 								"Bravo! Policija je pobedila, lopov je uspesno uhvacen!");
 						sendBroadcast(i);
 					}
-				} else
+				} else if (!gameStarted)
+					Log.v("SHOT_IS_FIRED", "Igra nije startovana");
+				else
 					Log.v("SHOT_IS_FIRED", "Aktiviran je pancir");
 				// nastavak
 				Intent i = new Intent("BULLETS_UPDATE_TAG");
@@ -610,8 +612,9 @@ public class GameService extends Service implements LocationListener {
 						"Vreme je isteklo, lopov je uspesno pobegao!");
 				sendBroadcast(i);
 			} else if (message.containsKey(GCM_START_TAG)) {
-				Toast.makeText(getBaseContext(), "Game starts :)",
+				Toast.makeText(getBaseContext(), "Igra je pocela.",
 						Toast.LENGTH_LONG).show();
+				gameStarted = true;
 			} else if (message.containsKey("player_exited")) {
 				Log.v("exited", message.toString());
 				String playerId = message.getString("player_exited");
@@ -621,11 +624,9 @@ public class GameService extends Service implements LocationListener {
 					i.putExtra("norestart", true);
 					sendBroadcast(i);
 				} else {
-					{
-						Toast.makeText(getBaseContext(),
-								"Policajac je napustio igru", Toast.LENGTH_LONG)
-								.show();
-					}
+					Toast.makeText(getBaseContext(),
+							"Policajac je napustio igru.", Toast.LENGTH_LONG)
+							.show();
 				}
 
 			} else if (message.containsKey("player_locations")) {
